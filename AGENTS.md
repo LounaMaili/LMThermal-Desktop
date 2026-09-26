@@ -174,3 +174,30 @@ Use focused branches for substantial changes, for example:
 Keep changes reviewable and avoid mixing unrelated tasks in the same commit.
 
 The sibling `LMThermal` repository has a separate Git history. If both repositories need changes, commit them independently.
+
+
+## End-of-task repository sync
+
+At the end of every completed task, after relevant tests or diagnostics pass:
+
+1. review the final diff and remove accidental or unrelated changes;
+2. update all documentation affected by the change;
+3. update the repository changelog for every meaningful code, behavior, architecture, dependency, hardware, protocol, or thermometry change;
+4. run the relevant tests/diagnostics again when practical;
+5. commit the complete task on its focused working branch with a descriptive English commit message;
+6. push that working branch to GitHub so remote reviewers and other agents can inspect the exact result.
+
+Do not leave completed work only in the local working tree unless the user explicitly asks for that.
+
+Do not merge into `main` automatically. Push the feature/fix/prototype branch and leave merge or pull-request approval to the user/reviewer.
+
+If a task also establishes new hardware, protocol, calibration, or thermometry knowledge, update the sibling `LMThermal` documentation and changelog in a separate commit and push its corresponding branch as well.
+
+Before reporting a task as complete, include:
+
+- branch name;
+- commit SHA(s);
+- whether the branch was pushed successfully;
+- tests/diagnostics run and their result;
+- documentation/changelog files updated;
+- any remaining uncertainty or follow-up work.
