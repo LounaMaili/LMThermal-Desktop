@@ -68,11 +68,15 @@ The development user should be able to access the camera without sudo. Do not ma
 Known structure:
 
 - complete frame: `224256` bytes;
+- thermal image: first 288 rows, `221184` bytes;
+- final four transport rows: non-image trailer;
 - temperature parameter block starts at byte `223742`;
 - parameter block size: `514` bytes;
-- firmware center temperature: parameter offset `356`.
+- candidate center-temperature field: parameter offset `356`, not validated as a live measurement.
 
-The parameter block occupies bytes at the end of the nominal YUYV frame. Exclude metadata bytes from image min/max, statistics, palette scaling, and temperature extrema.
+The parameter block occupies only part of the non-image trailer. Exclude all
+four trailer rows from image min/max, statistics, palette scaling, and
+temperature extrema.
 
 ## Current thermometry status
 
@@ -83,10 +87,12 @@ Example observed values include approximately:
 - environment temperature: 25.0 C
 - emissivity: 0.450
 - distance factor: 0.980
-- gain: 0.2705
-- firmware center temperature: 35.99 C
+- candidate gain field: 0.2705
+- field 356 candidate center temperature: 35.99 C (observed constant across changing images)
 
-The existing per-pixel temperature implementation is **not validated**. It can produce clearly incorrect center values while the firmware reports a plausible center temperature.
+The existing per-pixel temperature implementation is **not validated**. It can
+produce clearly incorrect center values, while field 356 holds a plausible
+but unverified value.
 
 In particular, do not assume the current approximation based on `gain * emissivity` is correct.
 
@@ -103,7 +109,9 @@ Use the reverse-engineering work in `LMThermal` to investigate the real processi
 
 Do not add empirical constants solely to force agreement with one frame.
 
-Before using firmware `center_temp` as an exact regression target, determine whether it represents a single center pixel, a region average, or another camera-side calculation.
+Do not use field 356 as an exact center-temperature regression target until
+its live meaning and measurement area have been established experimentally.
+See `docs/MEASUREMENT_AUDIT.md` for the current evidence.
 
 ## Measurement-first development order
 
