@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Radiometric-mode diagnostic — 2026-09-26)
+- Added a PyQt-independent, baseline-first HT-301 mode diagnostic reporting 14-bit word compatibility, trailer center/high/low indices, calibration inputs, and exact before/after frame metrics.
+- Added an explicit, single-control ThermViewer HT-301 output-type-zero test (`zoom_absolute=32773`) through standard V4L2, with settling frames and hardware-independent tests.
+- Observed that the documented control alone retained `0x80YY` display words in three live post-control frames; no Celsius lookup or GUI measurement was enabled.
+
 ### Corrected (Native thermometry audit — 2026-09-26)
 - Renamed diagnostic parameter fields to match the APK's correction, reflected temperature, ambient temperature, humidity, emissivity, distance, and copied calibration coefficients.
 - Added 14-bit lookup compatibility and trailer center/high/low index reporting for saved or live frames; the current saved image words exceed that range.

@@ -47,14 +47,43 @@ To inspect a saved frame without the camera:
 ./.venv/bin/python measurement_diagnostic.py --frame tests/fixtures/scene-a.raw
 ```
 
-The diagnostic reports the APK-identified settings, copied calibration
-coefficients, image-only Y statistics, 14-bit lookup compatibility, and the
-trailer center/high/low raw indices. It also retains the old rejected
-`Y → GetTempEvn` calculation as historical evidence. Block field 356 is a
-copy of a calibration coefficient; the Android app obtains its live center
-reading from a different trailer index and a native lookup. See the
-[native call chain](https://github.com/LounaMaili/LMThermal/blob/proto/native-thermometry-chain/docs/NATIVE_CALL_CHAIN.md). No per-pixel
-Celsius output is validated for the current Linux fixtures.
+## Radiometric-mode diagnostic
+
+`radiometric_mode_diagnostic.py` reports image-word min/max, the percentage
+within the native 14-bit lookup range, center/high/low trailer indices,
+calibration inputs, and image Y variation before and after a control. It is
+independent of PyQt and does not calculate Celsius. By default it captures
+baseline frames without changing the camera:
+
+```bash
+./.venv/bin/python radiometric_mode_diagnostic.py --count 3
+```
+
+To test the single HT-301 output-type-zero command traced in ThermViewer
+2.0.23(ot), explicitly request the control:
+
+```bash
+./.venv/bin/python radiometric_mode_diagnostic.py --count 3 --apply-thermviewer-output0
+```
+
+This sends V4L2 `zoom_absolute=32773` only after baseline frames are captured,
+discards 15 settling frames, and prints exact before/after metrics as JSON.
+The 2026-09-26 live test used 20 settling frames and still found 0% of image
+words in `0..16383`; see the sibling repository's
+[application comparison](https://github.com/LounaMaili/LMThermal/blob/proto/radiometric-mode/docs/APPLICATION_COMPARISON.md).
+The diagnostic does not reset the camera because a verified reset sequence is
+not yet known. It only writes sanitized fixtures with `--fixture-dir` when
+**all** post-control image words fit the lookup; no such fixture was obtained
+in this experiment.
+
+`measurement_diagnostic.py` reports the APK-identified settings, copied
+calibration coefficients, image-only Y statistics, 14-bit lookup
+compatibility, and the trailer center/high/low raw indices. It also retains
+the old rejected `Y → GetTempEvn` calculation as historical evidence. Block
+field 356 is a copy of a calibration coefficient; the Android app obtains its
+live center reading from a different trailer index and a native lookup. See the
+[native call chain](https://github.com/LounaMaili/LMThermal/blob/proto/radiometric-mode/docs/NATIVE_CALL_CHAIN.md).
+No per-pixel Celsius output is validated for the current Linux fixtures.
 
 Run the hardware-independent tests with:
 
