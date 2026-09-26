@@ -1,5 +1,21 @@
 # HT-301 measurement audit — 2026-09-26
 
+## Native follow-up (same date)
+
+The subsequent APK audit in the sibling `LMThermal` repository established
+the Java/JNI/native caller mapping; see `docs/NATIVE_CALL_CHAIN.md` there.
+The app calls `thermometryT4Line` to build a 16,384-entry lookup, then
+`thermometrySearch` to map 16-bit trailer summary indices and image words.
+The live center raw index is at frame byte 221208 (5165 / 5255 in these
+fixtures). Block field 356 is a byte-for-byte copy of the native calibration
+coefficient at byte 223498, not the live center reading. Parameter offsets
+4/8/12/16/20 mean reflected temperature, ambient temperature, humidity,
+emissivity, and uint16 distance. The image words in both fixtures have high
+byte `0x80` and exceed the native 14-bit lookup limit; Celsius remains
+unvalidated. The sections below preserve the original baseline evidence and
+rejected arithmetic as historical context. The diagnostic now reports the
+corrected labels and native lookup input checks.
+
 ## Evidence examined
 
 - Desktop `thermal_capture.py` and `lmthermal_viewer.py`.
@@ -8,8 +24,9 @@
 - OpenCV/V4L2 captures from the attached T3-317-13, including four initial
   frames, a later frame, and a 160-frame live sample.
 
-No native library binary or native call-site disassembly is present in either
-repository. The `CalcFixRaw` notes are explicitly partial.
+At the time of this baseline, no native library binary or native call-site
+disassembly was present in either maintained repository. The separate
+`LMThermal-Research` folder supplied those binaries for the follow-up above.
 
 ## Confirmed by captures or decoded arithmetic
 
@@ -29,14 +46,17 @@ that all bytes before offset 223742 are image bytes was not.
 
 ## Inferences and rejected approximation
 
-The decoded functions' **argument roles are not established** by their
-arithmetic alone. In particular, the native `a` argument has not been shown to
-be an 8-bit Y value, and `env_term` has not been shown to be a Celsius value.
+At baseline, the decoded functions' **argument roles were not established**
+by their arithmetic alone. Native tracing has since shown `a` is derived
+from a 14-bit lookup index rather than an 8-bit Y value, and `env_term` is
+the radiation correction output of `CalcFixRaw`.
 Subtracting 25 from approximately 18.6 billion makes almost no numerical
 difference, another reason to question the old parameter mapping.
 
-The desktop code sets `a = Y_center`, `env_term = env_temp1`, and
-`b = gain × emissivity`. For captured scene A these inputs give:
+The old desktop hypothesis set `a = Y_center`, `env_term = block offset 4`,
+and `b = block offset 352 × block offset 12`, mistakenly calling the factors
+gain and emissivity. Java identifies those fields as a calibration coefficient
+and humidity. For captured scene A the old inputs give:
 
 | Intermediate | Value |
 |---|---:|
@@ -52,13 +72,12 @@ The desktop code sets `a = Y_center`, `env_term = env_temp1`, and
 
 For scene B, transport-center Y is 107 and the legacy result is −48.607 °C,
 while field 356 remains 35.992. These calculations reject the current mapping.
-They do **not** independently validate field 356 as a thermometer.
+They do **not** validate field 356 as a thermometer.
 
-The partial documented `CalcFixRaw` polynomial at candidate input 96 yields
-`P = 6.265020896` and `exp(P) = 525.852574`. Its input, factors, later
-corrections, and relation to frame fields are still unproven. `InitTempParam`
-can be reproduced mathematically but no frame-field mapping to its `x` and
-`y` inputs is justified.
+The old partial `CalcFixRaw` polynomial at the mistaken Y input 96 yielded
+`P = 6.265020896` and `exp(P) = 525.852574`. Native tracing now identifies
+its input as ambient temperature and reconstructs the complete normal path.
+`InitTempParam` receives the coefficients at frame bytes 223494 and 223498.
 
 ## Field 356 and center semantics
 
@@ -75,27 +94,25 @@ rejected legacy mapping this produced 6.916 °C, still 29.076 °C below field
 356. The large image change with a constant field strengthens the conclusion
 that this field cannot currently be treated as a verified live center reading.
 
-This establishes that field 356 did not track these image changes. It may be
-calibration data, a stale reading, or some other value. The experiment cannot
-decide whether an actual firmware center measurement is a pixel or an area
-average, nor whether its coordinate is row 144 (center of the 288-row image)
-or row 146 (center of the 292-row transport). It must not be a formal
-regression target yet.
+This establishes that field 356 did not track image changes. The native
+follow-up identified it as copied calibration data. The app reads the live
+center index from another trailer location; whether the camera computed that
+index from a single pixel or an area remains unproven. Field 356 must not be
+a temperature regression target.
 
 ## Missing evidence and stopping boundary
 
-The exact call graph and argument mapping of `thermometryT`, `CalcFixRaw`,
-`GetTempEvn`, and `InitTempParam` are missing. The role/order of auto gain,
-emissivity, distance, environment, calibration, offset, and possible shutter
-state cannot be derived from the present notes or two scenes. The app must
-not compute a claimed Celsius matrix, cursor temperature, true temperature
-min/max, or Celsius range lock from Y until that chain is established.
+The call graph, five `CalcFixRaw` input sources, and lookup layout are now
+documented in `LMThermal/docs/NATIVE_CALL_CHAIN.md`. The missing evidence is
+the official app's camera mode transition and matched native temperature
+outputs for controlled frames. The current saved image words exceed the
+lookup's 14-bit range. No claimed Celsius matrix, cursor temperature, true
+temperature min/max, or Celsius range lock should be computed from them.
 
-Next experiments need a native library and call-site trace (or equivalent
-firmware protocol evidence), plus controlled targets of known temperature
-and emissivity moved through the center while capturing frames and all fields.
-Record shutter/zero-parameter frames separately. Compare row 144, row 146,
-and neighborhoods only after a live firmware measurement field is identified.
+Next experiments require the working camera and official app (or verified
+replay of its controls), with frames and native center/high/low outputs
+captured together for multiple known targets. Record shutter/zero-parameter
+frames separately and identify whether center means one pixel or a region.
 
 The new fixture tests cover exact size, field offsets, 288-row image boundary,
 metadata exclusion, reproducible decoded arithmetic, and scene-to-scene

@@ -72,7 +72,7 @@ Known structure:
 - final four transport rows: non-image trailer;
 - temperature parameter block starts at byte `223742`;
 - parameter block size: `514` bytes;
-- candidate center-temperature field: parameter offset `356`, not validated as a live measurement.
+- parameter offset `356` copies a calibration coefficient from byte `223498`; the app's live center index is elsewhere in the trailer.
 
 The parameter block occupies only part of the non-image trailer. Exclude all
 four trailer rows from image min/max, statistics, palette scaling, and
@@ -84,15 +84,16 @@ Parameter extraction from real hardware is working and produces plausible values
 
 Example observed values include approximately:
 
-- environment temperature: 25.0 C
-- emissivity: 0.450
-- distance factor: 0.980
-- candidate gain field: 0.2705
-- field 356 candidate center temperature: 35.99 C (observed constant across changing images)
+- reflected and ambient temperatures: 25.0 C
+- humidity: 0.450
+- emissivity: 0.980
+- distance: 1 (uint16)
+- calibration coefficients: 0.2705 and 35.992, duplicated at block offsets 352 and 356
 
-The existing per-pixel temperature implementation is **not validated**. It can
-produce clearly incorrect center values, while field 356 holds a plausible
-but unverified value.
+The existing per-pixel temperature implementation is **not validated**. The
+saved Linux image words exceed the Android app's 14-bit thermometry lookup
+range. Field 356 is a duplicated calibration coefficient, not a live center
+temperature.
 
 In particular, do not assume the current approximation based on `gain * emissivity` is correct.
 
@@ -109,9 +110,10 @@ Use the reverse-engineering work in `LMThermal` to investigate the real processi
 
 Do not add empirical constants solely to force agreement with one frame.
 
-Do not use field 356 as an exact center-temperature regression target until
-its live meaning and measurement area have been established experimentally.
-See `docs/MEASUREMENT_AUDIT.md` for the current evidence.
+Do not use field 356 as a center-temperature regression target. The native
+app derives its live center from a trailer raw index at frame byte 221208.
+See `docs/MEASUREMENT_AUDIT.md` and the sibling repository's
+`docs/NATIVE_CALL_CHAIN.md` for the evidence.
 
 ## Measurement-first development order
 

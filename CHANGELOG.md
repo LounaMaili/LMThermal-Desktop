@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Corrected (Native thermometry audit — 2026-09-26)
+- Renamed diagnostic parameter fields to match the APK's correction, reflected temperature, ambient temperature, humidity, emissivity, distance, and copied calibration coefficients.
+- Added 14-bit lookup compatibility and trailer center/high/low index reporting for saved or live frames; the current saved image words exceed that range.
+- Moved the historical rejected Y-based calculation behind explicit legacy labeling and evaluated the documented `CalcFixRaw` first stage with ambient temperature.
+- Updated measurement and fixture documentation to identify field 356 as a duplicated calibration coefficient while preserving the end-of-task workflow requirements.
+
 ### Added
 - A PyQt-independent HT-301 measurement diagnostic with stable camera discovery, exact raw-frame capture, known parameter decoding, and intermediate arithmetic traces.
 - Two sanitized captures and hardware-independent tests for frame size, parameter offsets, image/trailer separation, metadata exclusion, and reproducibility.

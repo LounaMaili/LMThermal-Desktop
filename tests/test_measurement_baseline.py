@@ -53,19 +53,22 @@ class RealFrameTests(unittest.TestCase):
         self.assertEqual(PARAMS_SIZE, 514)
         self.assertEqual(len(frame.parameter_bytes), PARAMS_SIZE)
         self.assertEqual(frame.parameter_bytes, raw[PARAMS_OFFSET:])
-        self.assertAlmostEqual(p.env_temp1, 25.0)
-        self.assertAlmostEqual(p.env_temp2, 25.0)
-        self.assertAlmostEqual(p.emissivity, 0.45, places=6)
-        self.assertAlmostEqual(p.distance_factor, 0.98, places=6)
-        self.assertEqual(p.active, 1)
-        self.assertAlmostEqual(p.gain_candidate, 0.2705, places=6)
-        self.assertAlmostEqual(p.center_temp_candidate, 35.992, places=5)
-        self.assertAlmostEqual(p.field_360, 0.00004, places=7)
-        self.assertAlmostEqual(p.offset_factor_candidate, 0.0057, places=6)
-        self.assertAlmostEqual(p.calib_factor_candidate, 0.8234, places=6)
-        self.assertAlmostEqual(p.env_temp1_repeat, p.env_temp1)
+        self.assertEqual(p.correction, 0.0)
+        self.assertAlmostEqual(p.reflected_temp, 25.0)
+        self.assertAlmostEqual(p.ambient_temp, 25.0)
+        self.assertAlmostEqual(p.humidity, 0.45, places=6)
+        self.assertAlmostEqual(p.emissivity, 0.98, places=6)
+        self.assertEqual(p.distance, 1)
+        self.assertAlmostEqual(p.calibration_0, 0.2705, places=6)
+        self.assertAlmostEqual(p.calibration_1, 35.992, places=5)
+        self.assertAlmostEqual(p.calibration_2, 0.00004, places=7)
+        self.assertAlmostEqual(p.calibration_3, 0.0057, places=6)
+        self.assertAlmostEqual(p.calibration_4, 0.8234, places=6)
+        self.assertAlmostEqual(p.reflected_temp_repeat, p.reflected_temp)
+        self.assertAlmostEqual(p.ambient_temp_repeat, p.ambient_temp)
+        self.assertAlmostEqual(p.humidity_repeat, p.humidity)
         self.assertAlmostEqual(p.emissivity_repeat, p.emissivity)
-        self.assertEqual(struct.unpack_from("<f", raw, PARAMS_OFFSET + 356)[0], p.center_temp_candidate)
+        self.assertEqual(struct.unpack_from("<f", raw, PARAMS_OFFSET + 356)[0], p.calibration_1)
 
     def test_image_ends_before_four_nonimage_rows(self):
         raw = (FIXTURES / "scene-a.raw").read_bytes()
@@ -83,8 +86,8 @@ class RealFrameTests(unittest.TestCase):
     def test_fields_stay_constant_while_scene_changes(self):
         a = parse_frame((FIXTURES / "scene-a.raw").read_bytes())
         b = parse_frame((FIXTURES / "scene-b.raw").read_bytes())
-        self.assertEqual(a.parameters.center_temp_candidate, b.parameters.center_temp_candidate)
-        self.assertEqual(a.parameters.gain_candidate, b.parameters.gain_candidate)
+        self.assertEqual(a.parameters.calibration_1, b.parameters.calibration_1)
+        self.assertEqual(a.parameters.calibration_0, b.parameters.calibration_0)
         self.assertEqual(image_statistics(a.image_y)["transport_center_y"], 96)
         self.assertEqual(image_statistics(b.image_y)["transport_center_y"], 107)
         self.assertNotEqual(image_statistics(a.image_y)["mean_y"], image_statistics(b.image_y)["mean_y"])
@@ -103,20 +106,42 @@ class RealFrameTests(unittest.TestCase):
         report = diagnostic_report(parse_frame(bytes(raw)))
         self.assertTrue(report["metadata_zeroed"])
         self.assertIsNone(report["legacy_rejected_hypothesis"])
+        self.assertIsNone(report["calcfixraw_first_stage"])
+
+    def test_native_lookup_inputs_expose_capture_mode(self):
+        for name, center, high, low in (
+            ("scene-a.raw", 5165, 5507, 4918),
+            ("scene-b.raw", 5255, 5292, 5238),
+        ):
+            with self.subTest(name=name):
+                report = diagnostic_report(parse_frame((FIXTURES / name).read_bytes()))
+                lookup = report["native_lookup_inputs"]
+                self.assertEqual(lookup["trailer_center_index"], center)
+                self.assertEqual(lookup["trailer_high_index"], high)
+                self.assertEqual(lookup["trailer_low_index"], low)
+                self.assertTrue(lookup["calibration_copy_matches"])
+                self.assertFalse(lookup["image_words_fit_14_bit_lookup"])
+                self.assertGreater(lookup["image_word_min"], 0x3fff)
+
+        compatible = bytearray((FIXTURES / "scene-a.raw").read_bytes())
+        compatible[:IMAGE_BYTES] = struct.pack("<H", 5000) * (IMAGE_BYTES // 2)
+        lookup = diagnostic_report(parse_frame(bytes(compatible)))["native_lookup_inputs"]
+        self.assertTrue(lookup["image_words_fit_14_bit_lookup"])
+        self.assertEqual((lookup["image_word_min"], lookup["image_word_max"]), (5000, 5000))
 
 
 class ArithmeticTests(unittest.TestCase):
-    """Pin documented arithmetic while keeping its native argument mapping open."""
+    """Pin documented arithmetic without claiming native measurement accuracy."""
 
     def test_legacy_center_trace_exposes_the_mismatch(self):
         frame = parse_frame((FIXTURES / "scene-a.raw").read_bytes())
         trace = diagnostic_report(frame)["legacy_rejected_hypothesis"]["trace"]
         self.assertEqual(trace["a"], 96)
-        self.assertAlmostEqual(trace["b"], 0.2705 * 0.45, places=6)
+        self.assertAlmostEqual(trace["b"], frame.parameters.calibration_0 * frame.parameters.humidity, places=6)
         self.assertAlmostEqual(trace["a_plus_273_15"], 369.15)
         self.assertAlmostEqual(trace["fourth_power"], 18569982353.117, places=2)
         self.assertAlmostEqual(trace["result_c_candidate"], -55.104154, places=5)
-        self.assertGreater(abs(trace["result_c_candidate"] - frame.parameters.center_temp_candidate), 90)
+        self.assertLess(trace["result_c_candidate"], 0)
 
     def test_decoded_helpers_are_deterministic(self):
         self.assertEqual(init_temp_param(2.0, 8.0), (2.0, 4.0))
@@ -125,9 +150,10 @@ class ArithmeticTests(unittest.TestCase):
         trace = get_temp_evn_trace(20.0, 0.0, 1.0)
         self.assertAlmostEqual(trace["result_c_candidate"], 20.0)
         self.assertIsNone(get_temp_evn_trace(20.0, 0.0, -1.0)["result_c_candidate"])
-        p = documented_calcfixraw_polynomial(96.0)
-        self.assertAlmostEqual(p["polynomial"], 6.265020896)
-        self.assertAlmostEqual(p["exp_polynomial"], math.exp(6.265020896))
+        p = documented_calcfixraw_polynomial(25.0)
+        expected = 1.5587 + 0.06939 * 25 - 0.00027816 * 25**2 + 6.8455e-7 * 25**3
+        self.assertAlmostEqual(p["polynomial"], expected)
+        self.assertAlmostEqual(p["exp_polynomial"], math.exp(expected))
 
     def test_scrubbing_preserves_thermal_statistics_and_center(self):
         raw = (FIXTURES / "scene-b.raw").read_bytes()

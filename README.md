@@ -47,12 +47,14 @@ To inspect a saved frame without the camera:
 ./.venv/bin/python measurement_diagnostic.py --frame tests/fixtures/scene-a.raw
 ```
 
-The diagnostic reports all known parameter offsets, image-only Y statistics,
-the decoded intermediate arithmetic of `GetTempEvn`, and the partial documented
-`CalcFixRaw` polynomial. The legacy assumption `b = gain × emissivity` is
-displayed only to show its mismatch; it is **not** a calibrated temperature
-conversion. The field at parameter offset 356 remains a candidate firmware
-center reading, not a verified live measurement.
+The diagnostic reports the APK-identified settings, copied calibration
+coefficients, image-only Y statistics, 14-bit lookup compatibility, and the
+trailer center/high/low raw indices. It also retains the old rejected
+`Y → GetTempEvn` calculation as historical evidence. Block field 356 is a
+copy of a calibration coefficient; the Android app obtains its live center
+reading from a different trailer index and a native lookup. See the
+[native call chain](https://github.com/LounaMaili/LMThermal/blob/proto/native-thermometry-chain/docs/NATIVE_CALL_CHAIN.md). No per-pixel
+Celsius output is validated for the current Linux fixtures.
 
 Run the hardware-independent tests with:
 

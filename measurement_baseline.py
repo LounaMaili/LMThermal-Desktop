@@ -19,23 +19,24 @@ PARAMS_SIZE = 514
 
 @dataclass(frozen=True)
 class FrameParameters:
-    """Decoded fields; names ending in 'candidate' retain unverified semantics."""
+    """Trailer settings identified by the APK and five copied calibration floats."""
 
-    env_temp1: float
-    env_temp2: float
+    correction: float
+    reflected_temp: float
+    ambient_temp: float
+    humidity: float
     emissivity: float
-    distance_factor: float
-    active: int
-    gain_candidate: float
-    center_temp_candidate: float
-    field_360: float
-    offset_factor_candidate: float
-    calib_factor_candidate: float
+    distance: int
+    calibration_0: float
+    calibration_1: float
+    calibration_2: float
+    calibration_3: float
+    calibration_4: float
     field_372: float
-    env_temp1_repeat: float
-    env_temp2_repeat: float
+    reflected_temp_repeat: float
+    ambient_temp_repeat: float
+    humidity_repeat: float
     emissivity_repeat: float
-    distance_factor_repeat: float
 
 
 @dataclass(frozen=True)
@@ -70,21 +71,22 @@ def parse_frame(raw: bytes) -> ParsedFrame:
         return struct.unpack_from("<f", p, offset)[0]
 
     parameters = FrameParameters(
-        env_temp1=f32(4),
-        env_temp2=f32(8),
-        emissivity=f32(12),
-        distance_factor=f32(16),
-        active=struct.unpack_from("<I", p, 20)[0],
-        gain_candidate=f32(352),
-        center_temp_candidate=f32(356),
-        field_360=f32(360),
-        offset_factor_candidate=f32(364),
-        calib_factor_candidate=f32(368),
+        correction=f32(0),
+        reflected_temp=f32(4),
+        ambient_temp=f32(8),
+        humidity=f32(12),
+        emissivity=f32(16),
+        distance=struct.unpack_from("<H", p, 20)[0],
+        calibration_0=f32(352),
+        calibration_1=f32(356),
+        calibration_2=f32(360),
+        calibration_3=f32(364),
+        calibration_4=f32(368),
         field_372=f32(372),
-        env_temp1_repeat=f32(376),
-        env_temp2_repeat=f32(380),
-        emissivity_repeat=f32(384),
-        distance_factor_repeat=f32(388),
+        reflected_temp_repeat=f32(376),
+        ambient_temp_repeat=f32(380),
+        humidity_repeat=f32(384),
+        emissivity_repeat=f32(388),
     )
     return ParsedFrame(raw, y, parameters)
 
@@ -109,9 +111,9 @@ def image_statistics(image_y: np.ndarray) -> dict:
 def get_temp_evn_trace(a: float, env_term: float, b: float) -> dict:
     """Trace documented native arithmetic with explicit, caller-supplied inputs.
 
-    The native caller and the units of ``env_term`` remain unknown. This function
-    does not validate a temperature measurement or map frame fields to arguments.
-    Python arithmetic traces the algebra, not native float32 rounding exactly.
+    The native caller supplies a calibrated lookup value, CalcFixRaw's fourth
+    output, and CalcFixRaw's third output. Python traces the algebra without
+    native float32 rounding; arbitrary arguments are not a measurement.
     """
     kelvin_candidate = a + 273.15
     fourth_power = kelvin_candidate ** 4
@@ -132,7 +134,7 @@ def get_temp_evn_trace(a: float, env_term: float, b: float) -> dict:
 
 
 def init_temp_param(x: float, y: float) -> tuple[float, float]:
-    """Reproduce decoded InitTempParam arithmetic; frame inputs are unknown."""
+    """Reproduce InitTempParam arithmetic for coefficients at 223494/223498."""
     if x == 0:
         raise ValueError("x must be nonzero")
     a = y / (2.0 * x)
@@ -140,14 +142,14 @@ def init_temp_param(x: float, y: float) -> tuple[float, float]:
 
 
 def documented_calcfixraw_polynomial(t: float) -> dict:
-    """Show the documented partial polynomial without claiming a full conversion."""
+    """Trace CalcFixRaw's first stage for caller-supplied ambient temperature."""
     c0 = 1.5587
     c1 = 0.06939 * t
-    c2 = -0.000278 * t * t
-    c3 = 6.86e-7 * t * t * t
+    c2 = -0.00027816 * t * t
+    c3 = 6.8455e-7 * t * t * t
     polynomial = c0 + c1 + c2 + c3
     return {
-        "t_candidate": t,
+        "ambient_temp": t,
         "constant": c0,
         "linear": c1,
         "quadratic": c2,
@@ -158,34 +160,39 @@ def documented_calcfixraw_polynomial(t: float) -> dict:
 
 
 def diagnostic_report(parsed: ParsedFrame) -> dict:
-    """Report observations and the rejected legacy hypothesis separately."""
+    """Report confirmed trailer inputs and keep rejected historical math separate."""
     stats = image_statistics(parsed.image_y)
     params = parsed.parameters
     metadata_zeroed = all(
         value == 0
         for value in (
-            params.env_temp1,
-            params.env_temp2,
+            params.reflected_temp,
+            params.ambient_temp,
+            params.humidity,
             params.emissivity,
-            params.distance_factor,
-            params.gain_candidate,
-            params.center_temp_candidate,
+            params.distance,
+            params.calibration_0,
+            params.calibration_1,
         )
     )
     legacy = None
     if not metadata_zeroed:
-        legacy_b = params.gain_candidate * params.emissivity
-        trace = get_temp_evn_trace(stats["transport_center_y"], params.env_temp1, legacy_b)
+        legacy_b = params.calibration_0 * params.humidity
+        trace = get_temp_evn_trace(stats["transport_center_y"], params.reflected_temp, legacy_b)
         legacy = {
             "assumed_a": "transport center Y (row 146) as native a",
-            "assumed_env_term": "env_temp1 as native env_term",
-            "assumed_b": "gain_candidate * emissivity",
+            "assumed_env_term": "block offset 4 (actually reflected temperature) as native radiation term",
+            "assumed_b": "block offset 352 times offset 12 (actually calibration_0 times humidity)",
             "trace": trace,
-            "difference_from_field_356_c": (
-                trace["result_c_candidate"] - params.center_temp_candidate
-                if trace["result_c_candidate"] is not None else None
-            ),
         }
+    image_words = np.frombuffer(parsed.raw, dtype="<u2", count=FRAME_WIDTH * IMAGE_HEIGHT)
+    trailer = parsed.nonimage_bytes
+    center_index = struct.unpack_from("<H", trailer, 24)[0]
+    high_index = struct.unpack_from("<H", trailer, 8)[0]
+    low_index = struct.unpack_from("<H", trailer, 14)[0]
+    calibration_copy_matches = (
+        parsed.raw[223494:223514] == parsed.raw[PARAMS_OFFSET + 352:PARAMS_OFFSET + 372]
+    )
     return {
         "frame_bytes": len(parsed.raw),
         "image_bytes": IMAGE_BYTES,
@@ -194,12 +201,23 @@ def diagnostic_report(parsed: ParsedFrame) -> dict:
         "metadata_zeroed": metadata_zeroed,
         "parameters": asdict(params),
         "image_y": stats,
+        "native_lookup_inputs": {
+            "image_word_min": int(image_words.min()),
+            "image_word_max": int(image_words.max()),
+            "image_words_fit_14_bit_lookup": bool(np.all(image_words <= 0x3fff)),
+            "trailer_center_index": center_index,
+            "trailer_high_index": high_index,
+            "trailer_low_index": low_index,
+            "calibration_copy_matches": calibration_copy_matches,
+        },
         "legacy_rejected_hypothesis": legacy,
-        "calcfixraw_partial_candidate": documented_calcfixraw_polynomial(stats["transport_center_y"]),
+        "calcfixraw_first_stage": (
+            documented_calcfixraw_polynomial(params.ambient_temp) if not metadata_zeroed else None
+        ),
         "limitations": [
             "No validated per-pixel temperature conversion is available.",
-            "Field 356 has not been shown to be a live center measurement.",
-            "The native inputs to GetTempEvn, InitTempParam and CalcFixRaw are unknown.",
+            "Block field 356 is a copied calibration coefficient, not the app's live center reading.",
+            "The camera mode and native readings needed to validate the lookup remain unavailable.",
         ] + (["Parameter fields are zeroed; no legacy arithmetic was attempted."] if metadata_zeroed else []),
     }
 
