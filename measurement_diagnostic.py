@@ -22,8 +22,7 @@ def sanitize_fixture(raw: bytes, seed: int = 1, scramble_image: bool = True) -> 
     """Optionally scramble the scene and redact identifier-bearing trailer ranges.
 
     When requested, YUYV four-byte groups outside an 8 by 8 center patch are
-    permuted, so
-    brightness statistics and the real center patch survive without a
+    permuted. Brightness statistics and the real center patch survive without a
     recognizable portrait. The camera's two serial-bearing ranges are erased.
     These fixtures are for parser and arithmetic reproducibility, not spatial
     analysis or proving what the firmware's center field represents.

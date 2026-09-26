@@ -5,6 +5,14 @@ priority is a reproducible measurement foundation. **Per-pixel Celsius values
 from the older viewer and `thermal_capture.py` are unvalidated and can be
 wrong.** The Temperature Lock widgets do not yet map colors to a Celsius range.
 
+This desktop repository is paired with [LMThermal](https://github.com/LounaMaili/LMThermal),
+which holds the hardware and reverse-engineering documentation.
+
+## Requirements
+
+Use the repository virtual environment when available. The diagnostic needs
+Python, OpenCV, and NumPy; the legacy viewer additionally needs PyQt6.
+
 ## Measurement baseline
 
 `measurement_baseline.py` parses exact 224,256-byte YUYV frames independently
@@ -29,6 +37,10 @@ To save privacy-scrubbed raw fixtures while inspecting them:
 ./.venv/bin/python measurement_diagnostic.py --count 2 --save-dir /tmp/ht301-fixtures
 ```
 
+Review newly saved fixtures before sharing them. The diagnostic scrambles the
+image outside a small center patch and clears the identifier ranges observed
+in these captures; other firmware revisions may store identifiers elsewhere.
+
 To inspect a saved frame without the camera:
 
 ```bash
@@ -50,6 +62,7 @@ Run the hardware-independent tests with:
 
 See [measurement audit](docs/MEASUREMENT_AUDIT.md) and the
 [fixture notes](tests/fixtures/README.md) for evidence and remaining unknowns.
+Changes are recorded in the [changelog](CHANGELOG.md).
 
 ## Legacy desktop viewer
 
@@ -57,3 +70,7 @@ See [measurement audit](docs/MEASUREMENT_AUDIT.md) and the
 and UI controls. Its spot, min/max and range-lock behavior must not be used as
 validated measurements. Work on those features resumes after the temperature
 conversion chain is established.
+
+## License
+
+To be determined.
