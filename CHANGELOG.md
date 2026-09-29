@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (PyQt radiometric MVP — 2026-09-29)
+- Replaced the obsolete Y-based PyQt thermometry path with a camera worker that owns stable HT-301 discovery, latest-frame acquisition, the validated radiometric session, controls, and clean shutdown outside the GUI thread.
+- Added a native-orientation 384 × 288 display with explicit initialization, session validity, view FPS, true matrix cursor values, validated high/low markers, and separately labeled literal/trailer center readings. Pure aspect-preserving coordinate helpers reject letterbox positions and retain raw14 indices independently of display normalization.
+- Removed misleading legacy range-lock, palette, point persistence, and screenshot controls from the first measurement MVP. Absolute physical accuracy remains unvalidated.
+
 ### Fixed (Live diagnostic preview validation — 2026-09-29)
 - Enlarged the OpenCV diagnostic window and rendered the center crosshair last at two-pixel thickness after a live display-mode window capture showed that the original one-pixel marker disappeared when HighGUI scaled the image down.
 - Allowed the noninteractive session to skip an invalid startup frame while requiring three consecutive valid display frames before any initialization write; the live camera produced a mixed first frame after reconnect.

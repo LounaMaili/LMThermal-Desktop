@@ -1,17 +1,47 @@
 # LMThermal-Desktop
 
-Experimental desktop tooling for the Infiray HT-301 / T3-317-13. The current
-priority is a reproducible measurement foundation. **Per-pixel Celsius values
-from the older viewer and `thermal_capture.py` are unvalidated and can be
-wrong.** The Temperature Lock widgets do not yet map colors to a Celsius range.
+Experimental desktop tooling for the Infiray HT-301 / T3-317-13. The first
+radiometric PyQt MVP now uses the evidence-gated native-equivalent measurement
+session. Absolute physical accuracy has not been independently validated.
+Historical `thermal_capture.py` calculations are not part of this viewer.
 
 This desktop repository is paired with [LMThermal](https://github.com/LounaMaili/LMThermal),
 which holds the hardware and reverse-engineering documentation.
 
 ## Requirements
 
-Use the repository virtual environment when available. The diagnostic needs
-Python, OpenCV, and NumPy; the legacy viewer additionally needs PyQt6.
+Use the repository virtual environment when available. The desktop viewer
+needs Python, OpenCV, NumPy and PyQt6.
+
+## Radiometric desktop MVP
+
+Launch the viewer with the HT-301 connected:
+
+```bash
+./.venv/bin/python lmthermal_viewer.py
+```
+
+The viewer discovers the stable Infiray `video-index0` path and opens a
+read-only display-Y preview. Use **Initialize radiometric** only when that
+display preview is active. The worker then runs the existing confirmed
+`32772 -> 32800 -> 32768` sequence, checks each readback and raw14 transition,
+discards shutter frames, and waits for live valid measurements. An existing
+raw14 stream with unknown host state remains viewable but has no temperatures;
+reconnect the camera to start a known display-mode session.
+
+Ready frames show contrast-normalized raw14 for aiming. Hover shows the
+original raw14 index and the corresponding value from the native-equivalent
+temperature matrix. Red and blue markers use the validated high/low camera
+coordinates. **Center pixel** means native `(192,144)`; **Camera center
+reading** means the separate trailer index. Invalid, held or unsettled frames
+hide current temperature readings until the session recovers. Resizing keeps
+the image's native aspect ratio and rejects cursor locations in the margins.
+Camera orientation remains native; preferred presentation rotation/mirroring
+is deferred. See [PyQt MVP architecture](docs/PYQT_RADIOMETRIC_MVP.md).
+
+Native-equivalent temperatures; absolute physical accuracy not yet
+independently validated. Celsius palette lock, ROI measurement, exports and
+recording remain outside this MVP.
 
 ## Measurement baseline
 
@@ -182,12 +212,10 @@ See [measurement audit](docs/MEASUREMENT_AUDIT.md) and the
 [fixture notes](tests/fixtures/README.md) for evidence and remaining unknowns.
 Changes are recorded in the [changelog](CHANGELOG.md).
 
-## Legacy desktop viewer
+## Historical prototype
 
-`lmthermal_viewer.py` is an early PyQt6 prototype with palettes, camera view,
-and UI controls. Its spot, min/max and range-lock behavior must not be used as
-validated measurements. Work on those features resumes after the temperature
-conversion chain is established.
+`thermal_capture.py` remains for research history. Its older Y-based
+temperature approximation is not used by `lmthermal_viewer.py`.
 
 ## License
 
