@@ -29,9 +29,18 @@ discards shutter frames, and waits for live valid measurements. An existing
 raw14 stream with unknown host state remains viewable but has no temperatures;
 reconnect the camera to start a known display-mode session.
 
-Ready frames show contrast-normalized raw14 for aiming. Hover shows the
-original raw14 index and the corresponding value from the native-equivalent
-temperature matrix. Red and blue markers use the validated high/low camera
+Ready frames now use a Celsius-driven palette derived solely from the
+native-equivalent temperature matrix. **Auto range** clips the display scale
+to the current frame's 2nd/98th temperature percentiles; **Locked range** uses
+the entered Celsius minimum and maximum exactly. The color legend shows the
+effective scale. Choose White hot, Black hot, Inferno, Iron-like (OpenCV Hot),
+or Turbo. Display mode remains grayscale and has no Celsius legend. On an
+invalid/unsettled frame, the viewer falls back to the current raw14 aiming
+view and hides current Celsius readings and legend until readiness returns.
+Palette and range affect visualization only.
+
+Hover shows the original raw14 index and the corresponding value from the
+native-equivalent temperature matrix. Red and blue markers use the validated high/low camera
 coordinates. **Center pixel** means native `(192,144)`; **Camera center
 reading** means the separate trailer index. Invalid, held or unsettled frames
 hide current temperature readings until the session recovers. Resizing keeps
@@ -40,8 +49,8 @@ Camera orientation remains native; preferred presentation rotation/mirroring
 is deferred. See [PyQt MVP architecture](docs/PYQT_RADIOMETRIC_MVP.md).
 
 Native-equivalent temperatures; absolute physical accuracy not yet
-independently validated. Celsius palette lock, ROI measurement, exports and
-recording remain outside this MVP.
+independently validated. ROI measurement, exports and recording remain outside
+this MVP.
 
 ## Measurement baseline
 
@@ -197,7 +206,9 @@ rules. Physical temperature accuracy still needs independent targets.
 temporal stability and optional independently measured target temperatures.
 It records signed errors without fitting or modifying the lookup. Use the
 [reference plan template](docs/validation/target-plan.template.json) and
-[validation procedure](docs/PHYSICAL_VALIDATION.md). GUI Celsius remains deferred.
+[validation procedure](docs/PHYSICAL_VALIDATION.md). The GUI now colors
+native-equivalent Celsius values, while independent physical accuracy remains
+unvalidated.
 An operator-confirmed hand capture now shows a central palm ROI consistently
 warmer than the cooler background across 23 distinct post-shutter raw14
 frames; see the validation procedure for the liveness and accuracy limits.

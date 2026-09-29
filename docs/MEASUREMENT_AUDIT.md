@@ -42,8 +42,10 @@ lookup standard deviations were about 0.029/0.017/0.039 °C. A later
 calibration update was observed, so short-term quiet output alone is not
 proof of equilibrium. High/low trailer indices and coordinates matched image
 extrema in all 75 later frames; the center index equaled the literal center
-pixel in 13 of 75. The experimental module exposes a full 288 × 384
-temperature matrix for valid raw14 input, without GUI integration.
+pixel in 13 of 75. The experimental module exposed a full 288 × 384
+temperature matrix for valid raw14 input. The later PyQt viewer uses the
+evidence-gated session and a display-only Celsius palette; see
+[PYQT_RADIOMETRIC_MVP.md](PYQT_RADIOMETRIC_MVP.md).
 
 The September 26 temporary JSON reports were lost across interruption; the
 raw fixture and native reference table survived and were archived with all

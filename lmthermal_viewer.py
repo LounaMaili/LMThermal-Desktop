@@ -6,9 +6,12 @@ import time
 
 from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QImage, QPainter, QPen
-from PyQt6.QtWidgets import (QApplication, QFormLayout, QGroupBox, QHBoxLayout,
-                             QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
+                             QFormLayout, QGroupBox, QHBoxLayout, QLabel,
+                             QMainWindow, QPushButton, QVBoxLayout, QWidget)
 
+from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
+                             effective_range, legend_image, render_temperature)
 from mvp_camera_worker import CameraWorker
 from mvp_presentation import (current_extrema, current_reading, display_image,
                               image_viewport, native_to_widget, widget_to_native)
@@ -28,12 +31,42 @@ class ThermalImageWidget(QWidget):
         self.image = None
         self.pointer = None
         self._mouse_widget = None
+        self.palette = DEFAULT_PALETTE
+        self.automatic_range = True
+        self.locked_lower = 20.0
+        self.locked_upper = 40.0
+        self.effective_bounds = None
+
+    def set_presentation(self, palette: str, automatic: bool,
+                         locked_lower: float, locked_upper: float) -> None:
+        """Change display colors without altering the current observation."""
+        if palette not in PALETTES:
+            raise ValueError("Unsupported Celsius palette")
+        CelsiusRange(locked_lower, locked_upper)
+        self.palette = palette
+        self.automatic_range = automatic
+        self.locked_lower, self.locked_upper = locked_lower, locked_upper
+        self._render()
 
     def set_observation(self, observation) -> None:
         """Replace the image; a rejected frame never inherits old measurements."""
         self.observation = observation
+        self._render()
+
+    def _render(self) -> None:
+        """Use Celsius color only for a currently valid measurement frame."""
+        observation = self.observation
+        self.effective_bounds = None
         if observation is None:
             self.image = None
+        elif observation.state == SessionState.RADIOMETRIC_READY and observation.measurement is not None:
+            matrix = observation.measurement.temperature_c
+            bounds = effective_range(matrix, self.automatic_range,
+                                     self.locked_lower, self.locked_upper)
+            rgb = render_temperature(matrix, bounds.lower, bounds.upper, self.palette)
+            self.image = QImage(rgb.data, rgb.shape[1], rgb.shape[0], rgb.strides[0],
+                                QImage.Format.Format_RGB888).copy()
+            self.effective_bounds = bounds
         else:
             gray = display_image(observation)
             self.image = QImage(gray.data, gray.shape[1], gray.shape[0], gray.strides[0],
@@ -99,6 +132,46 @@ class ThermalImageWidget(QWidget):
                              Qt.AlignmentFlag.AlignVCenter, text)
 
 
+class CelsiusLegend(QWidget):
+    """Show the exact Celsius bounds and palette used by the current image."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedWidth(94)
+        self.bounds = None
+        self.palette = DEFAULT_PALETTE
+        self.gradient = None
+        self.setVisible(False)
+
+    def set_presentation(self, bounds: CelsiusRange | None, palette: str) -> None:
+        self.bounds = bounds
+        self.palette = palette
+        if bounds is None:
+            self.gradient = None
+            self.setVisible(False)
+        else:
+            rgb = legend_image(bounds.lower, bounds.upper, palette)
+            self.gradient = QImage(rgb.data, rgb.shape[1], rgb.shape[0], rgb.strides[0],
+                                   QImage.Format.Format_RGB888).copy()
+            self.setVisible(True)
+        self.update()
+
+    def paintEvent(self, event) -> None:
+        if self.bounds is None or self.gradient is None:
+            return
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor(14, 16, 20))
+        top, height = 24.0, max(2.0, self.height() - 48.0)
+        painter.drawImage(QRectF(8, top, 22, height), self.gradient)
+        painter.setPen(QColor("white"))
+        for fraction in (0.0, .25, .5, .75, 1.0):
+            y = top + height * fraction
+            value = self.bounds.upper - (self.bounds.upper - self.bounds.lower) * fraction
+            painter.drawLine(QPointF(31, y), QPointF(36, y))
+            painter.drawText(QRectF(38, y - 10, 54, 20),
+                             Qt.AlignmentFlag.AlignVCenter, f"{value:.1f}°C")
+
+
 class MainWindow(QMainWindow):
     """Show session observations and native-equivalent values, never Y thermometry."""
 
@@ -128,6 +201,8 @@ class MainWindow(QMainWindow):
         self.image_widget = ThermalImageWidget()
         self.image_widget.hovered.connect(self._on_hover)
         layout.addWidget(self.image_widget, 1)
+        self.legend = CelsiusLegend()
+        layout.addWidget(self.legend)
         panel = QWidget()
         panel.setFixedWidth(280)
         side = QVBoxLayout(panel)
@@ -138,6 +213,40 @@ class MainWindow(QMainWindow):
         self.initialize_button.setEnabled(False)
         self.initialize_button.clicked.connect(self._initialize)
         side.addWidget(self.initialize_button)
+
+        palette_group = QGroupBox("Celsius display")
+        palette_form = QFormLayout(palette_group)
+        self.palette_combo = QComboBox()
+        self.palette_combo.addItems(PALETTES)
+        self.palette_combo.setCurrentText(DEFAULT_PALETTE)
+        self.auto_range_check = QCheckBox("Auto range")
+        self.auto_range_check.setChecked(True)
+        self.min_spin = QDoubleSpinBox()
+        self.min_spin.setRange(-273.15, 999.99)
+        self.min_spin.setDecimals(2)
+        self.min_spin.setSuffix(" °C")
+        self.min_spin.setValue(20.0)
+        self.max_spin = QDoubleSpinBox()
+        self.max_spin.setRange(-273.14, 1000.0)
+        self.max_spin.setDecimals(2)
+        self.max_spin.setSuffix(" °C")
+        self.max_spin.setValue(40.0)
+        self.min_spin.setMaximum(self.max_spin.value() - .01)
+        self.max_spin.setMinimum(self.min_spin.value() + .01)
+        self.min_spin.setEnabled(False)
+        self.max_spin.setEnabled(False)
+        self.range_label = QLabel("Available when radiometric-ready")
+        self.range_label.setWordWrap(True)
+        palette_form.addRow("Palette:", self.palette_combo)
+        palette_form.addRow(self.auto_range_check)
+        palette_form.addRow("Min:", self.min_spin)
+        palette_form.addRow("Max:", self.max_spin)
+        palette_form.addRow("Visual scale:", self.range_label)
+        side.addWidget(palette_group)
+        self.palette_combo.currentTextChanged.connect(self._apply_presentation)
+        self.auto_range_check.toggled.connect(self._auto_changed)
+        self.min_spin.valueChanged.connect(self._range_changed)
+        self.max_spin.valueChanged.connect(self._range_changed)
 
         session_form = QFormLayout()
         self.device_label = QLabel("Disconnected")
@@ -211,6 +320,7 @@ class MainWindow(QMainWindow):
         self.worker = None
         self.observation = None
         self.image_widget.set_observation(None)
+        self._sync_legend()
         self._clear_measurements()
         self.device_label.setText("Disconnected")
         self.state_label.setText("Disconnected")
@@ -225,6 +335,7 @@ class MainWindow(QMainWindow):
         self.worker = None
         self.observation = None
         self.image_widget.set_observation(None)
+        self._sync_legend()
         self._clear_measurements()
         self.initialize_button.setEnabled(False)
         self.connect_button.setText("Connect camera")
@@ -250,6 +361,7 @@ class MainWindow(QMainWindow):
             return
         self.observation = observation
         self.image_widget.set_observation(observation)
+        self._sync_legend()
         self._view_count += 1
         state = observation.state
         if state == SessionState.RADIOMETRIC_READY:
@@ -293,6 +405,35 @@ class MainWindow(QMainWindow):
                       self.center_pixel_label, self.trailer_center_label):
             label.setText("Unavailable")
 
+    def _auto_changed(self, automatic: bool) -> None:
+        self.min_spin.setEnabled(not automatic)
+        self.max_spin.setEnabled(not automatic)
+        self._apply_presentation()
+
+    def _range_changed(self) -> None:
+        """Keep manual Celsius bounds ordered, even during interactive edits."""
+        if self.sender() is self.min_spin:
+            self.max_spin.setMinimum(self.min_spin.value() + .01)
+        elif self.sender() is self.max_spin:
+            self.min_spin.setMaximum(self.max_spin.value() - .01)
+        self._apply_presentation()
+
+    def _apply_presentation(self) -> None:
+        self.image_widget.set_presentation(self.palette_combo.currentText(),
+                                           self.auto_range_check.isChecked(),
+                                           self.min_spin.value(), self.max_spin.value())
+        self._sync_legend()
+
+    def _sync_legend(self) -> None:
+        """Use the same effective bounds and palette as the rendered frame."""
+        bounds = self.image_widget.effective_bounds
+        self.legend.set_presentation(bounds, self.palette_combo.currentText())
+        if bounds is None:
+            self.range_label.setText("Unavailable until a valid measurement frame")
+        else:
+            mode = "Auto" if self.auto_range_check.isChecked() else "Locked"
+            self.range_label.setText(f"{mode}: {bounds.lower:.2f} to {bounds.upper:.2f} °C")
+
     def _on_hover(self, point) -> None:
         self.pointer = point
         self._update_cursor()
@@ -317,6 +458,7 @@ class MainWindow(QMainWindow):
         self.initialize_button.setEnabled(False)
         self.observation = None
         self.image_widget.set_observation(None)
+        self._sync_legend()
         self._clear_measurements()
 
     def closeEvent(self, event) -> None:

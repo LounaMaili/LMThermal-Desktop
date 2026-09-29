@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Celsius palette and range — 2026-09-29)
+- Added a pure display renderer that maps only valid native-equivalent temperature matrices through an automatic 2nd/98th-percentile Celsius scale or exact locked Celsius bounds into White hot, Black hot, Inferno, Iron-like/Hot, or Turbo colors.
+- Added an effective-range Celsius legend and live palette/auto/locked controls. Display and unsettled frames remain aiming previews without current Celsius colors, legend or readings; palette changes do not alter raw14, session validity, or thermometry.
+
 ### Added (PyQt radiometric MVP — 2026-09-29)
 - Replaced the obsolete Y-based PyQt thermometry path with a camera worker that owns stable HT-301 discovery, latest-frame acquisition, the validated radiometric session, controls, and clean shutdown outside the GUI thread.
 - Added a native-orientation 384 × 288 display with explicit initialization, session validity, view FPS, true matrix cursor values, validated high/low markers, and separately labeled literal/trailer center readings. Pure aspect-preserving coordinate helpers reject letterbox positions and retain raw14 indices independently of display normalization.
