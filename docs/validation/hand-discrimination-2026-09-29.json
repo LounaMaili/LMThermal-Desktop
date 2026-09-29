@@ -1,0 +1,13 @@
+{
+  "description": "Operator-confirmed hand held in the central HT-301 view against a cooler room background on 2026-09-29. Fixed ROIs were chosen from the visible spatial frame for numerical comparison. This is relative discrimination, not a physical temperature reference.",
+  "conditions": {
+    "independent_reference_available": false,
+    "operator_confirmed_hand_present": true,
+    "camera_mode": "Official raw14 after 32772, normal range 32800, shutter 32768 and 75 discarded frames",
+    "source_report": "LMThermal-Research/analysis/warm-target-20260929/hand-run-01/report.json"
+  },
+  "targets": [
+    {"name": "central_hand", "roi_xywh": [192, 128, 32, 32], "reference": null},
+    {"name": "cool_background", "roi_xywh": [16, 220, 32, 32], "reference": null}
+  ]
+}

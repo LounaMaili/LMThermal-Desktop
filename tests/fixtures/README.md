@@ -91,3 +91,25 @@ contained 75 distinct raw14 images, with center/high/low lookup standard
 deviations of about 0.029/0.017/0.039 °C. The room region comparison is in
 `docs/diagnostics/2026-09-27-room-stability.json`. Short-term liveness and
 repeatability do not prove physical accuracy or long-term calibration stability.
+
+## Operator-confirmed hand fixture (2026-09-29)
+
+`warm-hand-settled.raw` is a 224,256-byte frame from
+`LMThermal-Research/analysis/warm-target-20260929/hand-run-01/captures/E_post_shutter_stability/frame-045.raw`.
+SHA-256: `c31fda649ec08740e6ec2744dec037006c87b96ccfa685ca44d453615e50f4ae`.
+The operator confirmed a hand in the central view; the saved image retains
+the spatial hand/background structure. The two known identifier spans were
+cleared without changing image pixels, trailer indices or calibration values.
+The fixture is from a 23-frame run of distinct raw14 images after a separate
+31-frame held interval; it is a regression and relative-discrimination
+fixture, not a physical-temperature standard.
+
+For this frame, image words span 5340–5783 and the experimental full matrix
+spans 27.748–37.379 °C. The trailer center is index 5740 / 36.483 °C;
+literal pixel `(192,144)` is index 5742 / 36.525 °C. High is index 5783 at
+`(191,211)` on the visible hand, 37.379 °C; low is index 5340 at `(329,83)`
+in the cooler background, 27.748 °C. The central 32 × 32 palm ROI averages
+36.578 °C and the lower-left background ROI 27.996 °C. Detailed ROI
+min/max, within-frame variation, lookup inputs and provenance are in
+`docs/diagnostics/2026-09-29-hand-discrimination.json`. No independent
+surface reference was measured.

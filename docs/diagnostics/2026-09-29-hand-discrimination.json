@@ -1,0 +1,204 @@
+{
+  "purpose": "Operator-confirmed hand versus cooler background discrimination; no independent temperature reference or physical accuracy claim",
+  "captured_at_utc": "2026-09-29T12:19:24.114285+00:00",
+  "source_report": "LMThermal-Research/analysis/warm-target-20260929/hand-run-01/report.json",
+  "source_report_sha256": "3bded34c55bfe9fb0b9778288517fc81c0350c84bebfdc7295313d1559347d97",
+  "source_validation": "LMThermal-Research/analysis/warm-target-20260929/hand-run-01/validation-live-23.json",
+  "source_validation_sha256": "7802403c36fc82bf768412ad72c322f8e5ecc854403259f67efe46e60b7355ef",
+  "camera_vid_pid": {
+    "idVendor": "1514",
+    "idProduct": "0001"
+  },
+  "initial_zoom_readback": 0,
+  "documented_device_controls": [
+    {
+      "name": "B_output1",
+      "value": 32772,
+      "readback": 32772
+    },
+    {
+      "name": "C_range120",
+      "value": 32800,
+      "readback": 32800
+    },
+    {
+      "name": "D_refresh",
+      "value": 32768,
+      "readback": 32768
+    }
+  ],
+  "capture_status": "stopped",
+  "capture_stop_reason": "Post-shutter transport lost raw14 compatibility",
+  "post_shutter_discarded_frames": 75,
+  "additional_held_image_run": {
+    "stage": "E_post_shutter_stability",
+    "first_frame": 4,
+    "last_frame": 34,
+    "length_frames": 31,
+    "first_received_ms": 5932.909,
+    "last_received_ms": 7132.904,
+    "excluded_from_repeatability": true
+  },
+  "malformed_frame": {
+    "stage": "E_post_shutter_stability",
+    "frame": 58,
+    "excluded_from_repeatability": true,
+    "image_words_at_most_0x3fff_percent": 99.735966
+  },
+  "live_window": {
+    "stage": "E_post_shutter_stability",
+    "first_frame": 35,
+    "last_frame": 57,
+    "frame_count": 23,
+    "distinct_image_count": 23,
+    "longest_identical_image_run": 1,
+    "all_raw14": true,
+    "raw_word_min_max": [
+      5338,
+      5786
+    ],
+    "matrix_min_max_c": [
+      27.702421188354492,
+      37.44163131713867
+    ],
+    "high_low_index_and_coordinate_match_every_frame": true,
+    "literal_center_equals_trailer_count": 5,
+    "visual_interpretation": "High coordinates are on the visible hand near the thumb base; low coordinates are in dark cooler background."
+  },
+  "roi_plan": "docs/validation/hand-discrimination-2026-09-29.json",
+  "roi_stability": {
+    "central_hand": {
+      "mean_c": 36.58705552554001,
+      "frame_to_frame_stddev_c": 0.008329197335977477,
+      "mean_range_c": [
+        36.57594480365515,
+        36.61347941681743
+      ]
+    },
+    "cool_background": {
+      "mean_c": 27.991363548471227,
+      "frame_to_frame_stddev_c": 0.006541521403913617,
+      "mean_range_c": [
+        27.9834976606071,
+        28.014302480965853
+      ]
+    },
+    "hand_minus_background": {
+      "mean_c": 8.595691977068782,
+      "range_c": [
+        8.581940449774265,
+        8.606925565749407
+      ],
+      "positive_in_every_live_frame": true
+    }
+  },
+  "selected_fixture": {
+    "filename": "tests/fixtures/warm-hand-settled.raw",
+    "sha256": "c31fda649ec08740e6ec2744dec037006c87b96ccfa685ca44d453615e50f4ae",
+    "source_frame": "LMThermal-Research/analysis/warm-target-20260929/hand-run-01/captures/E_post_shutter_stability/frame-045.raw",
+    "stage_frame": 45,
+    "spatial_structure_retained": true,
+    "known_identifier_spans_cleared": true,
+    "raw_word_min_max": [
+      5340,
+      5783
+    ],
+    "matrix_min_max_c": [
+      27.748077392578125,
+      37.379337310791016
+    ],
+    "calibration_inputs": {
+      "fpa_word_at_221186": 7200,
+      "temperature_word_at_223490": 3099,
+      "coefficients": [
+        0.2705000042915344,
+        35.992000579833984,
+        3.9999998989515007e-05,
+        0.00570000009611249,
+        0.8234000205993652
+      ],
+      "lookup_trace": {
+        "host_range": 120,
+        "host_lens": 68,
+        "host_shutter_fix": 1.5,
+        "fpa_word_at_221186": 7200,
+        "fpa_term": 36.666664123535156,
+        "calibration_word_at_223490": 3099,
+        "calibration_temperature": 36.75,
+        "get_fix": 131,
+        "adjusted_lookup_base": 5869,
+        "init_a": 66.52864837646484,
+        "init_b": 4426.06103515625,
+        "linear": 1.0861778259277344,
+        "constant": 1772.452392578125,
+        "effective_native_distance": 3.0,
+        "calc_fix_raw": [
+          10.296338081359863,
+          0.9886223077774048,
+          1.0321515798568726,
+          246149488.0
+        ],
+        "finite_lookup_entries": 13249
+      }
+    },
+    "center": {
+      "trailer_raw_index": 5740,
+      "trailer_temperature_c": 36.48274612426758,
+      "literal_pixel_xy": [
+        192,
+        144
+      ],
+      "literal_pixel_raw_index": 5742,
+      "literal_pixel_temperature_c": 36.52460479736328,
+      "central_hand_roi_mean_c": 36.57752754166722
+    },
+    "high": {
+      "raw_index": 5783,
+      "xy": [
+        191,
+        211
+      ],
+      "temperature_c": 37.379337310791016,
+      "word_at_xy": 5783,
+      "temperature_at_xy_c": 37.379337310791016
+    },
+    "low": {
+      "raw_index": 5340,
+      "xy": [
+        329,
+        83
+      ],
+      "temperature_c": 27.748077392578125,
+      "word_at_xy": 5340,
+      "temperature_at_xy_c": 27.748077392578125
+    },
+    "regions": {
+      "central_hand": {
+        "raw_min_max_mean": [
+          5729,
+          5761,
+          5744.53125
+        ],
+        "lookup_min_max_mean_c": [
+          36.252159118652344,
+          36.92158126831055,
+          36.57752754166722
+        ],
+        "lookup_stddev_c": 0.11758684651613159
+      },
+      "cool_background": {
+        "raw_min_max_mean": [
+          5346,
+          5357,
+          5350.8642578125
+        ],
+        "lookup_min_max_mean_c": [
+          27.88485336303711,
+          28.135150909423828,
+          27.995587091892958
+        ],
+        "lookup_stddev_c": 0.04127039496305231
+      }
+    }
+  }
+}

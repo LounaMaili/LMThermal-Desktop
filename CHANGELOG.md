@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Operator-confirmed warm-target discrimination — 2026-09-29)
+- Captured a visible hand against cooler background after the documented official raw14 transition; selected 23 distinct post-shutter frames for relative ROI and center/high/low analysis.
+- Saved one identifier-redacted, spatially preserved steady hand fixture with provenance, a fixed ROI plan, a compact results report, and a hardware-independent regression test.
+- Detected and excluded an additional 31-frame held image interval after the 75-frame shutter discard and one malformed frame; neither contributes to reported repeatability. This does not establish absolute temperature accuracy.
+
 ### Changed (Settled radiometric validation — 2026-09-29)
 - Exposed the complete 288 × 384 experimental native-equivalent temperature matrix for valid raw14 frames, with strict display-word and undefined-entry rejection.
 - Recorded the observed roughly 1.3-second shutter hold and 75-frame experimental settling window; separate transient and settled fixtures, liveness, trailer-coordinate, and region-stability evidence are retained.

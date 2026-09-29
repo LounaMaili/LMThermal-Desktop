@@ -102,3 +102,38 @@ locations. Center is compared explicitly with pixel `(192,144)`; a mismatch
 is recorded and does not establish which area the firmware uses for center.
 No reference value changes the computed lookup. No GUI or camera I/O is used
 by `physical_validation.py`.
+
+## Operator-confirmed hand discrimination (2026-09-29)
+
+The operator placed a hand centrally with cooler background visible; the
+read-only baseline preview and saved spatial frames show that hand. Initial
+zoom readback was 0 and image words were 32777–33008. The documented
+`32772 -> 32800 -> 32768` sequence yielded raw14 image words. The shutter
+stage discarded 75 frames. The later stability stage contained an additional
+31-frame repeated image interval at frames 4–34, so the 75-frame discard is
+a **minimum**, not a guarantee of live output. Frame 58 was malformed and
+stopped the diagnostic. Both anomalies remain in the persistent report; neither
+was used for discrimination or repeatability.
+
+The subsequent frames 35–57 supplied 23 distinct, fully raw14 images. A
+fixed 32 × 32 central palm ROI averaged **36.587 °C** across these frames,
+with frame-to-frame standard deviation **0.0083 °C**. A fixed 32 × 32 lower
+left background ROI averaged **27.991 °C**, with standard deviation
+**0.0065 °C**. The hand-minus-background difference averaged **8.596 °C**
+and was positive in every selected frame (range 8.582–8.607 °C). The
+observed full image indices spanned 5338–5786 and matrix values
+27.702–37.442 °C. Visual inspection places reported high points on the hand
+near the thumb base and low points in dark background. Trailer high/low
+indices and coordinates matched image extrema in all 23 frames.
+
+The selected sanitized, spatially preserved
+`tests/fixtures/warm-hand-settled.raw` comes from frame 45 of that live
+window. Its full provenance, calibration inputs, raw and matrix ranges,
+ROI mean/min/max/spatial standard deviation, and literal/trailer center
+comparison are in
+[the compact discrimination report](diagnostics/2026-09-29-hand-discrimination.json).
+The source run and per-frame analysis remain in persistent
+`LMThermal-Research/analysis/warm-target-20260929/hand-run-01/` storage.
+Only 5 of the 23 live frames had trailer center index equal to literal pixel
+`(192,144)`; no center-region algorithm is inferred. This is a relative
+discrimination result, not an independently calibrated temperature test.

@@ -135,6 +135,9 @@ temporal stability and optional independently measured target temperatures.
 It records signed errors without fitting or modifying the lookup. Use the
 [reference plan template](docs/validation/target-plan.template.json) and
 [validation procedure](docs/PHYSICAL_VALIDATION.md). GUI Celsius remains deferred.
+An operator-confirmed hand capture now shows a central palm ROI consistently
+warmer than the cooler background across 23 distinct post-shutter raw14
+frames; see the validation procedure for the liveness and accuracy limits.
 
 Run the hardware-independent tests with:
 
