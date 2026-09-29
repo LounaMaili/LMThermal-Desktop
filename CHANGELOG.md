@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Live diagnostic preview validation — 2026-09-29)
+- Enlarged the OpenCV diagnostic window and rendered the center crosshair last at two-pixel thickness after a live display-mode window capture showed that the original one-pixel marker disappeared when HighGUI scaled the image down.
+- Allowed the noninteractive session to skip an invalid startup frame while requiring three consecutive valid display frames before any initialization write; the live camera produced a mixed first frame after reconnect.
+
 ### Added (Radiometric measurement session and diagnostic preview — 2026-09-29)
 - Added a PyQt-independent normal-range HT-301 session with explicit display, transition, shutter, unsettled, ready and error states. It uses only the confirmed `32772 -> 32800 -> 32768` controls, readbacks and observed-frame gates.
 - Added a measurement object containing original raw14 pixels, a native-equivalent 288 × 384 temperature matrix, settings/calibration trace, distinct trailer and literal-center readings, extrema and timestamps. Held, malformed, inconsistent and undefined frames cannot be reported as ready measurements.

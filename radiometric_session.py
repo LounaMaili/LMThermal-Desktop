@@ -317,9 +317,19 @@ class HT301RadiometricSession:
         """Initialize from display mode and wait for valid live post-shutter data."""
         try:
             self._initialization_started = self.clock()
-            baseline = [self.poll() for _ in range(3)]
-            if any(item.inspection.mode != "display" for item in baseline):
-                raise SessionError("Initialization requires three display baseline frames; existing raw14 needs a known session")
+            baseline = []
+            for _ in range(self.stage_limit):
+                observation = self.poll()
+                if observation.inspection.mode == "raw14":
+                    raise SessionError("Initialization requires display baseline frames; existing raw14 needs a known session")
+                if observation.inspection.mode == "display":
+                    baseline.append(observation)
+                    if len(baseline) == 3:
+                        break
+                else:
+                    baseline.clear()
+            if len(baseline) < 3:
+                raise SessionError("Initialization requires three consecutive valid display baseline frames")
             initial_zoom = self.control.get()
             self.events.append({"stage": "display_baseline", "verified": True,
                                 "zoom_readback": initial_zoom,

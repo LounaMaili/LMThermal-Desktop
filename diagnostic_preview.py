@@ -50,7 +50,6 @@ def render_overlay(observation: FrameObservation, rois=(), pointer=None) -> np.n
     validate_rois(list(rois))
     gray = preview_gray(observation.raw, observation.inspection.mode)
     canvas = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-    cv2.drawMarker(canvas, (192, 144), (0, 255, 255), cv2.MARKER_CROSS, 13, 1)
     for x, y, width, height in rois:
         cv2.rectangle(canvas, (x, y), (x + width - 1, y + height - 1), (255, 200, 0), 1)
     status = f"{observation.state.value} | {observation.inspection.mode} | ready={observation.measurement is not None}"
@@ -76,6 +75,8 @@ def render_overlay(observation: FrameObservation, rois=(), pointer=None) -> np.n
         cv2.drawMarker(canvas, measured.low_xy, (255, 0, 0), cv2.MARKER_TILTED_CROSS, 11, 1)
     if pointer and 0 <= pointer[0] < FRAME_WIDTH and 0 <= pointer[1] < IMAGE_HEIGHT:
         cv2.circle(canvas, pointer, 2, (0, 255, 0), 1)
+    # A thicker final marker survives HighGUI's default image resampling.
+    cv2.drawMarker(canvas, (192, 144), (0, 255, 255), cv2.MARKER_CROSS, 15, 2)
     return canvas
 
 
@@ -92,6 +93,7 @@ class DiagnosticPreview:
         self.pointer = None
         self.last_key = -1
         cv2.namedWindow(self.title, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(self.title, 768, 576)
         cv2.setMouseCallback(self.title, self._mouse)
 
     def _mouse(self, event, x, y, flags, userdata) -> None:

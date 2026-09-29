@@ -9,8 +9,9 @@ surface temperatures.
 
 ## Initialization and states
 
-The session reads three display frames and requires zoom readback 0 before
-issuing any control. It uses
+The session requires three consecutive valid display frames and zoom readback
+0 before issuing any control. An invalid startup frame resets that display
+streak; existing raw14 output is rejected rather than reinitialized. It uses
 only standard V4L2 `zoom_absolute` values established by the official APK:
 
 1. After at least 500 ms, send `32772`; discard 15 transport frames, then
@@ -63,8 +64,9 @@ For operator aiming, launch the lightweight OpenCV view:
   --roi 176,128,32,32 --roi 16,32,32,32
 ```
 
-The preview starts without changing controls. Press **i** while display frames
-are visible to run the supported sequence; the window continues through
+The preview opens at a 2× native-size window for easier aiming (and remains
+resizable). Press **i** while display frames are visible to run the supported
+sequence; the window continues through
 raw14 transition and shutter settling. Press **q** or **Escape** to close.
 Clicking a valid ready frame prints the pixel coordinate, original raw14
 index and native-equivalent temperature; clicks on other frames cannot report

@@ -105,6 +105,17 @@ class SessionTests(unittest.TestCase):
         self.assertEqual(control.writes, [32772])
         self.assertEqual(session.state, SessionState.ERROR)
 
+    def test_mixed_startup_frame_is_skipped_before_display_baseline(self):
+        session, stream, control, observations = self.new_session()
+        mixed = bytearray(DISPLAY)
+        struct.pack_into("<H", mixed, 0, 5000)
+        stream.inject.append(bytes(mixed))
+        session.initialize_normal_range()
+        self.assertEqual(observations[0].rejection, "mixed_or_out_of_range_words")
+        self.assertEqual(session.rejections["mixed_or_out_of_range_words"], 1)
+        self.assertEqual(session.events[0]["stage"], "display_baseline")
+        self.assertEqual(control.writes, [32772, 32800, 32768])
+
     def test_unknown_starting_zoom_is_rejected_without_a_write(self):
         session, _, control, _ = self.new_session()
         control.value = 32773
@@ -186,6 +197,7 @@ class PreviewTests(unittest.TestCase):
         original = observation.raw
         overlay = render_overlay(observation, [(10, 10, 20, 20)])
         self.assertEqual(overlay.shape, (288, 384, 3))
+        self.assertEqual(overlay[144, 192].tolist(), [0, 255, 255])
         self.assertEqual(observation.raw, original)
         stream.inject.append(b"bad")
         invalid = session.poll()
