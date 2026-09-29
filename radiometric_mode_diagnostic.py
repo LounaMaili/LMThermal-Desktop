@@ -26,25 +26,57 @@ def frame_metrics(raw: bytes) -> dict:
     words = np.frombuffer(raw, dtype="<u2", count=IMAGE_WORD_COUNT)
     y = parsed.image_y
     params = parsed.parameters
+    top_bits = np.bincount(words >> 14, minlength=4)
+    matrix = words.reshape(IMAGE_HEIGHT, FRAME_WIDTH)
+    high_xy = struct.unpack_from('<2H', raw, 221188)
+    low_xy = struct.unpack_from('<2H', raw, 221194)
+
+    def word_at(xy):
+        x, row = xy
+        return int(matrix[row, x]) if x < FRAME_WIDTH and row < IMAGE_HEIGHT else None
+
     return {
         "image_word_min": int(words.min()),
         "image_word_max": int(words.max()),
         "image_words_at_most_0x3fff_percent": round(
             100.0 * np.count_nonzero(words <= 0x3FFF) / IMAGE_WORD_COUNT, 6
         ),
+        "image_word_stddev": round(float(words.std()), 6),
+        "image_word_unique_count": int(np.unique(words).size),
+        "bit15_set_percent": round(float(np.count_nonzero(words & 0x8000) * 100 / IMAGE_WORD_COUNT), 6),
+        "bit14_set_percent": round(float(np.count_nonzero(words & 0x4000) * 100 / IMAGE_WORD_COUNT), 6),
+        "top_two_bits_percent": {
+            f"{i:02b}": round(float(n * 100 / IMAGE_WORD_COUNT), 6)
+            for i, n in enumerate(top_bits)
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [int((words & 0x3fff).min()), int((words & 0x3fff).max())],
+        "masked_0x7fff_min_max_diagnostic_only": [int((words & 0x7fff).min()), int((words & 0x7fff).max())],
         "image_y_min": int(y.min()),
         "image_y_max": int(y.max()),
         "image_y_stddev": round(float(y.std()), 4),
         "trailer_center_index": struct.unpack_from("<H", raw, 221208)[0],
+        "trailer_spot0_index": struct.unpack_from("<H", raw, 221210)[0],
         "trailer_high_index": struct.unpack_from("<H", raw, 221192)[0],
         "trailer_low_index": struct.unpack_from("<H", raw, 221198)[0],
+        "trailer_high_xy": list(high_xy),
+        "trailer_low_xy": list(low_xy),
+        "word_at_trailer_high_xy": word_at(high_xy),
+        "word_at_trailer_low_xy": word_at(low_xy),
+        "image_center_word_at_192_144": int(matrix[144, 192]),
+        "center_8x8_word_min_max_mean": [int(matrix[140:148, 188:196].min()),
+                                         int(matrix[140:148, 188:196].max()),
+                                         float(matrix[140:148, 188:196].mean())],
         "lookup_base": struct.unpack_from("<H", raw, 223488)[0],
-        "range_transform_input": struct.unpack_from("<H", raw, 223490)[0],
+        "fpa_transform_input_at_221186": struct.unpack_from("<H", raw, 221186)[0],
+        "calibration_temperature_word_at_223490": struct.unpack_from("<H", raw, 223490)[0],
         "calibration_coefficients": [
             struct.unpack_from("<f", raw, 223494 + 4 * i)[0] for i in range(5)
         ],
         "calibration_copy_matches": raw[223494:223514] == raw[224094:224114],
+        "correction_setting": params.correction,
+        "reflected_temp_setting": params.reflected_temp,
         "ambient_temp_setting": params.ambient_temp,
+        "humidity_setting": params.humidity,
         "emissivity_setting": params.emissivity,
         "distance_setting": params.distance,
     }

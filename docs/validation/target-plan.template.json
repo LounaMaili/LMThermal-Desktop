@@ -1,0 +1,23 @@
+{
+  "description": "Replace with target material, session and plateau description before capture",
+  "conditions": {
+    "actual_distance_m": null,
+    "target_emissivity_and_basis": null,
+    "ambient_temperature_c": null,
+    "reflected_temperature_c": null,
+    "camera_warmup_seconds": null,
+    "reference_stability_before_after_c": null
+  },
+  "targets": [
+    {
+      "name": "target",
+      "roi_xywh": [160, 120, 64, 48],
+      "reference": null
+    },
+    {
+      "name": "background",
+      "roi_xywh": [16, 16, 32, 32],
+      "reference": null
+    }
+  ]
+}

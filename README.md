@@ -47,7 +47,7 @@ To inspect a saved frame without the camera:
 ./.venv/bin/python measurement_diagnostic.py --frame tests/fixtures/scene-a.raw
 ```
 
-## Radiometric-mode diagnostic
+## Earlier single-command diagnostic
 
 `radiometric_mode_diagnostic.py` reports image-word min/max, the percentage
 within the native 14-bit lookup range, center/high/low trailer indices,
@@ -70,7 +70,7 @@ This sends V4L2 `zoom_absolute=32773` only after baseline frames are captured,
 discards 15 settling frames, and prints exact before/after metrics as JSON.
 The 2026-09-26 live test used 20 settling frames and still found 0% of image
 words in `0..16383`; see the sibling repository's
-[application comparison](https://github.com/LounaMaili/LMThermal/blob/proto/radiometric-mode/docs/APPLICATION_COMPARISON.md).
+[application comparison](https://github.com/LounaMaili/LMThermal/blob/proto/full-radiometric-init/docs/APPLICATION_COMPARISON.md).
 The diagnostic does not reset the camera because a verified reset sequence is
 not yet known. It only writes sanitized fixtures with `--fixture-dir` when
 **all** post-control image words fit the lookup; no such fixture was obtained
@@ -82,8 +82,59 @@ compatibility, and the trailer center/high/low raw indices. It also retains
 the old rejected `Y → GetTempEvn` calculation as historical evidence. Block
 field 356 is a copy of a calibration coefficient; the Android app obtains its
 live center reading from a different trailer index and a native lookup. See the
-[native call chain](https://github.com/LounaMaili/LMThermal/blob/proto/radiometric-mode/docs/NATIVE_CALL_CHAIN.md).
-No per-pixel Celsius output is validated for the current Linux fixtures.
+[native call chain](https://github.com/LounaMaili/LMThermal/blob/proto/full-radiometric-init/docs/NATIVE_CALL_CHAIN.md).
+These original display fixtures remain unsuitable as pixel LUT indices.
+New raw14 fixtures and experimental arithmetic are described below.
+
+## Staged radiometric initialization and experimental lookup
+
+`radiometric_sequence_diagnostic.py` replays the three official device writes:
+`32772 -> 32800 -> 32768`, recording baseline, every stage, high-bit
+statistics, trailer/calibration inputs, readbacks and actual timing. A separate
+ThermViewer mode reproduces its nested byte-write schedule from the APK.
+The official first command produced genuine raw14 pixels; the ThermViewer
+type-0 sequence retained `0x80YY` display words. No bit mask, Y16 negotiation
+or raw vendor request was used.
+
+```bash
+./.venv/bin/python radiometric_sequence_diagnostic.py \
+  --sequence official --report /path/to/new-session/report.json \
+  --capture-dir /path/to/new-session/captures --preserve-spatial \
+  --stability-count 75
+```
+
+Check zoom readback and image words first. If raw14 output is already active,
+use a read-only baseline capture rather than reconnecting or resending controls.
+The official replay requires readback 0. Its shutter stage discards at least
+75 frames: the first approximately 1.3 seconds can be held/transient output.
+Reports and captures refuse existing paths. Captures redact known identifier
+spans; review any preserved spatial scene before sharing. Full run output belongs in persistent
+research storage. See [physical validation preparation](docs/PHYSICAL_VALIDATION.md)
+for the capture procedure and read-only follow-up capture.
+
+`experimental_thermometry.py` reconstructs the official 16384-entry lookup
+for width 384, range 120, native lens 68 and shutter fix 1.5. It rejects
+out-of-range full words and does not mask them. It corrects the earlier
+conflation of FPA word 221186 and calibration-temperature word 223490.
+Its `temperature_matrix(raw)` function exposes all 288 × 384 float32
+native-equivalent values for valid raw14 frames without PyQt.
+
+```bash
+./.venv/bin/python experimental_thermometry.py tests/fixtures/radiometric-initial.raw
+```
+
+Every LUT entry agrees with the executed official x86_64 library for the
+initial fixture, including undefined entries; center/high/low are about
+16.283/16.800/12.868 °C. This is algorithmic parity, not independently
+validated physical temperature accuracy. The optional hash-pinned
+`tools/native_lookup_reference.py` needs pyelftools in an analysis environment;
+normal tests use saved reference tables and need no APK or RE dependencies.
+
+`physical_validation.py` compares unshuffled image regions, trailer extrema,
+temporal stability and optional independently measured target temperatures.
+It records signed errors without fitting or modifying the lookup. Use the
+[reference plan template](docs/validation/target-plan.template.json) and
+[validation procedure](docs/PHYSICAL_VALIDATION.md). GUI Celsius remains deferred.
 
 Run the hardware-independent tests with:
 

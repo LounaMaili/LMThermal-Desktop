@@ -1,0 +1,655 @@
+{
+  "scene": "Room/ceiling corner; a hand was not visible. Independent warm-target discrimination is pending.",
+  "first_raw14_definition": "First of three consecutive 14-bit-compatible frames with positive calibration coefficient; not a claim of thermal equilibrium.",
+  "first_raw14_received_ms": 1427.4,
+  "first_raw14_delay_from_command_completion_ms": 95.41200000000003,
+  "fixtures": [
+    {
+      "fixture": "display-room-baseline.raw",
+      "sha256": "d9daecccb563d15386b32f290c33caf564661f0fd3f3581077dfec4129a0248b",
+      "source_report": "run-01/report.json",
+      "source_frame": "captures/A_baseline/frame-000.raw",
+      "metrics": {
+        "image_word_min": 32768,
+        "image_word_max": 32980,
+        "image_words_at_most_0x3fff_percent": 0.0,
+        "image_word_stddev": 31.809269,
+        "image_word_unique_count": 172,
+        "bit15_set_percent": 100.0,
+        "bit14_set_percent": 0.0,
+        "top_two_bits_percent": {
+          "00": 0.0,
+          "01": 0.0,
+          "10": 100.0,
+          "11": 0.0
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [
+          0,
+          212
+        ],
+        "masked_0x7fff_min_max_diagnostic_only": [
+          0,
+          212
+        ],
+        "image_y_min": 0,
+        "image_y_max": 212,
+        "image_y_stddev": 31.8093,
+        "trailer_center_index": 5191,
+        "trailer_spot0_index": 5192,
+        "trailer_high_index": 5409,
+        "trailer_low_index": 5130,
+        "trailer_high_xy": [
+          6,
+          54
+        ],
+        "trailer_low_xy": [
+          173,
+          117
+        ],
+        "word_at_trailer_high_xy": 32978,
+        "word_at_trailer_low_xy": 32768,
+        "image_center_word_at_192_144": 32816,
+        "center_8x8_word_min_max_mean": [
+          32814,
+          32824,
+          32818.953125
+        ],
+        "lookup_base": 6000,
+        "fpa_transform_input_at_221186": 7275,
+        "calibration_temperature_word_at_223490": 3055,
+        "calibration_coefficients": [
+          0.2705000042915344,
+          35.992000579833984,
+          3.9999998989515007e-05,
+          0.00570000009611249,
+          0.8234000205993652
+        ],
+        "calibration_copy_matches": true,
+        "correction_setting": 0.0,
+        "reflected_temp_setting": 25.0,
+        "ambient_temp_setting": 25.0,
+        "humidity_setting": 0.44999998807907104,
+        "emissivity_setting": 0.9800000190734863,
+        "distance_setting": 1,
+        "received_ms": 747.76,
+        "saved_frame": "captures/A_baseline/frame-000.raw"
+      },
+      "spatial_agreement": {
+        "high_index_equals_image_max": false,
+        "low_index_equals_image_min": false,
+        "high_coordinate_matches_index": false,
+        "low_coordinate_matches_index": false,
+        "center_equals_pixel_192_144": false,
+        "center_minus_pixel_192_144": -27625
+      }
+    },
+    {
+      "fixture": "radiometric-room-first.raw",
+      "sha256": "8e5eb648c7dd632aae7810e89b86633ef79a5cf490b33ff364171cd0c0e80747",
+      "source_report": "run-01/report.json",
+      "source_frame": "captures/B_output1/settling-001.raw",
+      "metrics": {
+        "image_word_min": 5130,
+        "image_word_max": 5409,
+        "image_words_at_most_0x3fff_percent": 100.0,
+        "image_word_stddev": 38.341995,
+        "image_word_unique_count": 236,
+        "bit15_set_percent": 0.0,
+        "bit14_set_percent": 0.0,
+        "top_two_bits_percent": {
+          "00": 100.0,
+          "01": 0.0,
+          "10": 0.0,
+          "11": 0.0
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [
+          5130,
+          5409
+        ],
+        "masked_0x7fff_min_max_diagnostic_only": [
+          5130,
+          5409
+        ],
+        "image_y_min": 0,
+        "image_y_max": 255,
+        "image_y_stddev": 37.8606,
+        "trailer_center_index": 5191,
+        "trailer_spot0_index": 5193,
+        "trailer_high_index": 5409,
+        "trailer_low_index": 5130,
+        "trailer_high_xy": [
+          3,
+          54
+        ],
+        "trailer_low_xy": [
+          173,
+          117
+        ],
+        "word_at_trailer_high_xy": 5409,
+        "word_at_trailer_low_xy": 5130,
+        "image_center_word_at_192_144": 5191,
+        "center_8x8_word_min_max_mean": [
+          5186,
+          5195,
+          5190.453125
+        ],
+        "lookup_base": 6000,
+        "fpa_transform_input_at_221186": 7274,
+        "calibration_temperature_word_at_223490": 3055,
+        "calibration_coefficients": [
+          0.2705000042915344,
+          35.992000579833984,
+          3.9999998989515007e-05,
+          0.00570000009611249,
+          0.8234000205993652
+        ],
+        "calibration_copy_matches": true,
+        "correction_setting": 0.0,
+        "reflected_temp_setting": 25.0,
+        "ambient_temp_setting": 25.0,
+        "humidity_setting": 0.44999998807907104,
+        "emissivity_setting": 0.9800000190734863,
+        "distance_setting": 1,
+        "received_ms": 1427.4,
+        "saved_frame": "captures/B_output1/settling-001.raw"
+      },
+      "spatial_agreement": {
+        "high_index_equals_image_max": true,
+        "low_index_equals_image_min": true,
+        "high_coordinate_matches_index": true,
+        "low_coordinate_matches_index": true,
+        "center_equals_pixel_192_144": true,
+        "center_minus_pixel_192_144": 0
+      },
+      "native_summary": [
+        19.431550979614258,
+        3.0,
+        54.0,
+        24.6279239654541,
+        173.0,
+        117.0,
+        17.922712326049805,
+        19.4805908203125,
+        19.4805908203125,
+        20.576980590820312
+      ],
+      "native_parameters": [
+        34.61111068725586,
+        0.0,
+        25.0,
+        25.0,
+        0.44999998807907104,
+        0.9800000190734863,
+        1
+      ],
+      "native_table_sha256": "35ffa7d6a6f8e6e50c0b9bc3c3a15db87723870d3241b7b2e9b465e340bd9fcf",
+      "max_lookup_difference_c": 0.0,
+      "predicted": {
+        "status": "Experimental APK arithmetic; not calibrated temperature validation",
+        "center_high_low_indices": [
+          5191,
+          5409,
+          5130
+        ],
+        "center_high_low": [
+          19.431550979614258,
+          24.6279239654541,
+          17.922712326049805
+        ],
+        "image_lookup_min_max": [
+          17.922712326049805,
+          24.6279239654541
+        ],
+        "trace": {
+          "host_range": 120,
+          "host_lens": 68,
+          "host_shutter_fix": 1.5,
+          "fpa_word_at_221186": 7274,
+          "fpa_term": 34.61111068725586,
+          "calibration_word_at_223490": 3055,
+          "calibration_temperature": 32.350006103515625,
+          "get_fix": 145,
+          "adjusted_lookup_base": 5855,
+          "init_a": 66.52864837646484,
+          "init_b": 4426.06103515625,
+          "linear": 1.0686005353927612,
+          "constant": 1528.2745361328125,
+          "effective_native_distance": 3.0,
+          "calc_fix_raw": [
+            10.296338081359863,
+            0.9886223077774048,
+            1.0321515798568726,
+            246149488.0
+          ],
+          "finite_lookup_entries": 13079
+        }
+      }
+    },
+    {
+      "fixture": "radiometric-room-range.raw",
+      "sha256": "02c9ef0090da53e322265a36e92bbc53717433951941732838404633db96242d",
+      "source_report": "run-01/report.json",
+      "source_frame": "captures/C_range120/frame-000.raw",
+      "metrics": {
+        "image_word_min": 4624,
+        "image_word_max": 5008,
+        "image_words_at_most_0x3fff_percent": 100.0,
+        "image_word_stddev": 38.304601,
+        "image_word_unique_count": 227,
+        "bit15_set_percent": 0.0,
+        "bit14_set_percent": 0.0,
+        "top_two_bits_percent": {
+          "00": 100.0,
+          "01": 0.0,
+          "10": 0.0,
+          "11": 0.0
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [
+          4624,
+          5008
+        ],
+        "masked_0x7fff_min_max_diagnostic_only": [
+          4624,
+          5008
+        ],
+        "image_y_min": 0,
+        "image_y_max": 255,
+        "image_y_stddev": 82.8991,
+        "trailer_center_index": 4801,
+        "trailer_spot0_index": 4804,
+        "trailer_high_index": 5008,
+        "trailer_low_index": 4624,
+        "trailer_high_xy": [
+          0,
+          53
+        ],
+        "trailer_low_xy": [
+          173,
+          117
+        ],
+        "word_at_trailer_high_xy": 5008,
+        "word_at_trailer_low_xy": 4624,
+        "image_center_word_at_192_144": 4801,
+        "center_8x8_word_min_max_mean": [
+          4794,
+          4809,
+          4801.828125
+        ],
+        "lookup_base": 6000,
+        "fpa_transform_input_at_221186": 7275,
+        "calibration_temperature_word_at_223490": 3055,
+        "calibration_coefficients": [
+          0.2705000042915344,
+          35.992000579833984,
+          3.9999998989515007e-05,
+          0.00570000009611249,
+          0.8234000205993652
+        ],
+        "calibration_copy_matches": true,
+        "correction_setting": 0.0,
+        "reflected_temp_setting": 25.0,
+        "ambient_temp_setting": 25.0,
+        "humidity_setting": 0.44999998807907104,
+        "emissivity_setting": 0.9800000190734863,
+        "distance_setting": 1,
+        "received_ms": 2707.547,
+        "saved_frame": "captures/C_range120/frame-000.raw"
+      },
+      "spatial_agreement": {
+        "high_index_equals_image_max": true,
+        "low_index_equals_image_min": true,
+        "high_coordinate_matches_index": true,
+        "low_coordinate_matches_index": true,
+        "center_equals_pixel_192_144": true,
+        "center_minus_pixel_192_144": 0
+      },
+      "native_summary": [
+        9.328995704650879,
+        0.0,
+        53.0,
+        14.855745315551758,
+        173.0,
+        117.0,
+        4.281484127044678,
+        9.411858558654785,
+        9.411858558654785,
+        10.508027076721191
+      ],
+      "native_parameters": [
+        34.58333206176758,
+        0.0,
+        25.0,
+        25.0,
+        0.44999998807907104,
+        0.9800000190734863,
+        1
+      ],
+      "native_table_sha256": "f0dbdd83ed9426038403194aa99d046a2d00d1de45505d7153461179928baff1",
+      "max_lookup_difference_c": 0.0,
+      "predicted": {
+        "status": "Experimental APK arithmetic; not calibrated temperature validation",
+        "center_high_low_indices": [
+          4801,
+          5008,
+          4624
+        ],
+        "center_high_low": [
+          9.328995704650879,
+          14.855745315551758,
+          4.281484127044678
+        ],
+        "image_lookup_min_max": [
+          4.281484127044678,
+          14.855745315551758
+        ],
+        "trace": {
+          "host_range": 120,
+          "host_lens": 68,
+          "host_shutter_fix": 1.5,
+          "fpa_word_at_221186": 7275,
+          "fpa_term": 34.58333206176758,
+          "calibration_word_at_223490": 3055,
+          "calibration_temperature": 32.350006103515625,
+          "get_fix": 146,
+          "adjusted_lookup_base": 5854,
+          "init_a": 66.52864837646484,
+          "init_b": 4426.06103515625,
+          "linear": 1.0683653354644775,
+          "constant": 1528.2745361328125,
+          "effective_native_distance": 3.0,
+          "calc_fix_raw": [
+            10.296338081359863,
+            0.9886223077774048,
+            1.0321515798568726,
+            246149488.0
+          ],
+          "finite_lookup_entries": 13081
+        }
+      }
+    },
+    {
+      "fixture": "radiometric-room-shutter-held.raw",
+      "sha256": "fc1de1c0993e05c851f5aa80032d4b61d66677a2510f44c511030bc60426e2da",
+      "source_report": "run-01/report.json",
+      "source_frame": "captures/D_refresh/frame-000.raw",
+      "metrics": {
+        "image_word_min": 4621,
+        "image_word_max": 5007,
+        "image_words_at_most_0x3fff_percent": 100.0,
+        "image_word_stddev": 38.256823,
+        "image_word_unique_count": 224,
+        "bit15_set_percent": 0.0,
+        "bit14_set_percent": 0.0,
+        "top_two_bits_percent": {
+          "00": 100.0,
+          "01": 0.0,
+          "10": 0.0,
+          "11": 0.0
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [
+          4621,
+          5007
+        ],
+        "masked_0x7fff_min_max_diagnostic_only": [
+          4621,
+          5007
+        ],
+        "image_y_min": 0,
+        "image_y_max": 255,
+        "image_y_stddev": 82.9184,
+        "trailer_center_index": 4801,
+        "trailer_spot0_index": 4805,
+        "trailer_high_index": 5007,
+        "trailer_low_index": 4621,
+        "trailer_high_xy": [
+          0,
+          53
+        ],
+        "trailer_low_xy": [
+          173,
+          117
+        ],
+        "word_at_trailer_high_xy": 5007,
+        "word_at_trailer_low_xy": 4621,
+        "image_center_word_at_192_144": 4803,
+        "center_8x8_word_min_max_mean": [
+          4795,
+          4809,
+          4802.015625
+        ],
+        "lookup_base": 6000,
+        "fpa_transform_input_at_221186": 7275,
+        "calibration_temperature_word_at_223490": 3078,
+        "calibration_coefficients": [
+          0.2705000042915344,
+          35.992000579833984,
+          3.9999998989515007e-05,
+          0.00570000009611249,
+          0.8234000205993652
+        ],
+        "calibration_copy_matches": true,
+        "correction_setting": 0.0,
+        "reflected_temp_setting": 25.0,
+        "ambient_temp_setting": 25.0,
+        "humidity_setting": 0.44999998807907104,
+        "emissivity_setting": 0.9800000190734863,
+        "distance_setting": 1,
+        "received_ms": 3427.721,
+        "saved_frame": "captures/D_refresh/frame-000.raw"
+      },
+      "spatial_agreement": {
+        "high_index_equals_image_max": true,
+        "low_index_equals_image_min": true,
+        "high_coordinate_matches_index": true,
+        "low_coordinate_matches_index": true,
+        "center_equals_pixel_192_144": false,
+        "center_minus_pixel_192_144": -2
+      },
+      "native_summary": [
+        12.531094551086426,
+        0.0,
+        53.0,
+        17.833080291748047,
+        173.0,
+        117.0,
+        7.604855060577393,
+        12.637243270874023,
+        12.637243270874023,
+        13.665355682373047
+      ],
+      "native_parameters": [
+        34.58333206176758,
+        0.0,
+        25.0,
+        25.0,
+        0.44999998807907104,
+        0.9800000190734863,
+        1
+      ],
+      "native_table_sha256": "a7e072f7e1de67e512804a204b99ea1250496042a9ec2a7bd97b2ab76676c3f2",
+      "max_lookup_difference_c": 0.0,
+      "predicted": {
+        "status": "Experimental APK arithmetic; not calibrated temperature validation",
+        "center_high_low_indices": [
+          4801,
+          5007,
+          4621
+        ],
+        "center_high_low": [
+          12.531094551086426,
+          17.833080291748047,
+          7.604855060577393
+        ],
+        "image_lookup_min_max": [
+          7.604855060577393,
+          17.833080291748047
+        ],
+        "trace": {
+          "host_range": 120,
+          "host_lens": 68,
+          "host_shutter_fix": 1.5,
+          "fpa_word_at_221186": 7275,
+          "fpa_term": 34.58333206176758,
+          "calibration_word_at_223490": 3078,
+          "calibration_temperature": 34.649993896484375,
+          "get_fix": 146,
+          "adjusted_lookup_base": 5854,
+          "init_a": 66.52864837646484,
+          "init_b": 4426.06103515625,
+          "linear": 1.0683653354644775,
+          "constant": 1654.60595703125,
+          "effective_native_distance": 3.0,
+          "calc_fix_raw": [
+            10.296338081359863,
+            0.9886223077774048,
+            1.0321515798568726,
+            246149488.0
+          ],
+          "finite_lookup_entries": 13199
+        }
+      }
+    },
+    {
+      "fixture": "radiometric-room-settled.raw",
+      "sha256": "fde6a4b803b68fcea07ab7b428f4769d22e896f01055969f43102bdc9270f5d6",
+      "source_report": "late-room/report.json",
+      "source_frame": "captures/A_baseline/frame-000.raw",
+      "metrics": {
+        "image_word_min": 5128,
+        "image_word_max": 5537,
+        "image_words_at_most_0x3fff_percent": 100.0,
+        "image_word_stddev": 66.963811,
+        "image_word_unique_count": 377,
+        "bit15_set_percent": 0.0,
+        "bit14_set_percent": 0.0,
+        "top_two_bits_percent": {
+          "00": 100.0,
+          "01": 0.0,
+          "10": 0.0,
+          "11": 0.0
+        },
+        "masked_0x3fff_min_max_diagnostic_only": [
+          5128,
+          5537
+        ],
+        "masked_0x7fff_min_max_diagnostic_only": [
+          5128,
+          5537
+        ],
+        "image_y_min": 0,
+        "image_y_max": 255,
+        "image_y_stddev": 55.8377,
+        "trailer_center_index": 5169,
+        "trailer_spot0_index": 5172,
+        "trailer_high_index": 5537,
+        "trailer_low_index": 5128,
+        "trailer_high_xy": [
+          0,
+          54
+        ],
+        "trailer_low_xy": [
+          173,
+          117
+        ],
+        "word_at_trailer_high_xy": 5537,
+        "word_at_trailer_low_xy": 5128,
+        "image_center_word_at_192_144": 5170,
+        "center_8x8_word_min_max_mean": [
+          5165,
+          5174,
+          5169.8125
+        ],
+        "lookup_base": 6000,
+        "fpa_transform_input_at_221186": 7204,
+        "calibration_temperature_word_at_223490": 3083,
+        "calibration_coefficients": [
+          0.2705000042915344,
+          35.992000579833984,
+          3.9999998989515007e-05,
+          0.00570000009611249,
+          0.8234000205993652
+        ],
+        "calibration_copy_matches": true,
+        "correction_setting": 0.0,
+        "reflected_temp_setting": 25.0,
+        "ambient_temp_setting": 25.0,
+        "humidity_setting": 0.44999998807907104,
+        "emissivity_setting": 0.9800000190734863,
+        "distance_setting": 1,
+        "received_ms": 4065.647,
+        "saved_frame": "captures/A_baseline/frame-000.raw"
+      },
+      "spatial_agreement": {
+        "high_index_equals_image_max": true,
+        "low_index_equals_image_min": true,
+        "high_coordinate_matches_index": true,
+        "low_coordinate_matches_index": true,
+        "center_equals_pixel_192_144": false,
+        "center_minus_pixel_192_144": -1
+      },
+      "native_summary": [
+        21.81353187561035,
+        0.0,
+        54.0,
+        30.346817016601562,
+        173.0,
+        117.0,
+        20.813261032104492,
+        21.886301040649414,
+        21.886301040649414,
+        23.258045196533203
+      ],
+      "native_parameters": [
+        36.55555725097656,
+        0.0,
+        25.0,
+        25.0,
+        0.44999998807907104,
+        0.9800000190734863,
+        1
+      ],
+      "native_table_sha256": "36a54f932cc3e9eb77dfa6cf6e625a30a9ed5847fbd57f342259c5320c988583",
+      "max_lookup_difference_c": 0.0,
+      "predicted": {
+        "status": "Experimental APK arithmetic; not calibrated temperature validation",
+        "center_high_low_indices": [
+          5169,
+          5537,
+          5128
+        ],
+        "center_high_low": [
+          21.81353187561035,
+          30.346817016601562,
+          20.813261032104492
+        ],
+        "image_lookup_min_max": [
+          20.813261032104492,
+          30.346817016601562
+        ],
+        "trace": {
+          "host_range": 120,
+          "host_lens": 68,
+          "host_shutter_fix": 1.5,
+          "fpa_word_at_221186": 7204,
+          "fpa_term": 36.55555725097656,
+          "calibration_word_at_223490": 3083,
+          "calibration_temperature": 35.149993896484375,
+          "get_fix": 132,
+          "adjusted_lookup_base": 5868,
+          "init_a": 66.52864837646484,
+          "init_b": 4426.06103515625,
+          "linear": 1.0852190256118774,
+          "constant": 1682.4481201171875,
+          "effective_native_distance": 3.0,
+          "calc_fix_raw": [
+            10.296338081359863,
+            0.9886223077774048,
+            1.0321515798568726,
+            246149488.0
+          ],
+          "finite_lookup_entries": 13169
+        }
+      }
+    }
+  ]
+}

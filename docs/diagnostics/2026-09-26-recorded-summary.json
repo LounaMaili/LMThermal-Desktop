@@ -1,0 +1,32 @@
+{
+  "provenance": "Transcribed from interrupted-session tool output and research notes. Original /tmp JSON reports did not survive; this is not the original per-frame report.",
+  "official": {
+    "reset_readback": 0,
+    "stages": [
+      {"name": "baseline", "readback": 0, "image_word_min_max": [32768, 32993], "raw14_percent": 0, "bit15_percent": 100, "bit14_percent": 0},
+      {"name": "output1", "readback": 32772, "image_word_min_max": [5213, 5266], "raw14_percent": 100, "bit15_percent": 0, "bit14_percent": 0},
+      {"name": "range120", "readback": 32800, "image_word_min_max": [4715, 4864], "raw14_percent": 100, "bit15_percent": 0, "bit14_percent": 0},
+      {"name": "refresh", "readback": 32768, "image_word_min_max": [4715, 4864], "raw14_percent": 100, "bit15_percent": 0, "bit14_percent": 0, "center_high_low_indices": [4844, 4864, 4715]}
+    ],
+    "surviving_fixture": "tests/fixtures/radiometric-initial.raw",
+    "fixture_sha256": "aae1437a8e5d1f0f7dce03d9c14687545ad27bcc0ea3362d4664b5a5ba337815",
+    "native_center_high_low_c": [16.282669067382812, 16.800127029418945, 12.868019104003906],
+    "native_lut_sha256_raw_float32": "0d1ef968c0f2923c31b508ac51f2021b68bd74cc1a55a5fb6c9436ae8495e13a"
+  },
+  "thermviewer": {
+    "separate_physical_reconnect_confirmed": true,
+    "reset_readback": 0,
+    "command_and_readback_values": [32773, 4096, 32768, 4352, 0, 4736, 4927, 256, 512, 768],
+    "command_start_ms_relative_to_replay": [20.09, 30.15, 40.14, 40.66, 41.15, 50.13, 50.64, 51.34, 60.13, 60.67],
+    "baseline_image_word_min_max": [32768, 33009],
+    "byte0_interval_image_word_min_max": [32768, 33013],
+    "other_short_command_intervals": "No complete frame received",
+    "settled_image_word_min_max": [32877, 32907],
+    "settled_raw14_percent": 0,
+    "settled_bit15_percent": 100,
+    "settled_bit14_percent": 0,
+    "settled_emissivity": 1.0,
+    "settled_correction": 0.0,
+    "settled_trailer_center_index": 5998
+  }
+}

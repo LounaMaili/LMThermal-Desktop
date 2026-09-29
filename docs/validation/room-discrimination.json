@@ -1,0 +1,8 @@
+{
+  "description": "2026-09-27 static room/ceiling corner. Regions were selected from the spatial image for relative discrimination; no independent surface temperature was measured and no hand was visible.",
+  "conditions": {"actual_distance_m": null, "target_emissivity_and_basis": null, "independent_reference_available": false},
+  "targets": [
+    {"name": "bright_ceiling_strip", "roi_xywh": [80, 54, 20, 8], "reference": null},
+    {"name": "darker_wall", "roi_xywh": [120, 145, 32, 32], "reference": null}
+  ]
+}

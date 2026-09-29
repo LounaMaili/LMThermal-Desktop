@@ -4,6 +4,23 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Changed (Settled radiometric validation — 2026-09-29)
+- Exposed the complete 288 × 384 experimental native-equivalent temperature matrix for valid raw14 frames, with strict display-word and undefined-entry rejection.
+- Recorded the observed roughly 1.3-second shutter hold and 75-frame experimental settling window; separate transient and settled fixtures, liveness, trailer-coordinate, and region-stability evidence are retained.
+- Updated the capture procedure to inspect the current camera mode before replay and to use independent surface references for a later physical-accuracy test.
+
+### Added (Full radiometric sequence — 2026-09-27)
+- Added staged official and ThermViewer replays with exact decoded parameter commands, readbacks, command timing, settling observations and high-bit statistics. No raw vendor requests or GUI changes are involved.
+- Observed genuine raw14 output after official `zoom_absolute=32772`; the separately reset ThermViewer type-0 startup changed emissivity but retained display words.
+- Added an experimental 16384-entry official range-120/lens-68 lookup and an optional hash-pinned native reference harness. Every entry of the initial fixture agrees with executed x86_64 APK arithmetic, including undefined values; physical accuracy is not yet validated.
+- Preserved the interrupted work in timestamped research archives, and retained the surviving sanitized raw fixture/native table. Labeled the earlier temporary-report results as transcript-derived evidence.
+- Added persistent stage capture, no-overwrite checks, spatial/trailer comparisons and an offline controlled-target validation tool with independent-reference metadata and temporal drift reporting.
+
+### Corrected (Lookup inputs — 2026-09-27)
+- Separated the FPA word at frame byte 221186 from the calibration-temperature word at 223490 (`word/10-273.15`).
+- Reconstructed the native lens-68 distance multiplier and final correction using explicit float32/double arithmetic. Masked image-word statistics remain diagnostics only; invalid full pixel indices are rejected.
+- Updated the measurement audit, fixture provenance, agent measurement status, README and controlled-validation procedure while preserving repository completion workflow requirements.
+
 ### Added (Radiometric-mode diagnostic — 2026-09-26)
 - Added a PyQt-independent, baseline-first HT-301 mode diagnostic reporting 14-bit word compatibility, trailer center/high/low indices, calibration inputs, and exact before/after frame metrics.
 - Added an explicit, single-control ThermViewer HT-301 output-type-zero test (`zoom_absolute=32773`) through standard V4L2, with settling frames and hardware-independent tests.

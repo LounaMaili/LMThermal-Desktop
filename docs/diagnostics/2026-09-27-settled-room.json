@@ -1,0 +1,5881 @@
+{
+  "captured_at_utc": "2026-09-27T10:40:39.903339+00:00",
+  "sequence": "baseline",
+  "usb_identity": {
+    "idVendor": "1514",
+    "idProduct": "0001",
+    "busnum": "1",
+    "devnum": "11"
+  },
+  "control_id": "0x9a090d",
+  "commands": [],
+  "stages": [
+    {
+      "name": "A_baseline",
+      "started_ms": 0.011,
+      "discarded_frames": 15,
+      "settling_frames": [
+        {
+          "image_word_min": 0,
+          "image_word_max": 65301,
+          "image_words_at_most_0x3fff_percent": 98.102033,
+          "image_word_stddev": 5447.254701,
+          "image_word_unique_count": 406,
+          "bit15_set_percent": 0.537109,
+          "bit14_set_percent": 1.697229,
+          "top_two_bits_percent": {
+            "00": 98.102033,
+            "01": 1.360858,
+            "10": 0.200738,
+            "11": 0.336372
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            0,
+            16149
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            0,
+            32533
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 22.8318,
+          "trailer_center_index": 0,
+          "trailer_spot0_index": 0,
+          "trailer_high_index": 0,
+          "trailer_low_index": 0,
+          "trailer_high_xy": [
+            0,
+            0
+          ],
+          "trailer_low_xy": [
+            0,
+            0
+          ],
+          "word_at_trailer_high_xy": 10773,
+          "word_at_trailer_low_xy": 10773,
+          "image_center_word_at_192_144": 0,
+          "center_8x8_word_min_max_mean": [
+            0,
+            0,
+            0.0
+          ],
+          "lookup_base": 0,
+          "fpa_transform_input_at_221186": 0,
+          "calibration_temperature_word_at_223490": 0,
+          "calibration_coefficients": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 0.0,
+          "ambient_temp_setting": 0.0,
+          "humidity_setting": 0.0,
+          "emissivity_setting": 0.0,
+          "distance_setting": 0,
+          "received_ms": 54.706,
+          "saved_frame": "captures/A_baseline/settling-000.raw"
+        },
+        {
+          "image_word_min": 20,
+          "image_word_max": 65301,
+          "image_words_at_most_0x3fff_percent": 44.042969,
+          "image_word_stddev": 22226.791777,
+          "image_word_unique_count": 496,
+          "bit15_set_percent": 50.922309,
+          "bit14_set_percent": 48.92126,
+          "top_two_bits_percent": {
+            "00": 44.042969,
+            "01": 5.034722,
+            "10": 7.035771,
+            "11": 43.886538
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            20,
+            16149
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            20,
+            32533
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 72.6342,
+          "trailer_center_index": 48404,
+          "trailer_spot0_index": 48404,
+          "trailer_high_index": 48660,
+          "trailer_low_index": 48404,
+          "trailer_high_xy": [
+            48916,
+            48660
+          ],
+          "trailer_low_xy": [
+            48404,
+            48148
+          ],
+          "word_at_trailer_high_xy": null,
+          "word_at_trailer_low_xy": null,
+          "image_center_word_at_192_144": 16917,
+          "center_8x8_word_min_max_mean": [
+            14357,
+            19221,
+            17085.0
+          ],
+          "lookup_base": 48660,
+          "fpa_transform_input_at_221186": 48916,
+          "calibration_temperature_word_at_223490": 48660,
+          "calibration_coefficients": [
+            -0.5809948444366455,
+            -0.03631503880023956,
+            -9.295917510986328,
+            -0.145252525806427,
+            -0.036312177777290344
+          ],
+          "calibration_copy_matches": false,
+          "correction_setting": -38087.078125,
+          "reflected_temp_setting": -609345.25,
+          "ambient_temp_setting": -609425.25,
+          "humidity_setting": -38087.078125,
+          "emissivity_setting": -595.126220703125,
+          "distance_setting": 51220,
+          "received_ms": 106.521,
+          "saved_frame": "captures/A_baseline/settling-001.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.108329,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.668,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5303,
+            5298.359375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7261,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 162.388,
+          "saved_frame": "captures/A_baseline/settling-002.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.094319,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.6695,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5292,
+            5304,
+            5298.25
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 202.327,
+          "saved_frame": "captures/A_baseline/settling-003.raw"
+        },
+        {
+          "image_word_min": 5284,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.061913,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5284,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5284,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.72,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5284,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5284,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5292,
+            5304,
+            5298.15625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 242.421,
+          "saved_frame": "captures/A_baseline/settling-004.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.026161,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7763,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5304,
+            5298.171875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 282.481,
+          "saved_frame": "captures/A_baseline/settling-005.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.040237,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7645,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5304,
+            5298.296875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 322.796,
+          "saved_frame": "captures/A_baseline/settling-006.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.037725,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7594,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.296875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 362.498,
+          "saved_frame": "captures/A_baseline/settling-007.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5519,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.055945,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5519
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5519
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.731,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5519,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5519,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5304,
+            5298.421875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 402.694,
+          "saved_frame": "captures/A_baseline/settling-008.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5520,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.065521,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5520
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5520
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7324,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5520,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            216,
+            169
+          ],
+          "word_at_trailer_high_xy": 5520,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.40625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 442.455,
+          "saved_frame": "captures/A_baseline/settling-009.raw"
+        },
+        {
+          "image_word_min": 5288,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.043337,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.765,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5301,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5288,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5288,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.5625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 482.489,
+          "saved_frame": "captures/A_baseline/settling-010.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.097048,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.6961,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.515625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 522.494,
+          "saved_frame": "captures/A_baseline/settling-011.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.168429,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.6157,
+          "trailer_center_index": 5296,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.25
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 562.5,
+          "saved_frame": "captures/A_baseline/settling-012.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.072473,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.6792,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            4,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.046875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 602.421,
+          "saved_frame": "captures/A_baseline/settling-013.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.051254,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7008,
+          "trailer_center_index": 5299,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            4,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.34375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 642.493,
+          "saved_frame": "captures/A_baseline/settling-014.raw"
+        }
+      ],
+      "frames": [
+        {
+          "image_word_min": 5288,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.03089,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5288,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5288,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7348,
+          "trailer_center_index": 5300,
+          "trailer_spot0_index": 5298,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5288,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            191,
+            118
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5288,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5304,
+            5298.46875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 682.521,
+          "saved_frame": "captures/A_baseline/frame-000.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5516,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.044369,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7323,
+          "trailer_center_index": 5299,
+          "trailer_spot0_index": 5298,
+          "trailer_high_index": 5516,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            199,
+            126
+          ],
+          "word_at_trailer_high_xy": 5516,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5303,
+            5298.484375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 722.841,
+          "saved_frame": "captures/A_baseline/frame-001.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5516,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.064241,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.6968,
+          "trailer_center_index": 5299,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5516,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            193,
+            123
+          ],
+          "word_at_trailer_high_xy": 5516,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5302,
+            5298.328125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 762.489,
+          "saved_frame": "captures/A_baseline/frame-002.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.035715,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7361,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5298,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            130
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5302,
+            5298.3125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 802.496,
+          "saved_frame": "captures/A_baseline/frame-003.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.037084,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.72,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5297,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            216,
+            169
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5302,
+            5298.28125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 842.503,
+          "saved_frame": "captures/A_baseline/frame-004.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.0994,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.688,
+          "trailer_center_index": 5296,
+          "trailer_spot0_index": 5297,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            195,
+            124
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5303,
+            5298.265625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 882.477,
+          "saved_frame": "captures/A_baseline/frame-005.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.062257,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7393,
+          "trailer_center_index": 5296,
+          "trailer_spot0_index": 5298,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            195,
+            124
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.59375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 922.784,
+          "saved_frame": "captures/A_baseline/frame-006.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.048848,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.734,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            195,
+            124
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5303,
+            5298.625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7261,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 962.434,
+          "saved_frame": "captures/A_baseline/frame-007.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.03054,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7427,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5301,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5303,
+            5298.765625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1002.397,
+          "saved_frame": "captures/A_baseline/frame-008.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.002643,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7874,
+          "trailer_center_index": 5296,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5301,
+          "center_8x8_word_min_max_mean": [
+            5293,
+            5303,
+            5298.78125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1042.459,
+          "saved_frame": "captures/A_baseline/frame-009.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.013732,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7896,
+          "trailer_center_index": 5296,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.78125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1082.429,
+          "saved_frame": "captures/A_baseline/frame-010.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 45.995028,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.8117,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.65625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1122.409,
+          "saved_frame": "captures/A_baseline/frame-011.raw"
+        },
+        {
+          "image_word_min": 5286,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 45.974551,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5286,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.8416,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5286,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            251,
+            233
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5286,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.734375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1162.397,
+          "saved_frame": "captures/A_baseline/frame-012.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5516,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.00352,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5516
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.8051,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5516,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            251,
+            233
+          ],
+          "word_at_trailer_high_xy": 5516,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5301,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5305,
+            5298.90625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1202.398,
+          "saved_frame": "captures/A_baseline/frame-013.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.013402,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.799,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            1,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5301,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.8125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1242.404,
+          "saved_frame": "captures/A_baseline/frame-014.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.00232,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7971,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            191,
+            126
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5306,
+            5298.859375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1282.401,
+          "saved_frame": "captures/A_baseline/frame-015.raw"
+        },
+        {
+          "image_word_min": 5288,
+          "image_word_max": 5519,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.036604,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5288,
+            5519
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5288,
+            5519
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7831,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5519,
+          "trailer_low_index": 5288,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            193,
+            118
+          ],
+          "word_at_trailer_high_xy": 5519,
+          "word_at_trailer_low_xy": 5288,
+          "image_center_word_at_192_144": 5300,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5307,
+            5299.09375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1322.397,
+          "saved_frame": "captures/A_baseline/frame-016.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.037312,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7703,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5305,
+            5298.734375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1362.398,
+          "saved_frame": "captures/A_baseline/frame-017.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.062934,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7359,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5305,
+            5298.671875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1402.431,
+          "saved_frame": "captures/A_baseline/frame-018.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 45.998819,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7838,
+          "trailer_center_index": 5299,
+          "trailer_spot0_index": 5301,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5306,
+            5298.84375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1442.407,
+          "saved_frame": "captures/A_baseline/frame-019.raw"
+        },
+        {
+          "image_word_min": 5288,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.01389,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7947,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5288,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            194,
+            121
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5288,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5305,
+            5298.875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1482.408,
+          "saved_frame": "captures/A_baseline/frame-020.raw"
+        },
+        {
+          "image_word_min": 5288,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.033708,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5288,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7683,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5288,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            195,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5288,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.78125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1522.394,
+          "saved_frame": "captures/A_baseline/frame-021.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.047625,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7551,
+          "trailer_center_index": 5298,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            236,
+            205
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5303,
+            5298.75
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1562.419,
+          "saved_frame": "captures/A_baseline/frame-022.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.001303,
+          "image_word_unique_count": 230,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.8157,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5299,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            236,
+            205
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5299,
+          "center_8x8_word_min_max_mean": [
+            5294,
+            5304,
+            5298.65625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1602.399,
+          "saved_frame": "captures/A_baseline/frame-023.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5517,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.05717,
+          "image_word_unique_count": 231,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5517
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7642,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5517,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5517,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5303,
+            5298.484375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7257,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1642.391,
+          "saved_frame": "captures/A_baseline/frame-024.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1682.395,
+          "saved_frame": "captures/A_baseline/frame-025.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1722.442,
+          "saved_frame": "captures/A_baseline/frame-026.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7257,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1762.415,
+          "saved_frame": "captures/A_baseline/frame-027.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1802.407,
+          "saved_frame": "captures/A_baseline/frame-028.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1842.395,
+          "saved_frame": "captures/A_baseline/frame-029.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3078,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1882.394,
+          "saved_frame": "captures/A_baseline/frame-030.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7257,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1922.439,
+          "saved_frame": "captures/A_baseline/frame-031.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 1962.387,
+          "saved_frame": "captures/A_baseline/frame-032.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2002.408,
+          "saved_frame": "captures/A_baseline/frame-033.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7257,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2042.612,
+          "saved_frame": "captures/A_baseline/frame-034.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7256,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2082.444,
+          "saved_frame": "captures/A_baseline/frame-035.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2122.428,
+          "saved_frame": "captures/A_baseline/frame-036.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2162.431,
+          "saved_frame": "captures/A_baseline/frame-037.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2202.463,
+          "saved_frame": "captures/A_baseline/frame-038.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2242.423,
+          "saved_frame": "captures/A_baseline/frame-039.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2282.417,
+          "saved_frame": "captures/A_baseline/frame-040.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2322.383,
+          "saved_frame": "captures/A_baseline/frame-041.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2362.39,
+          "saved_frame": "captures/A_baseline/frame-042.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2402.39,
+          "saved_frame": "captures/A_baseline/frame-043.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2442.397,
+          "saved_frame": "captures/A_baseline/frame-044.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2482.393,
+          "saved_frame": "captures/A_baseline/frame-045.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2522.416,
+          "saved_frame": "captures/A_baseline/frame-046.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2562.394,
+          "saved_frame": "captures/A_baseline/frame-047.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2602.406,
+          "saved_frame": "captures/A_baseline/frame-048.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7261,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2642.405,
+          "saved_frame": "captures/A_baseline/frame-049.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2682.52,
+          "saved_frame": "captures/A_baseline/frame-050.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2722.493,
+          "saved_frame": "captures/A_baseline/frame-051.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2762.717,
+          "saved_frame": "captures/A_baseline/frame-052.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2802.486,
+          "saved_frame": "captures/A_baseline/frame-053.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2842.473,
+          "saved_frame": "captures/A_baseline/frame-054.raw"
+        },
+        {
+          "image_word_min": 5287,
+          "image_word_max": 5518,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.058117,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5287,
+            5518
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 73.7653,
+          "trailer_center_index": 5297,
+          "trailer_spot0_index": 5300,
+          "trailer_high_index": 5518,
+          "trailer_low_index": 5287,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            190,
+            124
+          ],
+          "word_at_trailer_high_xy": 5518,
+          "word_at_trailer_low_xy": 5287,
+          "image_center_word_at_192_144": 5298,
+          "center_8x8_word_min_max_mean": [
+            5295,
+            5304,
+            5298.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2882.49,
+          "saved_frame": "captures/A_baseline/frame-055.raw"
+        },
+        {
+          "image_word_min": 5307,
+          "image_word_max": 5545,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.667099,
+          "image_word_unique_count": 236,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5307,
+            5545
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5307,
+            5545
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 75.0197,
+          "trailer_center_index": 5322,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5545,
+          "trailer_low_index": 5307,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            196,
+            129
+          ],
+          "word_at_trailer_high_xy": 5545,
+          "word_at_trailer_low_xy": 5307,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5318,
+            5328,
+            5322.5
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2922.452,
+          "saved_frame": "captures/A_baseline/frame-056.raw"
+        },
+        {
+          "image_word_min": 5308,
+          "image_word_max": 5543,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.722315,
+          "image_word_unique_count": 235,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5308,
+            5543
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5308,
+            5543
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.9292,
+          "trailer_center_index": 5323,
+          "trailer_spot0_index": 5322,
+          "trailer_high_index": 5543,
+          "trailer_low_index": 5308,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            196,
+            129
+          ],
+          "word_at_trailer_high_xy": 5543,
+          "word_at_trailer_low_xy": 5308,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5327,
+            5321.96875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 2962.396,
+          "saved_frame": "captures/A_baseline/frame-057.raw"
+        },
+        {
+          "image_word_min": 5310,
+          "image_word_max": 5543,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.824243,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5310,
+            5543
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5310,
+            5543
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.8257,
+          "trailer_center_index": 5323,
+          "trailer_spot0_index": 5322,
+          "trailer_high_index": 5543,
+          "trailer_low_index": 5310,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            190,
+            123
+          ],
+          "word_at_trailer_high_xy": 5543,
+          "word_at_trailer_low_xy": 5310,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5321.53125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3002.387,
+          "saved_frame": "captures/A_baseline/frame-058.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.829322,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.8047,
+          "trailer_center_index": 5323,
+          "trailer_spot0_index": 5322,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            207,
+            158
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5321.4375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3042.382,
+          "saved_frame": "captures/A_baseline/frame-059.raw"
+        },
+        {
+          "image_word_min": 5310,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.870359,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5310,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5310,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7422,
+          "trailer_center_index": 5322,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5310,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            121
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5310,
+          "image_center_word_at_192_144": 5320,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5326,
+            5321.140625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7257,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3082.372,
+          "saved_frame": "captures/A_baseline/frame-060.raw"
+        },
+        {
+          "image_word_min": 5310,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.846073,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5310,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5310,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7424,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5310,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            213,
+            160
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5310,
+          "image_center_word_at_192_144": 5320,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5327,
+            5321.0625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3122.398,
+          "saved_frame": "captures/A_baseline/frame-061.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5541,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.857674,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7124,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5320,
+          "trailer_high_index": 5541,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            241,
+            213
+          ],
+          "word_at_trailer_high_xy": 5541,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5319,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5327,
+            5320.78125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3162.405,
+          "saved_frame": "captures/A_baseline/frame-062.raw"
+        },
+        {
+          "image_word_min": 5310,
+          "image_word_max": 5541,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.813756,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5310,
+            5541
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5310,
+            5541
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7521,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5320,
+          "trailer_high_index": 5541,
+          "trailer_low_index": 5310,
+          "trailer_high_xy": [
+            2,
+            53
+          ],
+          "trailer_low_xy": [
+            191,
+            121
+          ],
+          "word_at_trailer_high_xy": 5541,
+          "word_at_trailer_low_xy": 5310,
+          "image_center_word_at_192_144": 5319,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5320.5
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3202.413,
+          "saved_frame": "captures/A_baseline/frame-063.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.826829,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.726,
+          "trailer_center_index": 5320,
+          "trailer_spot0_index": 5320,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            2,
+            54
+          ],
+          "trailer_low_xy": [
+            213,
+            160
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5320.5625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3242.451,
+          "saved_frame": "captures/A_baseline/frame-064.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.830158,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7467,
+          "trailer_center_index": 5320,
+          "trailer_spot0_index": 5320,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            1,
+            53
+          ],
+          "trailer_low_xy": [
+            213,
+            160
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5327,
+            5320.578125
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7261,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3282.41,
+          "saved_frame": "captures/A_baseline/frame-065.raw"
+        },
+        {
+          "image_word_min": 5308,
+          "image_word_max": 5541,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.829404,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5308,
+            5541
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5308,
+            5541
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7427,
+          "trailer_center_index": 5320,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5541,
+          "trailer_low_index": 5308,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            195,
+            121
+          ],
+          "word_at_trailer_high_xy": 5541,
+          "word_at_trailer_low_xy": 5308,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5327,
+            5320.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3322.453,
+          "saved_frame": "captures/A_baseline/frame-066.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5541,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.807232,
+          "image_word_unique_count": 232,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7774,
+          "trailer_center_index": 5320,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5541,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            192,
+            123
+          ],
+          "word_at_trailer_high_xy": 5541,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5320,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5326,
+            5320.265625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7261,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3362.455,
+          "saved_frame": "captures/A_baseline/frame-067.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.81826,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.761,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            3,
+            54
+          ],
+          "trailer_low_xy": [
+            192,
+            123
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5321,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5325,
+            5320.59375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3402.611,
+          "saved_frame": "captures/A_baseline/frame-068.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5541,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.807994,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5541
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7608,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5320,
+          "trailer_high_index": 5541,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            192,
+            123
+          ],
+          "word_at_trailer_high_xy": 5541,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5325,
+            5320.390625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7258,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3442.406,
+          "saved_frame": "captures/A_baseline/frame-069.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.843456,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7108,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            200,
+            132
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5323,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5326,
+            5320.484375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3482.378,
+          "saved_frame": "captures/A_baseline/frame-070.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.866327,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.7079,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            193,
+            128
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5316,
+            5327,
+            5320.609375
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3522.385,
+          "saved_frame": "captures/A_baseline/frame-071.raw"
+        },
+        {
+          "image_word_min": 5309,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.855887,
+          "image_word_unique_count": 233,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5309,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.6969,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5322,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5309,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            192,
+            123
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5309,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5327,
+            5321.046875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7260,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3562.425,
+          "saved_frame": "captures/A_baseline/frame-072.raw"
+        },
+        {
+          "image_word_min": 5308,
+          "image_word_max": 5542,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.891666,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5308,
+            5542
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5308,
+            5542
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.6633,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5322,
+          "trailer_high_index": 5542,
+          "trailer_low_index": 5308,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            200,
+            132
+          ],
+          "word_at_trailer_high_xy": 5542,
+          "word_at_trailer_low_xy": 5308,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5320.765625
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3602.469,
+          "saved_frame": "captures/A_baseline/frame-073.raw"
+        },
+        {
+          "image_word_min": 5308,
+          "image_word_max": 5543,
+          "image_words_at_most_0x3fff_percent": 100.0,
+          "image_word_stddev": 46.868862,
+          "image_word_unique_count": 234,
+          "bit15_set_percent": 0.0,
+          "bit14_set_percent": 0.0,
+          "top_two_bits_percent": {
+            "00": 100.0,
+            "01": 0.0,
+            "10": 0.0,
+            "11": 0.0
+          },
+          "masked_0x3fff_min_max_diagnostic_only": [
+            5308,
+            5543
+          ],
+          "masked_0x7fff_min_max_diagnostic_only": [
+            5308,
+            5543
+          ],
+          "image_y_min": 0,
+          "image_y_max": 255,
+          "image_y_stddev": 74.6887,
+          "trailer_center_index": 5321,
+          "trailer_spot0_index": 5321,
+          "trailer_high_index": 5543,
+          "trailer_low_index": 5308,
+          "trailer_high_xy": [
+            0,
+            53
+          ],
+          "trailer_low_xy": [
+            213,
+            160
+          ],
+          "word_at_trailer_high_xy": 5543,
+          "word_at_trailer_low_xy": 5308,
+          "image_center_word_at_192_144": 5322,
+          "center_8x8_word_min_max_mean": [
+            5317,
+            5326,
+            5320.796875
+          ],
+          "lookup_base": 6000,
+          "fpa_transform_input_at_221186": 7259,
+          "calibration_temperature_word_at_223490": 3083,
+          "calibration_coefficients": [
+            0.2705000042915344,
+            35.992000579833984,
+            3.9999998989515007e-05,
+            0.00570000009611249,
+            0.8234000205993652
+          ],
+          "calibration_copy_matches": true,
+          "correction_setting": 0.0,
+          "reflected_temp_setting": 25.0,
+          "ambient_temp_setting": 25.0,
+          "humidity_setting": 0.44999998807907104,
+          "emissivity_setting": 0.9800000190734863,
+          "distance_setting": 1,
+          "received_ms": 3642.467,
+          "saved_frame": "captures/A_baseline/frame-074.raw"
+        }
+      ],
+      "control_readback": 32768,
+      "finished_ms": 3645.006
+    }
+  ],
+  "spatial_layout_preserved": true,
+  "status": "complete",
+  "mask_interpretation": "Diagnostic only; native search does not mask.",
+  "initial_readback": 32768,
+  "all_final_image_words_fit_native_lookup": true,
+  "raw_artifact_store": "LMThermal-Research/analysis/warm-target-20260927/settled-room"
+}

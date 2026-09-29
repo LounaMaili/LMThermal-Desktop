@@ -1,5 +1,41 @@
 # HT-301 measurement audit — 2026-09-26
 
+## Radiometric follow-up (September 26–27)
+
+A clean official sequence produced true 14-bit image words immediately after
+`zoom_absolute=32772`; normal-range `32800` and shutter `32768` retained raw
+representation. ThermViewer's full type-0 startup changed emissivity to 1.0
+but retained display words. Both ARM native searches reject full uint16
+values >=0x4000 without masking; ThermViewer passes the copied UVC buffer
+unchanged to its search.
+
+The standalone experimental range-120/lens-68 lookup now matches the executed
+official x86_64 library across all 16384 entries on the initial raw fixture.
+The corrected FPA input is byte 221186; byte 223490 is separately interpreted
+as word/10 - 273.15. Native lens 68 multiplies stored distance by three.
+These findings resolve the prior raw-mode and arithmetic reconstruction
+blockers for that branch. Independent temperature accuracy, cross-ABI parity
+and complete stability/range validation remain open. See
+[physical validation](PHYSICAL_VALIDATION.md) and the sibling repository's
+`docs/RADIOMETRIC_INITIALIZATION.md`.
+
+A second official replay observed a roughly 1.3-second held/repeated image
+interval after shutter command `32768`. The initial 15-frame discard was too
+short. The staged diagnostic now discards at least 75 frames after that
+control, and the held frame is marked transient evidence. A subsequent
+75-frame read-only room window had 75 distinct raw14 images; center/high/low
+lookup standard deviations were about 0.029/0.017/0.039 °C. A later
+calibration update was observed, so short-term quiet output alone is not
+proof of equilibrium. High/low trailer indices and coordinates matched image
+extrema in all 75 later frames; the center index equaled the literal center
+pixel in 13 of 75. The experimental module exposes a full 288 × 384
+temperature matrix for valid raw14 input, without GUI integration.
+
+The September 26 temporary JSON reports were lost across interruption; the
+raw fixture and native reference table survived and were archived with all
+uncommitted work before resuming. Transcript-derived summary data is labeled
+as such. New capture reports and frames use persistent research storage.
+
 ## Native follow-up (same date)
 
 The subsequent APK audit in the sibling `LMThermal` repository established
@@ -100,7 +136,7 @@ center index from another trailer location; whether the camera computed that
 index from a single pixel or an area remains unproven. Field 356 must not be
 a temperature regression target.
 
-## Missing evidence and stopping boundary
+## Original audit boundary (superseded by the radiometric follow-up above)
 
 The call graph, five `CalcFixRaw` input sources, and lookup layout are now
 documented in `LMThermal/docs/NATIVE_CALL_CHAIN.md`. The missing evidence is

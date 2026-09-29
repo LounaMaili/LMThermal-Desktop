@@ -91,8 +91,13 @@ Example observed values include approximately:
 - calibration coefficients: 0.2705 and 35.992, duplicated at block offsets 352 and 356
 
 The existing per-pixel temperature implementation is **not validated**. The
-saved Linux image words exceed the Android app's 14-bit thermometry lookup
-range. Field 356 is a duplicated calibration coefficient, not a live center
+original baseline image words exceed the Android app's 14-bit thermometry
+lookup range. The official `zoom_absolute=32772` control now yields raw14
+indices; a standalone experimental lookup matches executed official x86_64
+arithmetic for the tested range-120/lens-68 branch. Independent physical
+accuracy is still unresolved. Read the sibling repository's
+`docs/RADIOMETRIC_INITIALIZATION.md` before further camera/thermometry changes.
+Field 356 is a duplicated calibration coefficient, not a live center
 temperature.
 
 In particular, do not assume the current approximation based on `gain * emissivity` is correct.
