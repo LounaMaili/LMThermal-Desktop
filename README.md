@@ -49,8 +49,17 @@ Camera orientation remains native; preferred presentation rotation/mirroring
 is deferred. See [PyQt MVP architecture](docs/PYQT_RADIOMETRIC_MVP.md).
 
 Native-equivalent temperatures; absolute physical accuracy not yet
-independently validated. ROI measurement, exports and recording remain outside
-this MVP.
+independently validated. ROI measurement and recording remain outside this MVP.
+
+When **Radiometric ready**, **Save radiometric capture** writes a versioned
+`<name>.png`, `<name>.npz`, `<name>.json` set from one frozen measurement and
+the displayed palette/range. The button is disabled during display, shutter,
+held, and unsettled states. The PNG is a human-viewable rendering; the NPZ
+contains lossless native `raw14`, float32 `temperature_c`, and exact transport
+bytes for later analysis or re-rendering. The JSON records measurement,
+calibration, and presentation metadata. Existing filenames are never replaced.
+See [capture format v1](docs/RADIOMETRIC_CAPTURE_FORMAT.md). The exact transport
+frame can contain camera or scene information; review captures before sharing.
 
 ## Measurement baseline
 

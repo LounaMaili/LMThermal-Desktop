@@ -1,8 +1,11 @@
 """Offscreen Qt state checks without camera hardware or pixel-perfect captures."""
 
+import json
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -57,6 +60,7 @@ class MVPWindowTests(unittest.TestCase):
         self.assertIsNone(self.window.image_widget.effective_bounds)
         self.assertIsNone(self.window.legend.bounds)
         self.assertTrue(self.window.initialize_button.isEnabled())
+        self.assertFalse(self.window.capture_button.isEnabled())
         self.window._on_hover((192, 144))
         self.assertEqual(self.window.cursor_label.text(), "Unavailable")
         self.assertEqual(self.window.high_label.text(), "Unavailable")
@@ -64,6 +68,7 @@ class MVPWindowTests(unittest.TestCase):
     def test_ready_values_use_matrix_and_distinct_centers_then_clear(self):
         self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
         self.assertEqual(self.window.image_widget.image.format(), QImage.Format.Format_RGB888)
+        self.assertTrue(self.window.capture_button.isEnabled())
         self.assertEqual(self.window.legend.bounds, self.window.image_widget.effective_bounds)
         self.window._on_hover((191, 211))
         self.assertIn(f"raw {int(self.measured.raw14[211, 191])}",
@@ -77,12 +82,36 @@ class MVPWindowTests(unittest.TestCase):
         self.assertIn("Temporarily invalid", self.window.state_label.text())
         self.assertEqual(self.window.image_widget.image.format(), QImage.Format.Format_Grayscale8)
         self.assertIsNone(self.window.legend.bounds)
+        self.assertFalse(self.window.capture_button.isEnabled())
         for label in (self.window.cursor_label, self.window.high_label,
                       self.window.low_label, self.window.center_pixel_label,
                       self.window.trailer_center_label):
             self.assertEqual(label.text(), "Unavailable")
         self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
         self.assertIn(f"{self.measured.high_c:.2f}", self.window.high_label.text())
+        self.assertTrue(self.window.capture_button.isEnabled())
+
+    def test_save_action_snapshots_current_ready_view(self):
+        self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
+        with TemporaryDirectory() as root:
+            name = str(Path(root) / "ui-capture.png")
+
+            def change_view_during_dialog(*args):
+                self.window.palette_combo.setCurrentText("White hot")
+                self.window.auto_range_check.setChecked(False)
+                self.window.min_spin.setValue(25.0)
+                self.window.max_spin.setValue(45.0)
+                return name, ""
+
+            with patch("lmthermal_viewer.QFileDialog.getSaveFileName",
+                       side_effect=change_view_during_dialog):
+                self.window.capture_button.click()
+            self.assertTrue((Path(root) / "ui-capture.json").exists())
+            metadata = json.loads((Path(root) / "ui-capture.json").read_text())
+            self.assertEqual(metadata["presentation"]["palette"], "Inferno")
+            self.assertEqual(metadata["presentation"]["range_mode"], "auto")
+            self.assertEqual(self.window.palette_combo.currentText(), "White hot")
+            self.assertIn("ui-capture.json", self.window.statusBar().currentMessage())
 
     def test_palette_and_manual_lock_change_color_not_measurement_or_mapping(self):
         self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)

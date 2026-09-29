@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Radiometric capture/export — 2026-09-29)
+- Added ready-frame-only PyQt capture from one frozen `MeasurementFrame` and effective palette/range; display, held, shutter and unsettled states disable saving.
+- Added no-overwrite v1 PNG/NPZ/JSON capture sets: a Celsius rendering, lossless native raw14/float32 matrix plus exact transport bytes, and versioned settings/calibration/presentation metadata with integrity hashes. Temporary-file publication rolls back ordinary failures; absolute physical accuracy remains unvalidated.
+
 ### Added (Celsius palette and range — 2026-09-29)
 - Added a pure display renderer that maps only valid native-equivalent temperature matrices through an automatic 2nd/98th-percentile Celsius scale or exact locked Celsius bounds into White hot, Black hot, Inferno, Iron-like/Hot, or Turbo colors.
 - Added an effective-range Celsius legend and live palette/auto/locked controls. Display and unsettled frames remain aiming previews without current Celsius colors, legend or readings; palette changes do not alter raw14, session validity, or thermometry.

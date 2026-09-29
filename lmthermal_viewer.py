@@ -3,18 +3,22 @@
 
 import sys
 import time
+from datetime import datetime
+from pathlib import Path
 
 from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QImage, QPainter, QPen
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
-                             QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                             QMainWindow, QPushButton, QVBoxLayout, QWidget)
+                             QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
+                             QLabel, QMainWindow, QMessageBox, QPushButton,
+                             QVBoxLayout, QWidget)
 
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
 from mvp_camera_worker import CameraWorker
 from mvp_presentation import (current_extrema, current_reading, display_image,
                               image_viewport, native_to_widget, widget_to_native)
+from radiometric_export import export_capture, snapshot_capture
 from radiometric_session import SessionState
 
 
@@ -243,6 +247,10 @@ class MainWindow(QMainWindow):
         palette_form.addRow("Max:", self.max_spin)
         palette_form.addRow("Visual scale:", self.range_label)
         side.addWidget(palette_group)
+        self.capture_button = QPushButton("Save radiometric capture")
+        self.capture_button.setEnabled(False)
+        self.capture_button.clicked.connect(self._save_capture)
+        side.addWidget(self.capture_button)
         self.palette_combo.currentTextChanged.connect(self._apply_presentation)
         self.auto_range_check.toggled.connect(self._auto_changed)
         self.min_spin.valueChanged.connect(self._range_changed)
@@ -312,6 +320,7 @@ class MainWindow(QMainWindow):
         if worker is None:
             return
         self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
         self.state_label.setText("Stopping…")
         worker.request_stop()
         if not worker.wait(10000):
@@ -338,6 +347,7 @@ class MainWindow(QMainWindow):
         self._sync_legend()
         self._clear_measurements()
         self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
         self.connect_button.setText("Connect camera")
         if not self._had_error:
             self.device_label.setText("Disconnected")
@@ -389,6 +399,8 @@ class MainWindow(QMainWindow):
                                           observation.inspection.mode == "display" and
                                           not self.init_requested)
         measurement = observation.measurement
+        self.capture_button.setEnabled(state == SessionState.RADIOMETRIC_READY and
+                                       measurement is not None)
         if measurement is None:
             self._clear_measurements()
         else:
@@ -404,6 +416,34 @@ class MainWindow(QMainWindow):
         for label in (self.cursor_label, self.high_label, self.low_label,
                       self.center_pixel_label, self.trailer_center_label):
             label.setText("Unavailable")
+
+    def _save_capture(self) -> None:
+        """Freeze the displayed ready frame before opening the destination dialog."""
+        observation = self.image_widget.observation
+        bounds = self.image_widget.effective_bounds
+        if (observation is None or observation.state != SessionState.RADIOMETRIC_READY or
+                observation.measurement is None or bounds is None):
+            self.capture_button.setEnabled(False)
+            return
+        try:
+            snapshot = snapshot_capture(observation, self.image_widget.palette,
+                                        bounds, self.image_widget.automatic_range)
+        except (ValueError, TypeError) as exc:
+            QMessageBox.warning(self, "Capture unavailable", str(exc))
+            return
+        suggested = f"ht301-{datetime.now().strftime('%Y%m%d-%H%M%S')}.png"
+        selected, _ = QFileDialog.getSaveFileName(self, "Save radiometric capture",
+                                                  suggested, "PNG rendering (*.png)")
+        if not selected:
+            return
+        path = Path(selected)
+        basename = path.with_suffix("") if path.suffix.lower() == ".png" else path
+        try:
+            saved = export_capture(snapshot, basename)
+        except (OSError, ValueError, TypeError) as exc:
+            QMessageBox.warning(self, "Capture failed", str(exc))
+            return
+        self.statusBar().showMessage(f"Saved radiometric capture: {saved['.json']}", 10000)
 
     def _auto_changed(self, automatic: bool) -> None:
         self.min_spin.setEnabled(not automatic)
@@ -456,6 +496,7 @@ class MainWindow(QMainWindow):
         self.init_requested = False
         self.state_label.setText(f"Error: {message}")
         self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
         self.observation = None
         self.image_widget.set_observation(None)
         self._sync_legend()
