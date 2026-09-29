@@ -112,12 +112,13 @@ spans; review any preserved spatial scene before sharing. Full run output belong
 research storage. See [physical validation preparation](docs/PHYSICAL_VALIDATION.md)
 for the capture procedure and read-only follow-up capture.
 
-`experimental_thermometry.py` reconstructs the official 16384-entry lookup
+`native_equivalent_thermometry.py` reconstructs the official 16384-entry lookup
 for width 384, range 120, native lens 68 and shutter fix 1.5. It rejects
 out-of-range full words and does not mask them. It corrects the earlier
 conflation of FPA word 221186 and calibration-temperature word 223490.
 Its `temperature_matrix(raw)` function exposes all 288 × 384 float32
-native-equivalent values for valid raw14 frames without PyQt.
+native-equivalent values for valid raw14 frames without PyQt. The historical
+`experimental_thermometry.py` CLI/import path remains available.
 
 ```bash
 ./.venv/bin/python experimental_thermometry.py tests/fixtures/radiometric-initial.raw
@@ -129,6 +130,38 @@ initial fixture, including undefined entries; center/high/low are about
 validated physical temperature accuracy. The optional hash-pinned
 `tools/native_lookup_reference.py` needs pyelftools in an analysis environment;
 normal tests use saved reference tables and need no APK or RE dependencies.
+
+## Measurement session and operator preview
+
+`radiometric_session.py` manages the supported normal-range initialization
+and admits measurements only after live, complete raw14 frames survive the
+post-shutter interval. It rejects held images, malformed frames, inconsistent
+trailer extrema and undefined lookup values. Readiness is not based on a
+frame count alone. The separate OpenCV preview uses display Y or display-only
+contrast normalization of raw14 words; normalized bytes never enter the LUT.
+
+Run a noninteractive diagnostic from display mode:
+
+```bash
+./.venv/bin/python radiometric_session_diagnostic.py --samples 5 \
+  --report /tmp/ht301-measurement-session.json
+```
+
+For live aiming, run the preview and press **i** to initialize after aiming;
+press **q** or **Escape** to close. Optional ROI boxes are visual guides.
+
+```bash
+./.venv/bin/python radiometric_session_diagnostic.py --preview \
+  --roi 176,128,32,32
+```
+
+The preview shows center, high/low markers when measurements are valid, state,
+mode and transient status. A click prints the original pixel index and
+native-equivalent temperature only for ready raw14 frames. If the camera is
+already raw14 when opened, the preview stays read-only rather than guessing
+the current range or repeating initialization. See the
+[session architecture](docs/RADIOMETRIC_SESSION.md) for state and validity
+rules. Physical temperature accuracy still needs independent targets.
 
 `physical_validation.py` compares unshuffled image regions, trailer extrema,
 temporal stability and optional independently measured target temperatures.

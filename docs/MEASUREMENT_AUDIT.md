@@ -1,5 +1,19 @@
 # HT-301 measurement audit — 2026-09-26
 
+## Reusable measurement layer (2026-09-29)
+
+The reconstructed normal-range lookup is now maintained in
+`native_equivalent_thermometry.py`; `experimental_thermometry.py` remains a
+compatibility command. `radiometric_session.py` gates live measurements on
+the observed three-control sequence, valid complete raw14 frames, consistent
+trailer extrema and consecutive changing images after shutter settling. The
+OpenCV diagnostic preview normalizes raw14 only for display and never supplies
+its 8-bit output to thermometry. See [RADIOMETRIC_SESSION.md](RADIOMETRIC_SESSION.md)
+for the software states and launch command. Saved-fixture regressions validate
+structure and APK arithmetic; independent surface-temperature accuracy is
+still unmeasured. The historical audit below records the earlier experimental
+boundary in its original context.
+
 ## Radiometric follow-up (September 26–27)
 
 A clean official sequence produced true 14-bit image words immediately after

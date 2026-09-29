@@ -7,6 +7,22 @@ must not be assigned an assumed temperature.
 
 ## Acquisition
 
+For operator aiming, use the read-only-start OpenCV diagnostic preview before
+the controlled capture:
+
+```bash
+./.venv/bin/python radiometric_session_diagnostic.py --preview \
+  --roi 176,128,32,32
+```
+
+Press `i` only when display frames are visible and a new normal-range session
+is intended. The preview then stays open through the official mode transition
+and shutter settling; `q` or Escape closes it. The ROI overlay helps position
+targets but does not select measurements or change their raw14 data. The
+session's five distinct valid-frame readiness gate is documented in
+[RADIOMETRIC_SESSION.md](RADIOMETRIC_SESSION.md). The preview does not replace
+the independently measured surface reference required below.
+
 Check the current zoom readback and image-word range first. If output is
 already raw14, retain that state and use read-only `--sequence baseline`.
 If output is display mode and zoom readback is 0, the official replay uses
@@ -43,6 +59,8 @@ state; the offline lookup currently assumes range 120, native lens 68 and
 shutter fix 1.5. Other modes are unsupported. Select a spatially preserved
 raw14 frame for ROI analysis; the public `temperature_matrix` function returns
 the complete 288 × 384 float32 native-equivalent output for that frame.
+An already-raw14 stream cannot be assigned a normal-range measurement state
+by the new session API without known initialization provenance.
 
 ## Independent reference experiment
 

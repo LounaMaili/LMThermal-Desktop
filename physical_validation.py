@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experimental_thermometry import build_lookup, lookup_frame, temperature_matrix
+from native_equivalent_thermometry import build_lookup, lookup_frame, temperature_matrix
 from radiometric_mode_diagnostic import frame_metrics
 
 

@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Radiometric measurement session and diagnostic preview — 2026-09-29)
+- Added a PyQt-independent normal-range HT-301 session with explicit display, transition, shutter, unsettled, ready and error states. It uses only the confirmed `32772 -> 32800 -> 32768` controls, readbacks and observed-frame gates.
+- Added a measurement object containing original raw14 pixels, a native-equivalent 288 × 384 temperature matrix, settings/calibration trace, distinct trailer and literal-center readings, extrema and timestamps. Held, malformed, inconsistent and undefined frames cannot be reported as ready measurements.
+- Promoted the float32-faithful lookup to `native_equivalent_thermometry.py` while retaining the experimental CLI compatibility path; physical accuracy remains unvalidated.
+- Added an OpenCV diagnostic preview for display Y and display-only normalized raw14, with state/transient overlays, center and extrema markers, optional ROI guides and valid-frame click inspection. Added saved-fixture state/recovery and pure preview tests; no PyQt measurement integration.
+
 ### Added (Operator-confirmed warm-target discrimination — 2026-09-29)
 - Captured a visible hand against cooler background after the documented official raw14 transition; selected 23 distinct post-shutter frames for relative ROI and center/high/low analysis.
 - Saved one identifier-redacted, spatially preserved steady hand fixture with provenance, a fixed ROI plan, a compact results report, and a hardware-independent regression test.
