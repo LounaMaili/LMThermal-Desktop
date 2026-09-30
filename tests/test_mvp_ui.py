@@ -2,6 +2,7 @@
 
 import json
 import os
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -10,12 +11,14 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QImage
+from PyQt6.QtCore import QEvent, QPointF, Qt
+from PyQt6.QtGui import QImage, QMouseEvent
 
 from lmthermal_viewer import MainWindow
 from mvp_presentation import native_to_widget
 from mvp_camera_worker import CameraWorker, WorkerStopped
 from radiometric_session import FrameObservation, SessionState, inspect_frame, make_measurement
+from roi_measurement import NativeROI, current_roi_statistics
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -93,6 +96,7 @@ class MVPWindowTests(unittest.TestCase):
 
     def test_save_action_snapshots_current_ready_view(self):
         self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
+        self.window.image_widget.set_roi(NativeROI(10, 20, 31, 41))
         with TemporaryDirectory() as root:
             name = str(Path(root) / "ui-capture.png")
 
@@ -101,6 +105,7 @@ class MVPWindowTests(unittest.TestCase):
                 self.window.auto_range_check.setChecked(False)
                 self.window.min_spin.setValue(25.0)
                 self.window.max_spin.setValue(45.0)
+                self.window.image_widget.set_roi(NativeROI(100, 100, 110, 110))
                 return name, ""
 
             with patch("lmthermal_viewer.QFileDialog.getSaveFileName",
@@ -110,6 +115,8 @@ class MVPWindowTests(unittest.TestCase):
             metadata = json.loads((Path(root) / "ui-capture.json").read_text())
             self.assertEqual(metadata["presentation"]["palette"], "Inferno")
             self.assertEqual(metadata["presentation"]["range_mode"], "auto")
+            self.assertEqual(metadata["roi"]["geometry"], {
+                "x1_px": 10, "y1_px": 20, "x2_px": 31, "y2_px": 41})
             self.assertEqual(self.window.palette_combo.currentText(), "White hot")
             self.assertIn("ui-capture.json", self.window.statusBar().currentMessage())
 
@@ -139,6 +146,64 @@ class MVPWindowTests(unittest.TestCase):
         self.assertLess(self.window.min_spin.value(), self.window.max_spin.value())
         self.window.auto_range_check.setChecked(True)
         self.assertEqual(self.window.legend.bounds, self.window.image_widget.effective_bounds)
+
+    def drag(self, start, end):
+        widget = self.window.image_widget
+        for event_type, position, button, buttons in (
+            (QEvent.Type.MouseButtonPress, start, Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton),
+            (QEvent.Type.MouseMove, end, Qt.MouseButton.NoButton, Qt.MouseButton.LeftButton),
+            (QEvent.Type.MouseButtonRelease, end, Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton),
+        ):
+            self.app.sendEvent(widget, QMouseEvent(event_type, QPointF(*position),
+                                                 button, buttons, Qt.KeyboardModifier.NoModifier))
+
+    def test_widget_drag_reverse_clip_margins_and_clear(self):
+        self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
+        widget = self.window.image_widget
+        widget.resize(800, 800)
+        first = native_to_widget(10, 20, 800, 800)
+        last = native_to_widget(30, 40, 800, 800)
+        self.drag(first, last)
+        self.assertEqual(widget.roi, NativeROI(10, 20, 31, 41))
+        self.drag(last, first)
+        self.assertEqual(widget.roi, NativeROI(10, 20, 31, 41))
+        self.drag(first, (900, 900))
+        self.assertEqual(widget.roi, NativeROI(10, 20, 384, 288))
+        self.window.clear_roi_button.click()
+        self.assertIsNone(widget.roi)
+        self.drag((20, 10), (30, 20))
+        self.assertIsNone(widget.roi)
+        self.drag(first, first)
+        self.assertEqual(widget.roi, NativeROI(10, 20, 11, 21))
+
+    def test_roi_numbers_ignore_presentation_and_resume_after_invalid_frame(self):
+        self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
+        widget = self.window.image_widget
+        roi = NativeROI(160, 180, 220, 240)
+        widget.set_roi(roi)
+        values = self.window.roi_values_label.text()
+        original_stats = current_roi_statistics(self.window.observation, roi)
+        self.assertIn("Pixels: 3600", values)
+        self.window.palette_combo.setCurrentText("Turbo")
+        self.window.auto_range_check.setChecked(False)
+        self.window.min_spin.setValue(25)
+        self.window.max_spin.setValue(45)
+        widget.resize(700, 500)
+        self.assertEqual(widget.roi, roi)
+        self.assertEqual(self.window.roi_values_label.text(), values)
+        self.assertEqual(current_roi_statistics(self.window.observation, roi), original_stats)
+        for state in (SessionState.SHUTTER_TRANSIENT, SessionState.RAW14_UNSETTLED,
+                      SessionState.DISPLAY_STREAM):
+            self.send(HAND, state, rejection="unavailable")
+            self.assertEqual(self.window.roi_values_label.text(), "Unavailable")
+            self.assertEqual(widget.roi, roi)
+        self.send(HAND, SessionState.RADIOMETRIC_READY, self.measured)
+        self.assertEqual(self.window.roi_values_label.text(), values)
+        warmer = replace(self.measured, temperature_c=self.measured.temperature_c + 1)
+        self.send(HAND, SessionState.RADIOMETRIC_READY, warmer)
+        self.assertNotEqual(self.window.roi_values_label.text(), values)
+        self.assertEqual(current_roi_statistics(self.window.observation, roi).mean_c,
+                         float(warmer.temperature_c[180:240, 160:220].mean(dtype="float64")))
 
     def test_worker_coalesces_gui_notifications_and_stops_publication(self):
         worker = CameraWorker()

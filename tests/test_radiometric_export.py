@@ -15,6 +15,7 @@ from celsius_palette import CelsiusRange, render_temperature
 from radiometric_export import (ACCURACY_WARNING, FORMAT_ID, FORMAT_VERSION,
                                 export_capture, snapshot_capture)
 from radiometric_session import FrameObservation, SessionState, inspect_frame, make_measurement
+from roi_measurement import NativeROI, roi_statistics
 
 
 HAND = (Path(__file__).parent / "fixtures/warm-hand-settled.raw").read_bytes()
@@ -66,6 +67,7 @@ class RadiometricExportTests(unittest.TestCase):
             np.testing.assert_array_equal(cv2.cvtColor(png_bgr, cv2.COLOR_BGR2RGB), expected_rgb)
             data = json.loads(paths[".json"].read_text())
             self.assertEqual((data["format"], data["version"]), (FORMAT_ID, FORMAT_VERSION))
+            self.assertNotIn("roi", data)
             self.assertEqual(data["presentation"], {
                 "palette": "Inferno", "range_mode": "locked",
                 "effective_min_c": 15.0, "effective_max_c": 45.0})
@@ -83,6 +85,22 @@ class RadiometricExportTests(unittest.TestCase):
             self.assertEqual(data["accuracy_warning"], ACCURACY_WARNING)
             self.assertNotIn("NaN", paths[".json"].read_text())
             self.assertNotIn("Infinity", paths[".json"].read_text())
+
+    def test_roi_metadata_matches_same_captured_matrix_without_changing_npz(self):
+        roi = NativeROI(160, 180, 220, 240)
+        snapshot = snapshot_capture(self.ready, "Inferno", CelsiusRange(15, 45), True, roi=roi)
+        with TemporaryDirectory() as root:
+            paths = export_capture(snapshot, Path(root) / "roi")
+            data = json.loads(paths[".json"].read_text())
+            self.assertEqual(data["version"], 1)
+            self.assertEqual(data["roi"]["coordinate_semantics"], "half_open")
+            self.assertEqual(data["roi"]["geometry"], {
+                "x1_px": 160, "y1_px": 180, "x2_px": 220, "y2_px": 240})
+            with np.load(paths[".npz"], allow_pickle=False) as arrays:
+                self.assertEqual(set(arrays.files), {"temperature_c", "raw14", "raw_transport"})
+                np.testing.assert_array_equal(arrays["temperature_c"], self.measurement.temperature_c)
+                self.assertEqual(data["roi"]["statistics"],
+                                 roi_statistics(arrays["temperature_c"], roi).metadata())
 
     def test_nonfinite_metadata_rejected_and_existing_files_not_overwritten(self):
         bad = replace(self.ready, measurement=replace(

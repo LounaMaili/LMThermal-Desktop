@@ -15,6 +15,7 @@ import numpy as np
 from celsius_palette import PALETTES, CelsiusRange, render_temperature
 from measurement_baseline import FRAME_BYTES, FRAME_WIDTH, IMAGE_BYTES, IMAGE_HEIGHT
 from radiometric_session import FrameObservation, SessionState
+from roi_measurement import NativeROI, roi_statistics
 
 
 FORMAT_ID = "lmthermal-radiometric-capture"
@@ -51,7 +52,8 @@ class CaptureSnapshot:
 
 
 def snapshot_capture(observation: FrameObservation, palette: str,
-                     bounds: CelsiusRange, automatic_range: bool) -> CaptureSnapshot:
+                     bounds: CelsiusRange, automatic_range: bool, *,
+                     roi: NativeROI | None = None) -> CaptureSnapshot:
     """Reject stale observations and freeze arrays before a dialog can change UI state."""
     if observation.state != SessionState.RADIOMETRIC_READY or observation.measurement is None:
         raise ValueError("Only a radiometric-ready measurement can be exported")
@@ -118,6 +120,13 @@ def snapshot_capture(observation: FrameObservation, palette: str,
                          "effective_min_c": bounds.lower, "effective_max_c": bounds.upper},
         "accuracy_warning": ACCURACY_WARNING,
     }
+    if roi is not None:
+        metadata["roi"] = {
+            "coordinate_semantics": "half_open",
+            "geometry": {"x1_px": roi.x1, "y1_px": roi.y1,
+                         "x2_px": roi.x2, "y2_px": roi.y2},
+            "statistics": roi_statistics(temperature, roi).metadata(),
+        }
     # Reject NaN/Infinity in the trace or scalar metadata before any file is written.
     metadata_json = json.dumps(metadata, allow_nan=False, sort_keys=True, indent=2) + "\n"
     return CaptureSnapshot(bytes(measurement.raw), raw14_bytes, temperature_bytes,

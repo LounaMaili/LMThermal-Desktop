@@ -6,6 +6,15 @@ Clicking it first freezes the displayed measurement, palette, effective Celsius
 bounds, and auto/locked range mode. A destination dialog then selects a basename.
 Saving does not recompute thermometry or change the camera session.
 
+An active rectangular ROI adds an optional `roi` object to JSON, preserving
+format version 1. Captures without a ROI omit that key. Its `geometry` fields
+`x1_px`, `y1_px`, `x2_px`, `y2_px` use the explicit `coordinate_semantics:
+half_open`: `temperature_c[y1_px:y2_px, x1_px:x2_px]`. Bounds are in the native
+384 × 288 image and the rectangle is nonempty. `statistics` stores `min_c`,
+`max_c`, `mean_c`, `pixel_count`, `min_xy_px` and `max_xy_px` for this exact
+captured matrix slice. The mean uses float64 accumulation without smoothing;
+ties use the first row-major pixel. Arrays and the clean PNG remain unchanged.
+
 Each basename produces three sibling files:
 
 | File | Contents | Role |

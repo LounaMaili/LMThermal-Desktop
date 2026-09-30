@@ -11,21 +11,24 @@ from PyQt6.QtGui import QColor, QCursor, QImage, QPainter, QPen
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
                              QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
                              QLabel, QMainWindow, QMessageBox, QPushButton,
-                             QVBoxLayout, QWidget)
+                             QScrollArea, QVBoxLayout, QWidget)
 
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
 from mvp_camera_worker import CameraWorker
 from mvp_presentation import (current_extrema, current_reading, display_image,
-                              image_viewport, native_to_widget, widget_to_native)
-from radiometric_export import export_capture, snapshot_capture
+                              image_viewport, native_edge_to_widget,
+                              native_to_widget, widget_to_native)
+from radiometric_export import ACCURACY_WARNING, export_capture, snapshot_capture
 from radiometric_session import SessionState
+from roi_measurement import NativeROI, current_roi_statistics, roi_from_native_pixels
 
 
 class ThermalImageWidget(QWidget):
     """Paint image and markers in widget space without transforming camera data."""
 
     hovered = pyqtSignal(object)
+    roi_changed = pyqtSignal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -40,6 +43,25 @@ class ThermalImageWidget(QWidget):
         self.locked_lower = 20.0
         self.locked_upper = 40.0
         self.effective_bounds = None
+        self.roi = None
+        self._roi_anchor = None
+
+    def set_roi(self, roi: NativeROI | None) -> None:
+        """Keep selected geometry in native pixels across frames and resizes."""
+        self.roi = roi
+        self.roi_changed.emit(roi)
+        self.update()
+
+    def clear_roi(self) -> None:
+        self._roi_anchor = None
+        self.set_roi(None)
+
+    def _drag_roi(self, position) -> None:
+        if self._roi_anchor is not None:
+            endpoint = widget_to_native(position.x(), position.y(), self.width(),
+                                         self.height(), clip=True)
+            if endpoint is not None:
+                self.set_roi(roi_from_native_pixels(self._roi_anchor, endpoint))
 
     def set_presentation(self, palette: str, automatic: bool,
                          locked_lower: float, locked_upper: float) -> None:
@@ -85,10 +107,19 @@ class ThermalImageWidget(QWidget):
 
     def mouseMoveEvent(self, event) -> None:
         self._move(event.position())
+        self._drag_roi(event.position())
 
     def mousePressEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self._move(event.position())
+            if self.image is not None and self.pointer is not None:
+                self._roi_anchor = self.pointer
+                self.set_roi(roi_from_native_pixels(self.pointer, self.pointer))
+
+    def mouseReleaseEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._drag_roi(event.position())
+            self._roi_anchor = None
 
     def leaveEvent(self, event) -> None:
         self._mouse_widget = None
@@ -117,6 +148,16 @@ class ThermalImageWidget(QWidget):
             return
         area = image_viewport(self.width(), self.height())
         painter.drawImage(QRectF(area.left, area.top, area.width, area.height), self.image)
+        if self.roi is not None:
+            left, top = native_edge_to_widget(self.roi.x1, self.roi.y1,
+                                               self.width(), self.height())
+            right, bottom = native_edge_to_widget(self.roi.x2, self.roi.y2,
+                                                   self.width(), self.height())
+            rectangle = QRectF(left, top, right - left, bottom - top)
+            painter.setPen(QPen(QColor("black"), 4))
+            painter.drawRect(rectangle)
+            painter.setPen(QPen(QColor(80, 255, 150), 2))
+            painter.drawRect(rectangle)
         self._marker(painter, (192, 144), QColor(255, 220, 0), 10)
         extrema = current_extrema(self.observation)
         if extrema is not None:
@@ -204,11 +245,12 @@ class MainWindow(QMainWindow):
         layout = QHBoxLayout(central)
         self.image_widget = ThermalImageWidget()
         self.image_widget.hovered.connect(self._on_hover)
+        self.image_widget.roi_changed.connect(self._on_roi_changed)
         layout.addWidget(self.image_widget, 1)
         self.legend = CelsiusLegend()
         layout.addWidget(self.legend)
         panel = QWidget()
-        panel.setFixedWidth(280)
+        panel.setMinimumWidth(280)
         side = QVBoxLayout(panel)
         self.connect_button = QPushButton("Connect camera")
         self.connect_button.clicked.connect(self._toggle_camera)
@@ -283,11 +325,28 @@ class MainWindow(QMainWindow):
         measurement_group = QGroupBox("Native-equivalent readings")
         measurement_group.setLayout(measurement_form)
         side.addWidget(measurement_group)
+        roi_group = QGroupBox("ROI — native pixels")
+        roi_layout = QVBoxLayout(roi_group)
+        self.roi_geometry_label = QLabel("Drag on the image to select a rectangle")
+        self.roi_geometry_label.setWordWrap(True)
+        self.roi_values_label = QLabel("Unavailable")
+        self.roi_values_label.setWordWrap(True)
+        self.clear_roi_button = QPushButton("Clear ROI")
+        self.clear_roi_button.setEnabled(False)
+        self.clear_roi_button.clicked.connect(self.image_widget.clear_roi)
+        roi_layout.addWidget(self.roi_geometry_label)
+        roi_layout.addWidget(self.roi_values_label)
+        roi_layout.addWidget(self.clear_roi_button)
+        side.addWidget(roi_group)
         side.addStretch()
-        warning = QLabel("Native-equivalent temperatures; absolute physical accuracy not independently validated.")
+        warning = QLabel(ACCURACY_WARNING)
         warning.setWordWrap(True)
         side.addWidget(warning)
-        layout.addWidget(panel)
+        sidebar = QScrollArea()
+        sidebar.setWidgetResizable(True)
+        sidebar.setFixedWidth(320)
+        sidebar.setWidget(panel)
+        layout.addWidget(sidebar)
 
     def _toggle_camera(self) -> None:
         if self.worker is None:
@@ -411,11 +470,28 @@ class MainWindow(QMainWindow):
             self.trailer_center_label.setText(f"{measurement.trailer_center_c:.2f} °C "
                                              f"(raw {measurement.trailer_center_index})")
             self._update_cursor()
+        self._update_roi()
 
     def _clear_measurements(self) -> None:
         for label in (self.cursor_label, self.high_label, self.low_label,
                       self.center_pixel_label, self.trailer_center_label):
             label.setText("Unavailable")
+        self._update_roi()
+
+    def _on_roi_changed(self, roi: NativeROI | None) -> None:
+        self.clear_roi_button.setEnabled(roi is not None)
+        self.roi_geometry_label.setText(
+            "Drag on the image to select a rectangle" if roi is None else
+            f"[{roi.x1},{roi.x2}) × [{roi.y1},{roi.y2})")
+        self._update_roi()
+
+    def _update_roi(self) -> None:
+        stats = current_roi_statistics(self.observation, self.image_widget.roi)
+        self.roi_values_label.setText("Unavailable" if stats is None else
+                                     f"Min: {stats.min_c:.2f} °C at {stats.min_xy}\n"
+                                     f"Max: {stats.max_c:.2f} °C at {stats.max_xy}\n"
+                                     f"Mean: {stats.mean_c:.2f} °C\n"
+                                     f"Pixels: {stats.pixel_count}")
 
     def _save_capture(self) -> None:
         """Freeze the displayed ready frame before opening the destination dialog."""
@@ -427,7 +503,8 @@ class MainWindow(QMainWindow):
             return
         try:
             snapshot = snapshot_capture(observation, self.image_widget.palette,
-                                        bounds, self.image_widget.automatic_range)
+                                        bounds, self.image_widget.automatic_range,
+                                        roi=self.image_widget.roi)
         except (ValueError, TypeError) as exc:
             QMessageBox.warning(self, "Capture unavailable", str(exc))
             return

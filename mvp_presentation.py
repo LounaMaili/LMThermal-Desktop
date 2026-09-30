@@ -39,15 +39,28 @@ def image_viewport(widget_width: int, widget_height: int) -> ImageViewport:
 
 
 def widget_to_native(widget_x: float, widget_y: float,
-                     widget_width: int, widget_height: int) -> tuple[int, int] | None:
-    """Reject letterbox clicks and return the original camera pixel."""
+                     widget_width: int, widget_height: int, *,
+                     clip: bool = False) -> tuple[int, int] | None:
+    """Return a native pixel; optional clipping is for an already-started drag."""
     area = image_viewport(widget_width, widget_height)
-    if not (area.left <= widget_x < area.left + area.width and
-            area.top <= widget_y < area.top + area.height):
+    if not (math.isfinite(widget_x) and math.isfinite(widget_y)):
+        return None
+    if not clip and not (area.left <= widget_x < area.left + area.width and
+                         area.top <= widget_y < area.top + area.height):
         return None
     x = math.floor((widget_x - area.left) * FRAME_WIDTH / area.width)
     y = math.floor((widget_y - area.top) * IMAGE_HEIGHT / area.height)
-    return min(x, FRAME_WIDTH - 1), min(y, IMAGE_HEIGHT - 1)
+    return max(0, min(x, FRAME_WIDTH - 1)), max(0, min(y, IMAGE_HEIGHT - 1))
+
+
+def native_edge_to_widget(x: float, y: float, widget_width: int,
+                          widget_height: int) -> tuple[float, float]:
+    """Map native pixel boundaries, including right/bottom image edges."""
+    if not (0 <= x <= FRAME_WIDTH and 0 <= y <= IMAGE_HEIGHT):
+        raise ValueError("Native edge is outside the thermal image")
+    area = image_viewport(widget_width, widget_height)
+    return (area.left + x * area.width / FRAME_WIDTH,
+            area.top + y * area.height / IMAGE_HEIGHT)
 
 
 def native_to_widget(x: int, y: int, widget_width: int,
@@ -55,9 +68,7 @@ def native_to_widget(x: int, y: int, widget_width: int,
     """Locate a native pixel center inside the current letterboxed view."""
     if not (0 <= x < FRAME_WIDTH and 0 <= y < IMAGE_HEIGHT):
         raise ValueError("Native coordinate is outside the thermal image")
-    area = image_viewport(widget_width, widget_height)
-    return (area.left + (x + .5) * area.width / FRAME_WIDTH,
-            area.top + (y + .5) * area.height / IMAGE_HEIGHT)
+    return native_edge_to_widget(x + .5, y + .5, widget_width, widget_height)
 
 
 def current_reading(observation: FrameObservation | None,

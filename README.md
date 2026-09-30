@@ -49,7 +49,17 @@ Camera orientation remains native; preferred presentation rotation/mirroring
 is deferred. See [PyQt MVP architecture](docs/PYQT_RADIOMETRIC_MVP.md).
 
 Native-equivalent temperatures; absolute physical accuracy not yet
-independently validated. ROI measurement and recording remain outside this MVP.
+independently validated. Recording remains outside this MVP.
+
+Left-click and drag on the image to create or replace one rectangular ROI.
+**Clear ROI** removes it. Both endpoint pixels are included, including a
+single-pixel click; the stored geometry is half-open
+`temperature_c[y1:y2, x1:x2]` in native camera coordinates. A drag must start
+inside the image and its endpoint clips at the image edge. The ROI panel shows
+the current matrix slice's min, max, mean, pixel count and native extrema
+locations. Geometry stays fixed through resizing and palette/range changes.
+During display, held or unsettled frames the rectangle remains selected and
+its numerical readings become unavailable; ready-frame recovery restores them.
 
 When **Radiometric ready**, **Save radiometric capture** writes a versioned
 `<name>.png`, `<name>.npz`, `<name>.json` set from one frozen measurement and
@@ -58,6 +68,8 @@ held, and unsettled states. The PNG is a human-viewable rendering; the NPZ
 contains lossless native `raw14`, float32 `temperature_c`, and exact transport
 bytes for later analysis or re-rendering. The JSON records measurement,
 calibration, and presentation metadata. Existing filenames are never replaced.
+An active ROI adds its native geometry and same-frame statistics to JSON;
+the PNG stays a clean thermal rendering and the NPZ matrices retain all pixels.
 See [capture format v1](docs/RADIOMETRIC_CAPTURE_FORMAT.md). The exact transport
 frame can contain camera or scene information; review captures before sharing.
 
