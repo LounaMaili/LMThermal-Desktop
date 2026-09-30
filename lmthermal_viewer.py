@@ -13,7 +13,7 @@ from PyQt6.QtGui import QColor, QCursor, QImage, QPainter, QPen
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
                              QDialog, QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
                              QLabel, QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
-                             QScrollArea, QVBoxLayout, QWidget)
+                             QScrollArea, QSlider, QVBoxLayout, QWidget)
 
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
@@ -21,6 +21,8 @@ from measurement_logger import MeasurementLogger, SUPPORTED_RATES
 from radiometric_recorder import RadiometricRecorder
 from radiometric_recording import RATES as RECORDING_RATES
 from mvp_camera_worker import CameraWorker
+from playback_worker import PlaybackWorker
+from radiometric_playback import PlaybackFrame, save_playback_png
 from mvp_presentation import (current_extrema, current_measurement, current_reading, display_image,
                               image_viewport, native_edge_to_widget,
                               native_to_widget, widget_to_native)
@@ -41,6 +43,7 @@ class ThermalImageWidget(QWidget):
         self.setMinimumSize(384, 288)
         self.setMouseTracking(True)
         self.observation = None
+        self.empty_text = "Camera disconnected"
         self.image = None
         self.pointer = None
         self._mouse_widget = None
@@ -153,7 +156,7 @@ class ThermalImageWidget(QWidget):
         painter.fillRect(self.rect(), QColor(14, 16, 20))
         if self.image is None:
             painter.setPen(QColor("white"))
-            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "Camera disconnected")
+            painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.empty_text)
             return
         area = image_viewport(self.width(), self.height())
         painter.drawImage(QRectF(area.left, area.top, area.width, area.height), self.image)
@@ -237,6 +240,10 @@ class MainWindow(QMainWindow):
         self.logger = None
         self.recorder = None
         self.offline_capture = None
+        self.playback = None
+        self.playback_worker = None
+        self._playback_token = 0
+        self._restoring_roi = False
         self.observation = None
         self.pointer = None
         self.init_requested = False
@@ -245,6 +252,9 @@ class MainWindow(QMainWindow):
         self._view_count = 0
         self._fps_started = time.monotonic()
         self._setup_ui()
+        self._playback_timer = QTimer(self)
+        self._playback_timer.timeout.connect(self._playback_tick)
+        self._playback_timer.setInterval(33)
         self._fps_timer = QTimer(self)
         self._fps_timer.timeout.connect(self._update_fps)
         self._fps_timer.timeout.connect(self._update_logging_status)
@@ -263,9 +273,49 @@ class MainWindow(QMainWindow):
         self.image_widget = ThermalImageWidget()
         self.image_widget.hovered.connect(self._on_hover)
         self.image_widget.roi_changed.connect(self._on_roi_changed)
-        layout.addWidget(self.image_widget, 1)
+        view_column = QVBoxLayout()
+        view_row = QHBoxLayout()
+        view_row.addWidget(self.image_widget, 1)
         self.legend = CelsiusLegend()
-        layout.addWidget(self.legend)
+        view_row.addWidget(self.legend)
+        view_column.addLayout(view_row, 1)
+        self.playback_group = QGroupBox("Offline recording playback")
+        playback_layout = QVBoxLayout(self.playback_group)
+        self.timeline_slider = QSlider(Qt.Orientation.Horizontal)
+        self.timeline_slider.valueChanged.connect(self._scrub_recording)
+        playback_layout.addWidget(self.timeline_slider)
+        controls = QHBoxLayout()
+        self.first_sample_button = QPushButton("|◀")
+        self.previous_sample_button = QPushButton("Previous")
+        self.play_button = QPushButton("Play")
+        self.next_sample_button = QPushButton("Next")
+        self.last_sample_button = QPushButton("▶|")
+        self.first_sample_button.clicked.connect(lambda: self._select_recording(0))
+        self.previous_sample_button.clicked.connect(lambda: self._step_recording(-1))
+        self.play_button.clicked.connect(self._toggle_playback)
+        self.next_sample_button.clicked.connect(lambda: self._step_recording(1))
+        self.last_sample_button.clicked.connect(lambda: self._select_recording(len(self.playback.entries)-1) if self.playback else None)
+        for button in (self.first_sample_button, self.previous_sample_button, self.play_button,
+                       self.next_sample_button, self.last_sample_button):
+            controls.addWidget(button)
+        self.playback_speed = QComboBox()
+        for speed in (.5, 1, 2, 4):
+            self.playback_speed.addItem(f"{speed:g}×", speed)
+        self.playback_speed.setCurrentIndex(1)
+        self.playback_speed.currentIndexChanged.connect(self._change_playback_speed)
+        controls.addWidget(self.playback_speed)
+        self.close_recording_button = QPushButton("Close recording")
+        self.close_recording_button.clicked.connect(self.close_recording)
+        controls.addWidget(self.close_recording_button)
+        playback_layout.addLayout(controls)
+        self.playback_status_label = QLabel()
+        self.playback_status_label.setWordWrap(True)
+        playback_layout.addWidget(self.playback_status_label)
+        self.playback_roi_label = QLabel("ROI: none")
+        playback_layout.addWidget(self.playback_roi_label)
+        self.playback_group.hide()
+        view_column.addWidget(self.playback_group)
+        layout.addLayout(view_column, 1)
         panel = QWidget()
         panel.setMinimumWidth(280)
         side = QVBoxLayout(panel)
@@ -275,6 +325,9 @@ class MainWindow(QMainWindow):
         self.open_capture_button = QPushButton("Open radiometric capture")
         self.open_capture_button.clicked.connect(self._choose_capture)
         side.addWidget(self.open_capture_button)
+        self.open_recording_button = QPushButton("Open radiometric recording")
+        self.open_recording_button.clicked.connect(self._choose_recording)
+        side.addWidget(self.open_recording_button)
         self.close_capture_button = QPushButton("Close saved capture")
         self.close_capture_button.setEnabled(False)
         self.close_capture_button.clicked.connect(self.close_capture)
@@ -432,7 +485,10 @@ class MainWindow(QMainWindow):
         if (self.worker is not None or not self._stop_recording("camera_reconnect")
                 or not self._stop_logging("camera_reconnect")):
             return
+        if not self.close_recording():
+            return
         self.close_capture()
+        self.image_widget.empty_text = "Camera disconnected"
         self._had_error = False
         self.init_requested = False
         self.session_initialized = False
@@ -507,7 +563,7 @@ class MainWindow(QMainWindow):
 
     def _on_frame_available(self) -> None:
         """Consume the newest observation; the Qt event queue stays bounded."""
-        if (self.worker is None or self.offline_capture is not None or
+        if (self.worker is None or self.offline_capture is not None or self.playback_worker is not None or
                 (self.sender() is not None and self.sender() is not self.worker)):
             return
         observation = self.worker.take_latest()
@@ -571,6 +627,9 @@ class MainWindow(QMainWindow):
         self._update_roi()
 
     def _on_roi_changed(self, roi: NativeROI | None) -> None:
+        if self.playback is not None:
+            origin = "Recorded" if self._restoring_roi else "Inspection"
+            self.playback_roi_label.setText(f"{origin} ROI" if roi is not None else f"{origin} ROI: none")
         if self.recorder is not None:
             self.recorder.update_latest(self.observation, roi)
         if self.logger is not None:
@@ -591,7 +650,7 @@ class MainWindow(QMainWindow):
 
     def _save_capture(self) -> None:
         """Freeze the displayed ready frame before opening the destination dialog."""
-        if self.offline_capture is not None:
+        if self.offline_capture is not None or self.playback_worker is not None:
             return
         observation = self.image_widget.observation
         bounds = self.image_widget.effective_bounds
@@ -668,7 +727,7 @@ class MainWindow(QMainWindow):
         self._fps_started = now
 
     def _on_failure(self, message: str) -> None:
-        if (self.offline_capture is not None or
+        if (self.offline_capture is not None or self.playback_worker is not None or
                 (self.sender() is not None and self.sender() is not self.worker)):
             return
         self._stop_recording("camera_error")
@@ -684,7 +743,7 @@ class MainWindow(QMainWindow):
         self._clear_measurements()
 
     def _sync_logging_controls(self) -> None:
-        live = self.worker is not None and self.offline_capture is None
+        live = self.worker is not None and self.offline_capture is None and self.playback_worker is None
         recording = self.logger is not None
         self.start_log_button.setEnabled(live and not recording and self.recorder is None)
         self.stop_log_button.setEnabled(recording)
@@ -694,7 +753,7 @@ class MainWindow(QMainWindow):
         self.record_rate_combo.setEnabled(self.recorder is None)
 
     def _start_logging(self) -> None:
-        if (self.worker is None or self.offline_capture is not None
+        if (self.worker is None or self.offline_capture is not None or self.playback_worker is not None
                 or self.logger is not None or self.recorder is not None):
             return
         selected, _ = QFileDialog.getSaveFileName(
@@ -703,7 +762,7 @@ class MainWindow(QMainWindow):
         if not selected:
             return
         # A modal dialog can process queued disconnect/failure events.
-        if (self.worker is None or self.offline_capture is not None
+        if (self.worker is None or self.offline_capture is not None or self.playback_worker is not None
                 or self.logger is not None or self.recorder is not None):
             return
         path = Path(selected)
@@ -753,7 +812,7 @@ class MainWindow(QMainWindow):
             f"({status.valid_sample_count} valid)\n{status.csv_path}")
 
     def _start_recording(self) -> None:
-        if (self.worker is None or self.offline_capture is not None
+        if (self.worker is None or self.offline_capture is not None or self.playback_worker is not None
                 or self.logger is not None or self.recorder is not None):
             return
         selected, _ = QFileDialog.getSaveFileName(
@@ -761,7 +820,7 @@ class MainWindow(QMainWindow):
             "Radiometric recording (*.lmthermal)", options=QFileDialog.Option.DontConfirmOverwrite)
         if not selected:
             return
-        if (self.worker is None or self.offline_capture is not None
+        if (self.worker is None or self.offline_capture is not None or self.playback_worker is not None
                 or self.logger is not None or self.recorder is not None):
             return
         path = Path(selected)
@@ -812,12 +871,211 @@ class MainWindow(QMainWindow):
             f"Queue {status.queue_depth}/4; chunks {status.bytes_written/1e6:.2f} MB\n{status.directory}")
 
     def _on_connected(self, device: str) -> None:
-        if self.sender() is self.worker and self.offline_capture is None:
+        if self.sender() is self.worker and self.offline_capture is None and self.playback_worker is None:
             self.device_label.setText(device)
 
     def _on_notice(self, notice: str) -> None:
-        if self.sender() is self.worker and self.offline_capture is None:
+        if self.sender() is self.worker and self.offline_capture is None and self.playback_worker is None:
             self.state_label.setText(notice)
+
+    def _choose_recording(self) -> None:
+        selected = QFileDialog.getExistingDirectory(self, "Open .lmthermal recording directory")
+        if selected:
+            self.open_recording(Path(selected))
+
+    def open_recording(self, path: Path) -> bool:
+        """Validate asynchronously after all live resources have been finalized."""
+        self._auto_connect_timer.stop()
+        self.stop_camera()
+        if self.worker is not None or self.logger is not None or self.recorder is not None:
+            return False
+        if not self.close_recording():
+            return False
+        self.close_capture()
+        self.playback_group.show()
+        self.playback_status_label.setText("Validating manifest, timeline and committed chunks…")
+        self.image_widget.empty_text = "Opening recording…"
+        self.image_widget.set_observation(None)
+        self.observation = None
+        self._clear_measurements()
+        self._sync_legend()
+        self.device_label.setText("Offline recording — no camera")
+        self.state_label.setText("Validating recording…")
+        self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
+        self.render_button.setEnabled(False)
+        self._set_playback_controls(False)
+        worker = PlaybackWorker(self)
+        worker.result_available.connect(self._on_playback_result)
+        self.playback_worker = worker
+        self._playback_token += 1
+        worker.request(self._playback_token, path=path)
+        worker.start()
+        self._sync_logging_controls()
+        return True
+
+    def _set_playback_controls(self, enabled):
+        for control in (self.timeline_slider, self.first_sample_button, self.previous_sample_button,
+                        self.next_sample_button, self.last_sample_button, self.play_button, self.playback_speed):
+            control.setEnabled(enabled)
+
+    def close_recording(self) -> bool:
+        self._playback_timer.stop()
+        worker = self.playback_worker
+        if worker is None:
+            return True
+        self._playback_token += 1
+        worker.request_stop()
+        if not worker.wait(10000):
+            self.state_label.setText("Still closing recording loader; wait before switching modes")
+            return False
+        self.playback_worker = None
+        self.playback = None
+        self.observation = None
+        self.pointer = None
+        self.image_widget.pointer = None
+        self.image_widget._mouse_widget = None
+        self.image_widget.empty_text = "Camera disconnected"
+        self.image_widget.set_observation(None)
+        self.image_widget.clear_roi()
+        self._sync_legend()
+        self._clear_measurements()
+        self.playback_group.hide()
+        self.render_button.setText("Save rendered image")
+        self.metadata_button.setEnabled(False)
+        self.render_button.setEnabled(False)
+        self.device_label.setText("Disconnected")
+        self.state_label.setText("Disconnected")
+        self.mode_label.setText("—")
+        self._sync_logging_controls()
+        worker.deleteLater()
+        return True
+
+    def _on_playback_result(self):
+        if self.playback_worker is None or self.sender() is not self.playback_worker:
+            return
+        result = self.playback_worker.take_latest()
+        if result is None:
+            return
+        token, model, index, frame, error = result
+        if token != self._playback_token:
+            return
+        if error:
+            if self.playback is not None:
+                self.playback.pause()
+            self._playback_timer.stop()
+            self.observation = None
+            self.image_widget.empty_text = "Recording cannot be read"
+            self.image_widget.set_observation(None)
+            self._sync_legend()
+            self._clear_measurements()
+            self.render_button.setEnabled(False)
+            self.play_button.setText("Play")
+            self.playback_status_label.setText(f"Recording integrity error: {error}")
+            self.state_label.setText(f"Recording integrity error: {error}")
+            return
+        if self.playback is None:
+            self.playback = model
+            self.playback.set_speed(self.playback_speed.currentData())
+            self.timeline_slider.setRange(0, max(0,len(model.entries)-1))
+            self._set_playback_controls(bool(model.entries))
+            self.metadata_button.setEnabled(True)
+        self._apply_recording_entry(index, frame)
+
+    def _apply_recording_entry(self, index, frame):
+        model = self.playback
+        entry = model.entries[index] if model.entries else None
+        completion = "Complete" if model.completed else "INCOMPLETE — recovered committed chunks"
+        self.observation = frame
+        reason = "Empty recording" if entry is None else {
+            "valid": "Valid recorded matrix", "gap": "Invalid camera/session gap",
+            "drop": "Recorder drop", "uncommitted": "Uncommitted matrix unavailable"}[entry.kind]
+        self.image_widget.empty_text = reason + (f"\n{entry.reason}" if entry else "")
+        self.image_widget.set_observation(frame)
+        self._restoring_roi = True
+        try:
+            self.image_widget.set_roi(entry.roi if entry else None)
+        finally:
+            self._restoring_roi = False
+        self._sync_legend()
+        self._show_measurement(frame)
+        self.render_button.setEnabled(frame is not None)
+        self.render_button.setText("Save selected frame PNG…")
+        self.state_label.setText(f"{completion}\n{reason}" + (f" — {entry.reason}" if entry else ""))
+        self.mode_label.setText("Stored raw14 / native-equivalent matrix" if frame else reason)
+        blocker = QSignalBlocker(self.timeline_slider)
+        self.timeline_slider.setValue(index)
+        del blocker
+        self.playback_status_label.setText(
+            f"{completion} | sample {index+1 if entry else 0}/{len(model.entries)}"
+            + (f" | sequence {entry.sequence} | {entry.elapsed_s:.3f}/{model.duration_s:.3f} s\n"
+               f"{entry.timestamp_utc} | {reason}: {entry.reason}" if entry else ""))
+        self.play_button.setText("Pause" if model.playing else "Play")
+
+    def _request_recording_index(self, index):
+        self._playback_token += 1
+        self.observation = None
+        self.image_widget.empty_text = f"Loading sample {index+1}…"
+        self.image_widget.set_observation(None)
+        self._sync_legend()
+        self._clear_measurements()
+        self.render_button.setEnabled(False)
+        entry = self.playback.entries[index]
+        blocker = QSignalBlocker(self.timeline_slider)
+        self.timeline_slider.setValue(index)
+        del blocker
+        completion = "Complete" if self.playback.completed else "INCOMPLETE — recovered committed chunks"
+        self.playback_status_label.setText(
+            f"{completion} | Loading sample {index+1}/{len(self.playback.entries)} (sequence {entry.sequence}) "
+            f"| {entry.elapsed_s:.3f}/{self.playback.duration_s:.3f} s")
+        self.state_label.setText("Loading recorded sample; readings unavailable")
+        self.mode_label.setText("Stored matrix pending")
+        self.playback_worker.request(self._playback_token, model=self.playback, index=index)
+
+    def _select_recording(self, index):
+        if self.playback is None or not self.playback.entries:
+            return
+        self.playback.seek(index)
+        self._playback_timer.stop()
+        self.play_button.setText("Play")
+        self._request_recording_index(self.playback.index)
+
+    def _scrub_recording(self, index):
+        self._select_recording(index)
+
+    def _step_recording(self, delta):
+        if self.playback:
+            self._select_recording(self.playback.index+delta)
+
+    def _toggle_playback(self):
+        if self.playback is None:
+            return
+        if self.playback.playing:
+            self.playback.pause()
+            self._playback_timer.stop()
+            self.play_button.setText("Play")
+        else:
+            previous = self.playback.index
+            self.playback.play()
+            if previous != self.playback.index:
+                self._request_recording_index(self.playback.index)
+            self._playback_timer.start()
+            self.play_button.setText("Pause")
+
+    def _change_playback_speed(self):
+        if self.playback:
+            self.playback.set_speed(self.playback_speed.currentData())
+
+    def _playback_tick(self):
+        if self.playback is None:
+            return
+        previous = self.playback.index
+        self.playback.advance()
+        if previous != self.playback.index:
+            self._request_recording_index(self.playback.index)
+        if not self.playback.playing:
+            self._playback_timer.stop()
+            self.play_button.setText("Play")
 
     def _choose_capture(self) -> None:
         selected, _ = QFileDialog.getOpenFileName(
@@ -830,6 +1088,8 @@ class MainWindow(QMainWindow):
         self._auto_connect_timer.stop()
         self.stop_camera()
         if self.worker is not None or self.logger is not None or self.recorder is not None:
+            return False
+        if not self.close_recording():
             return False
         self.close_capture()
         try:
@@ -896,39 +1156,51 @@ class MainWindow(QMainWindow):
         self.fps_label.setText("—")
 
     def _show_metadata(self) -> None:
-        if self.offline_capture is None:
+        if self.offline_capture is None and self.playback is None:
             return
+        metadata = self.offline_capture.metadata if self.offline_capture else {
+            "manifest": self.playback.recording.manifest,
+            "timeline_entry": self.playback.recording.timeline[self.playback.index] if self.playback.entries else None,
+            "frame": self.observation.metadata if isinstance(self.observation, PlaybackFrame) else None}
         dialog = QDialog(self)
-        dialog.setWindowTitle("Saved capture metadata — original")
+        dialog.setWindowTitle("Saved capture metadata — original" if self.offline_capture else "Recording/sample metadata — original")
         dialog.resize(680, 640)
         layout = QVBoxLayout(dialog)
         text = QPlainTextEdit()
         text.setReadOnly(True)
-        text.setPlainText(json.dumps(self.offline_capture.metadata, indent=2, sort_keys=True))
+        text.setPlainText(json.dumps(metadata, indent=2, sort_keys=True))
         layout.addWidget(text)
         dialog.exec()
 
     def _save_rendered(self) -> None:
-        capture = self.offline_capture
+        capture = self.offline_capture or (self.observation if isinstance(self.observation, PlaybackFrame) else None)
         bounds = self.image_widget.effective_bounds
         if capture is None or bounds is None:
             return
         palette = self.image_widget.palette
+        suggested = "rendered.png"
+        if isinstance(capture, PlaybackFrame):
+            bundle = capture.source_path.parent
+            suggested = str(bundle.parent / f"{bundle.stem}-sample-{capture.payload.sequence:06d}.png")
         selected, _ = QFileDialog.getSaveFileName(
-            self, "Save rendered image only", "rendered.png", "PNG rendering (*.png)")
+            self, "Save rendered image only", suggested, "PNG rendering (*.png)")
         if not selected:
             return
         target = Path(selected)
         if not target.suffix:
             target = target.with_suffix(".png")
         try:
-            saved = save_rendered_image(capture, target, palette, bounds)
+            exporter = save_playback_png if isinstance(capture, PlaybackFrame) else save_rendered_image
+            saved = exporter(capture, target, palette, bounds)
         except (OSError, ValueError) as exc:
             QMessageBox.warning(self, "Rendering failed", str(exc))
             return
         self.statusBar().showMessage(f"Saved rendered PNG only: {saved}", 10000)
 
     def closeEvent(self, event) -> None:
+        if not self.close_recording():
+            event.ignore()
+            return
         if not self._stop_recording("window_closed") or not self._stop_logging("window_closed"):
             event.ignore()
             return
@@ -942,13 +1214,17 @@ class MainWindow(QMainWindow):
 def main() -> None:
     """Launch live display acquisition or camera-free saved capture inspection."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--capture", type=Path, help="Open a saved capture without camera acquisition")
+    offline = parser.add_mutually_exclusive_group()
+    offline.add_argument("--capture", type=Path, help="Open a saved capture without camera acquisition")
+    offline.add_argument("--recording", type=Path, help="Open a recording bundle without camera acquisition")
     args = parser.parse_args()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    window = MainWindow(auto_connect=args.capture is None)
+    window = MainWindow(auto_connect=args.capture is None and args.recording is None)
     if args.capture is not None:
         window.open_capture(args.capture)
+    elif args.recording is not None:
+        window.open_recording(args.recording)
     window.show()
     sys.exit(app.exec())
 

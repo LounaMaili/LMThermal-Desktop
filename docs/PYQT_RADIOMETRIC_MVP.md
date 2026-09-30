@@ -252,3 +252,23 @@ still-capture semantics. Offline opening/disconnect/close finalize the active
 recorder. 25 Hz is experimental, and readiness is never weakened for recording.
 See [recording v1](RADIOMETRIC_RECORDING_FORMAT.md) for format, loader, memory
 bounds, interruption behavior, benchmark and live storage figures.
+
+## Offline sequence playback
+
+**Open radiometric recording** enters a third isolated mode alongside live
+acquisition and offline still inspection. `--recording DIR` starts directly
+without any camera. A focused panel beneath the image offers timeline
+scrubbing across every entry, stepping, beginning/end, elapsed-time play/pause
+and 0.5×/1×/2×/4× speed. Loading/validation run in `PlaybackWorker`, using the
+pure `PlaybackModel` and a two-chunk LRU cache. Sender/token guards reject old
+loads; opening another mode stops the worker and clears previous measurements.
+
+Valid frames reuse stored-matrix cursor/extrema/separate-center, palette,
+legend and ROI controls. Invalid/drop/uncommitted selections are blank with
+reason labels and unavailable readings. Each navigation restores the recorded
+ROI; replacing/clearing labels an inspection ROI. PNG export freezes the
+current frame and refuses any destination inside the source bundle.
+See [playback details and measured validation](RADIOMETRIC_PLAYBACK.md).
+The original live bundles were unavailable; this task used explicitly
+fixture-derived histories instead and does not claim playback validation of
+the missing live recordings. Independent physical accuracy remains unvalidated.

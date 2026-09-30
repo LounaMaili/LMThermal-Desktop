@@ -4,6 +4,13 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Offline radiometric sequence playback — 2026-09-30)
+- Added a camera-independent timeline/playback model with exact stored uint16/float32 frames, lazy two-chunk LRU access, elapsed-time 0.5×/1×/2×/4× playback and explicit valid/gap/drop/uncommitted entries. No thermometry is recomputed.
+- Added asynchronous coalesced validation/loading, all-sample slider/step/beginning/end/play/pause controls, blank invalid/drop views, separately preserved centers, recorded/inspection ROI policy and existing Celsius rendering/cursor/legend reuse. Live, still and sequence modes finalize resources and reject obsolete results.
+- Added selected PNG-only rendering export with whole-bundle protection; radiometric still extraction remains deferred because recording v1 has no transport evidence. Recording/still format semantics, camera initialization and measurement arithmetic are unchanged.
+- Extended loader checks for monotonic timeline timing and existing drop flags/reasons. Added hardware-independent cache/timing/integrity/recovery/UI tests and measured about 5.3 ms median Qt sample navigation with a bounded 21.23 MB array cache.
+- Documented camera-free CLI, recovery/timing/ROI/source protection and explicit validation provenance: the prior live bundles were no longer available after temporary storage removal, so operator/automated validation used fixture-derived 5/10/25 Hz histories. Original-live-bundle playback and independent physical accuracy remain unverified.
+
 ### Added (Radiometric sequence recording — 2026-09-30)
 - Added distinct v1 `.lmthermal` directory recordings with exact raw14/float32 matrices, per-frame parameters/lookup inputs, scalar/ROI timeline, hashes and native-coordinate accuracy warning. Still-capture v1 and thermometry remain unchanged.
 - Added latest-observation 1/2/5/10/25 Hz sampling (default 5), a four-frame handoff, compressed 16-frame incremental chunks, explicit validity gaps/overload drops and atomic chunk/manifest publication. Interrupted bundles preserve committed chunks; a camera-independent bounded chunk loader validates shapes/dtypes/hashes/mappings/summaries.

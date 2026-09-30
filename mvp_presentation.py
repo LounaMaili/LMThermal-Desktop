@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import math
 
 from radiometric_capture import OfflineCapture
+from radiometric_playback import PlaybackFrame
 from diagnostic_preview import preview_gray
 from measurement_baseline import FRAME_WIDTH, IMAGE_HEIGHT
 from radiometric_session import FrameObservation, SessionState
@@ -73,8 +74,8 @@ def native_to_widget(x: int, y: int, widget_width: int,
 
 
 def current_measurement(observation):
-    """Distinguish a validated saved capture from a currently ready live frame."""
-    if isinstance(observation, OfflineCapture):
+    """Distinguish verified offline matrices from a currently ready live frame."""
+    if isinstance(observation, (OfflineCapture, PlaybackFrame)):
         return observation
     if (observation is None or observation.state != SessionState.RADIOMETRIC_READY or
             observation.measurement is None or

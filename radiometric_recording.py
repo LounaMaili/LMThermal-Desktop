@@ -232,6 +232,18 @@ class Recording:
     manifest: dict
     timeline: tuple
 
+    def load_chunk(self, name):
+        """Validate one manifest-committed chunk for a bounded external cache."""
+        entry = next((c for c in self.manifest["chunks"] if c["file"] == name), None)
+        if entry is None:
+            raise RecordingError("Chunk is not manifest-committed")
+        try:
+            return _load_chunk(self.directory/"chunks"/name, entry)
+        except RecordingError:
+            raise
+        except (OSError, ValueError, TypeError, KeyError, IndexError, zipfile.BadZipFile, EOFError) as exc:
+            raise RecordingError(f"Cannot load committed chunk: {exc}") from exc
+
     def frame(self, sequence: int) -> FramePayload | None:
         row = next((r for r in self.timeline if int(r["sequence"]) == sequence), None)
         if row is None:
@@ -241,7 +253,7 @@ class Recording:
         entry = next((c for c in self.manifest["chunks"] if c["file"] == row["chunk"]), None)
         if entry is None:
             return None  # Visible uncommitted reference in an interrupted recording.
-        arrays, metadata = _load_chunk(self.directory/"chunks"/entry["file"], entry)
+        arrays, metadata = self.load_chunk(entry["file"])
         index = int(row["frame_index"])
         return FramePayload(sequence, arrays["raw14"][index].tobytes(),
                             arrays["temperature_c"][index].tobytes(), json.dumps(metadata[index], allow_nan=False))
@@ -306,6 +318,14 @@ def open_recording(directory: Path) -> Recording:
                     _require(all(row[k] == "" for k in COLUMNS if k.startswith(("high_", "low_", "literal_center_", "trailer_center_"))
                                  or k in ("roi_min_c", "roi_max_c", "roi_mean_c", "roi_pixel_count", "frame_measured_at_utc")),
                              "Invalid sample contains thermometry")
+                _require(not rows or float(row["elapsed_s"]) >= float(rows[-1]["elapsed_s"]),
+                         "Timeline elapsed times must be nondecreasing")
+                if row["stored"] == "false" and row["measurement_valid"] == "true":
+                    _require(row["dropped"] == "true" and row["status"] == "writer_overload",
+                             "Unstored valid sample must be an explicit overload drop")
+                if row["dropped"] == "true":
+                    _require(row["status"] in ("writer_overload", "sampler_missed_deadline"),
+                             "Unknown dropped sample reason")
                 rows.append(row)
         if manifest["completed"]:
             _require(len(rows) == manifest["requested_samples"] and len(mapping) == manifest["valid_frames"] and

@@ -293,8 +293,25 @@ measurement matrices, per-frame settings, ROI summaries and valid/gap/drop
 history in compressed 16-frame chunks. A four-frame handoff bounds backlog;
 overload produces explicit drops. CSV scalar logging and matrix recording are
 mutually exclusive. Closing/disconnecting/opening an offline still finalizes
-recording. Still-capture v1 is unchanged; playback UI is deferred.
+recording. Still-capture v1 is unchanged; offline playback is documented below.
 
 See [recording v1 documentation](docs/RADIOMETRIC_RECORDING_FORMAT.md) for the
 hardware-independent loader, recovery rules and measured storage tradeoffs.
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## Offline radiometric playback
+
+Open a `.lmthermal` directory with **Open radiometric recording**, or launch
+without a camera:
+
+```bash
+./.venv/bin/python lmthermal_viewer.py --recording /path/to/example.lmthermal
+```
+
+The timeline includes valid samples, gaps and drops. Scrub/step, play/pause
+at 0.5×/1×/2×/4×, inspect stored raw14/Celsius values and ROI, change palette/
+range, and save a selected rendering as PNG. Gaps/drops have no current
+measurements. Incomplete recordings clearly identify recoverable committed
+frames. Loading uses a background worker and a bounded two-chunk cache.
+See [playback documentation](docs/RADIOMETRIC_PLAYBACK.md) for timing, ROI
+policy, recovery, source protection and validation limitations.

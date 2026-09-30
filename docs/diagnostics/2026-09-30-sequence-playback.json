@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-30",
+  "provenance": "Fixture-derived histories using sanitized room/hand raw frames; original 5/10/25 Hz live bundles were unavailable after /tmp removal.",
+  "source_files_unchanged": true,
+  "runs": [
+    {
+      "name": "fixture-palm-5hz.lmthermal",
+      "rate_hz": 5,
+      "entries": 65,
+      "kinds": {
+        "valid": 54,
+        "gap": 6,
+        "drop": 5,
+        "uncommitted": 0
+      },
+      "validated_open_s": 0.09174632999975074,
+      "cold_frame_median_s": 0.02042512100001659,
+      "cold_frame_max_s": 0.022331261000090308,
+      "cached_frame_median_s": 6.037999992258847e-05,
+      "cache_max_array_bytes": 21233920,
+      "max_cached_chunks": 2,
+      "source_hashes_unchanged": true,
+      "png_saved": "fixture-palm-5hz-selected.png"
+    },
+    {
+      "name": "fixture-roi-5hz.lmthermal",
+      "rate_hz": 5,
+      "entries": 65,
+      "kinds": {
+        "valid": 54,
+        "gap": 6,
+        "drop": 5,
+        "uncommitted": 0
+      },
+      "validated_open_s": 0.05872972599991044,
+      "cold_frame_median_s": 0.017309978000184856,
+      "cold_frame_max_s": 0.01782301399998687,
+      "cached_frame_median_s": 3.86550002531294e-05,
+      "cache_max_array_bytes": 21233920,
+      "max_cached_chunks": 2,
+      "source_hashes_unchanged": true,
+      "png_saved": "fixture-roi-5hz-selected.png"
+    },
+    {
+      "name": "fixture-room-10hz.lmthermal",
+      "rate_hz": 10,
+      "entries": 101,
+      "kinds": {
+        "valid": 84,
+        "gap": 9,
+        "drop": 8,
+        "uncommitted": 0
+      },
+      "validated_open_s": 0.09016347799979485,
+      "cold_frame_median_s": 0.01683691050016023,
+      "cold_frame_max_s": 0.0203689109998777,
+      "cached_frame_median_s": 3.91650000892696e-05,
+      "cache_max_array_bytes": 21233920,
+      "max_cached_chunks": 2,
+      "source_hashes_unchanged": true,
+      "png_saved": "fixture-room-10hz-selected.png"
+    },
+    {
+      "name": "fixture-stress-25hz.lmthermal",
+      "rate_hz": 25,
+      "entries": 145,
+      "kinds": {
+        "valid": 122,
+        "gap": 13,
+        "drop": 10,
+        "uncommitted": 0
+      },
+      "validated_open_s": 0.1262490760000219,
+      "cold_frame_median_s": 0.017595005999737623,
+      "cold_frame_max_s": 0.023765972000092006,
+      "cached_frame_median_s": 4.421999983605929e-05,
+      "cache_max_array_bytes": 21233920,
+      "max_cached_chunks": 2,
+      "source_hashes_unchanged": true,
+      "png_saved": "fixture-stress-25hz-selected.png"
+    }
+  ],
+  "qt_event_loop": {
+    "provenance": "Camera-free Qt event-loop validation on fixture-derived 5/10/25 Hz bundles; not the missing original live recordings.",
+    "runs": [
+      {
+        "name": "fixture-palm-5hz.lmthermal",
+        "async_open_s": 0.10690860500017152,
+        "ui_select_median_s": 0.0052257919996918645,
+        "ui_select_max_s": 0.023669402999985323,
+        "playback_1x_wall_s": 12.998386307000146,
+        "recorded_span_s": 12.99200000000019,
+        "ui_heartbeat_median_s": 0.009561333499959801,
+        "ui_heartbeat_max_s": 0.015050329000132479,
+        "cache_chunks": 2,
+        "cache_array_bytes": 14598320
+      },
+      {
+        "name": "fixture-roi-5hz.lmthermal",
+        "async_open_s": 0.09072998200008442,
+        "ui_select_median_s": 0.005365790999803721,
+        "ui_select_max_s": 0.02248871900019367,
+        "playback_1x_wall_s": 12.999199332999979,
+        "recorded_span_s": 12.99200000000019,
+        "ui_heartbeat_median_s": 0.009558817999959501,
+        "ui_heartbeat_max_s": 0.014836169999853155,
+        "cache_chunks": 2,
+        "cache_array_bytes": 14598320
+      },
+      {
+        "name": "fixture-room-10hz.lmthermal",
+        "async_open_s": 0.10592830999985381,
+        "ui_select_median_s": 0.005345090999981039,
+        "ui_select_max_s": 0.02361167300023226,
+        "playback_1x_wall_s": 10.313211587999831,
+        "recorded_span_s": 10.300000000000182,
+        "ui_heartbeat_median_s": 0.009557637999932922,
+        "ui_heartbeat_max_s": 0.015165509000325983,
+        "cache_chunks": 2,
+        "cache_array_bytes": 13271200
+      },
+      {
+        "name": "fixture-stress-25hz.lmthermal",
+        "async_open_s": 0.14501337999990938,
+        "ui_select_median_s": 0.005369570999846474,
+        "ui_select_max_s": 0.022892646999935096,
+        "playback_1x_wall_s": 6.217258695000055,
+        "recorded_span_s": 6.192000000000007,
+        "ui_heartbeat_median_s": 0.009567487999902369,
+        "ui_heartbeat_max_s": 0.014863829999740119,
+        "cache_chunks": 2,
+        "cache_array_bytes": 17252560
+      }
+    ],
+    "process_peak_RSS_KiB": 146244
+  },
+  "operator_5hz": "Confirmed usable hover/resize/ROI/palette/range/play/pause/step and gap presentation on fixture-derived demo.",
+  "png_ui_action": {
+    "sequence": 101,
+    "source_files_unchanged": true,
+    "png_bytes": 144944,
+    "png_sha256": "c14e554a2e7a7e63d31ab572a73b3a294937e23e85a234aaf33e6bb86f288de7"
+  },
+  "operator_25hz": "Operator could not locate a PNG; the actual UI save action was then exercised programmatically on valid sample 101, file existence and unchanged source hashes verified, and PNG shown to the operator. Gap/drop presentation verified by Qt automation.",
+  "final_checks": {
+    "hardware_independent_tests_passed": 147,
+    "project_python_files_compiled": 42,
+    "diff_check": "passed",
+    "research_repository_changed": false
+  }
+}

@@ -164,7 +164,7 @@ It loads at most one chunk's matrices at a time; timeline and manifest indexes
 are held in memory. Limits are 16 MiB per chunk file, 12 MiB per member,
 1 MiB per metadata array and 8 MiB per manifest. Unsupported versions,
 malformed/missing chunks and inconsistent metadata raise `RecordingError`.
-No thermometry is recomputed. A playback GUI is deferred.
+No thermometry is recomputed. The [offline playback viewer](RADIOMETRIC_PLAYBACK.md) now provides timeline inspection.
 
 ## Compression benchmark (saved data, 2026-09-30)
 
@@ -241,3 +241,16 @@ successfully. A fresh read-only camera reopen returned a complete 224,256-byte
 frame, with zoom still 32768, and released the handle again. Final checks:
 128 hardware-independent tests passed, Python compilation passed and
 `git diff --check` passed.
+
+## Offline playback and recovery
+
+`--recording DIR` or **Open radiometric recording** uses the v1 loader without
+camera acquisition or thermometry recomputation. Playback includes every
+valid/gap/drop timeline entry and labels incomplete/uncommitted data clearly;
+only committed matrices provide readings. Validation additionally enforces
+nondecreasing finite elapsed timestamps and existing writer drop semantics.
+Background loading and a two-chunk cache keep matrices bounded; source files
+are never modified, including when saving a PNG outside the bundle.
+See [playback documentation](RADIOMETRIC_PLAYBACK.md) for controls, timing,
+ROI policy and the missing-original-bundle validation limitation. Format v1,
+transport omission and still-capture semantics are unchanged.
