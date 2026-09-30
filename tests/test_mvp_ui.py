@@ -17,6 +17,8 @@ from PyQt6.QtGui import QImage, QMouseEvent
 from lmthermal_viewer import MainWindow
 from mvp_presentation import native_to_widget
 from mvp_camera_worker import CameraWorker, WorkerStopped
+from radiometric_export import export_capture, snapshot_capture
+from celsius_palette import CelsiusRange
 from radiometric_session import FrameObservation, SessionState, inspect_frame, make_measurement
 from roi_measurement import NativeROI, current_roi_statistics
 
@@ -204,6 +206,131 @@ class MVPWindowTests(unittest.TestCase):
         self.assertNotEqual(self.window.roi_values_label.text(), values)
         self.assertEqual(current_roi_statistics(self.window.observation, roi).mean_c,
                          float(warmer.temperature_c[180:240, 160:220].mean(dtype="float64")))
+
+    def saved_capture(self, root, *, automatic=True):
+        ready = FrameObservation(HAND, 0, SessionState.RADIOMETRIC_READY,
+                                 inspect_frame(HAND), False, None, self.measured)
+        export_capture(snapshot_capture(ready, "White hot", CelsiusRange(25, 45), automatic,
+                                       roi=NativeROI(160, 180, 220, 240)), Path(root) / "saved")
+        return Path(root) / "saved.json"
+
+    def test_offline_opens_without_camera_restores_range_roi_and_reads_saved_matrix(self):
+        with TemporaryDirectory() as root:
+            path = self.saved_capture(root)
+            with patch("lmthermal_viewer.CameraWorker", side_effect=AssertionError("camera started")):
+                self.assertTrue(self.window.open_capture(path))
+                self.app.processEvents()
+            capture = self.window.offline_capture
+            self.assertIs(self.window.observation, capture)
+            self.assertIn("Saved capture", self.window.state_label.text())
+            self.assertEqual(self.window.device_label.text(), "Offline — no camera")
+            self.assertFalse(self.window.initialize_button.isEnabled())
+            self.assertFalse(self.window.capture_button.isEnabled())
+            self.assertTrue(self.window.render_button.isEnabled())
+            self.assertTrue(self.window.metadata_button.isEnabled())
+            self.assertEqual(self.window.image_widget.effective_bounds, CelsiusRange(25, 45))
+            self.assertTrue(self.window.auto_range_check.isChecked())
+            self.assertEqual(self.window.palette_combo.currentText(), "White hot")
+            self.assertEqual(self.window.image_widget.roi, capture.roi)
+            self.window._on_hover((192, 144))
+            self.assertIn(str(capture.literal_center_index), self.window.cursor_label.text())
+            self.assertIn(str(capture.trailer_center_index), self.window.trailer_center_label.text())
+            original = self.window.roi_values_label.text()
+            self.window.palette_combo.setCurrentText("Turbo")
+            self.window.auto_range_check.setChecked(False)
+            self.window.min_spin.setValue(20)
+            self.window.image_widget.resize(800, 600)
+            self.assertEqual(self.window.roi_values_label.text(), original)
+            self.window.clear_roi_button.click()
+            self.assertEqual(self.window.roi_values_label.text(), "Unavailable")
+            self.window.image_widget.set_roi(NativeROI(10, 20, 30, 40))
+            self.assertIn("Pixels: 400", self.window.roi_values_label.text())
+            target = Path(root) / "rendered.png"
+            with patch("lmthermal_viewer.QFileDialog.getSaveFileName", return_value=(str(target), "")):
+                self.window.render_button.click()
+            self.assertTrue(target.exists())
+            self.assertFalse(target.with_suffix(".json").exists())
+            self.window._update_fps()
+            self.assertEqual(self.window.fps_label.text(), "—")
+            self.window.close_capture_button.click()
+            self.assertIsNone(self.window.observation)
+            self.assertIsNone(self.window.image_widget.roi)
+            self.assertIsNone(self.window.image_widget.image)
+            self.assertEqual(self.window.cursor_label.text(), "Unavailable")
+            self.assertEqual(self.window.state_label.text(), "Disconnected")
+            self.assertIsNone(self.window.worker)
+
+    def test_open_capture_cancels_pending_startup_camera_connection(self):
+        with TemporaryDirectory() as root:
+            path = self.saved_capture(root)
+            window = MainWindow(auto_connect=True)
+            try:
+                with patch("lmthermal_viewer.CameraWorker", side_effect=AssertionError("camera started")):
+                    self.assertTrue(window.open_capture(path))
+                    window.close_capture()
+                    self.app.processEvents()
+                self.assertIsNone(window.worker)
+            finally:
+                window.close()
+
+    def test_camera_stopped_before_load_and_queued_old_signals_cannot_overwrite_offline(self):
+        with TemporaryDirectory() as root:
+            path = self.saved_capture(root, automatic=False)
+            with patch.object(CameraWorker, "start"):
+                self.window.connect_camera()
+            worker = self.window.worker
+            # Emulate signals already queued at the instant the operator opens a capture.
+            worker.connected.disconnect()
+            worker.notice.disconnect()
+            worker.failed.disconnect()
+            worker.frame_available.disconnect()
+            worker.connected.connect(self.window._on_connected, Qt.ConnectionType.QueuedConnection)
+            worker.notice.connect(self.window._on_notice, Qt.ConnectionType.QueuedConnection)
+            worker.failed.connect(self.window._on_failure, Qt.ConnectionType.QueuedConnection)
+            worker.frame_available.connect(self.window._on_frame_available, Qt.ConnectionType.QueuedConnection)
+            worker.connected.emit("stale device")
+            worker.notice.emit("stale notice")
+            worker.failed.emit("stale failure")
+            worker.frame_available.emit()
+            with patch.object(worker, "request_stop", wraps=worker.request_stop) as stopped:
+                self.assertTrue(self.window.open_capture(path))
+                stopped.assert_called_once()
+            before = (self.window.state_label.text(), self.window.device_label.text(),
+                      self.window.observation)
+            self.app.processEvents()
+            self.assertEqual((self.window.state_label.text(), self.window.device_label.text(),
+                              self.window.observation), before)
+            self.assertIsNone(self.window.worker)
+            self.assertFalse(self.window.auto_range_check.isChecked())
+            # Explicit Connect closes saved data before starting the next worker.
+            with patch.object(CameraWorker, "start") as start:
+                self.window.connect_button.click()
+                start.assert_called_once()
+            self.assertIsNone(self.window.offline_capture)
+            self.assertIsNone(self.window.observation)
+            self.assertIsNone(self.window.image_widget.roi)
+            self.assertFalse(self.window.render_button.isEnabled())
+            self.window.stop_camera()
+
+    def test_capture_rejection_and_stop_timeout_do_not_load_or_connect(self):
+        with TemporaryDirectory() as root:
+            path = self.saved_capture(root)
+            with patch.object(CameraWorker, "start"):
+                self.window.connect_camera()
+            worker = self.window.worker
+            with patch.object(worker, "wait", return_value=False):
+                self.assertFalse(self.window.open_capture(path))
+            self.assertIs(self.window.worker, worker)
+            self.assertIsNone(self.window.offline_capture)
+            self.window.stop_camera()
+            path.with_suffix(".npz").write_bytes(b"corrupt")
+            with patch("lmthermal_viewer.QMessageBox.warning") as warning:
+                self.assertFalse(self.window.open_capture(path))
+                warning.assert_called_once()
+            self.assertIsNone(self.window.worker)
+            self.assertIsNone(self.window.observation)
+            self.assertFalse(self.window.capture_button.isEnabled())
+            self.assertFalse(self.window.render_button.isEnabled())
 
     def test_worker_coalesces_gui_notifications_and_stops_publication(self):
         worker = CameraWorker()

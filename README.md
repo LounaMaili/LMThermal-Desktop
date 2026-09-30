@@ -70,6 +70,26 @@ bytes for later analysis or re-rendering. The JSON records measurement,
 calibration, and presentation metadata. Existing filenames are never replaced.
 An active ROI adds its native geometry and same-frame statistics to JSON;
 the PNG stays a clean thermal rendering and the NPZ matrices retain all pixels.
+
+Saved captures can be inspected without the camera:
+
+```bash
+./.venv/bin/python lmthermal_viewer.py --capture /path/to/capture.json
+```
+
+Alternatively use **Open radiometric capture**. Opening releases any live
+camera first. **Close saved capture** returns to disconnected mode; **Connect
+camera** closes the saved view. The sidebar identifies **Saved capture** and
+**Offline — no camera**. The loader verifies the complete v1 set and hashes,
+then uses the saved float32 Celsius and uint16 raw14 matrices directly, with
+no thermometry recomputation. Cursor, high/low, distinct centers and ROI stay
+in native camera coordinates. Stored ROI statistics are checked against the
+matrix; clear or drag to inspect another region. **Saved capture metadata**
+shows the original timestamp, calibration/settings and presentation metadata.
+Palette and auto/locked Celsius controls change colors only. **Save rendered
+image** writes a separate clean PNG using the current display settings; it
+never replaces original capture files or creates a new JSON/NPZ set.
+
 See [capture format v1](docs/RADIOMETRIC_CAPTURE_FORMAT.md). The exact transport
 frame can contain camera or scene information; review captures before sharing.
 

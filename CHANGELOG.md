@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Offline radiometric viewer — 2026-09-30)
+- Added a camera-independent v1 capture loader with immutable saved matrices, companion hashes/completion checks, bounded NPZ header validation, metadata/coordinate consistency checks, optional transport evidence and verified saved ROI statistics. Reopening uses stored Celsius values without recomputing thermometry.
+- Added explicit saved-capture inspection, original metadata, cursor/raw14, distinct centers, extrema, restored/new ROI and existing Celsius palette/range controls. Opening stops live acquisition; reconnect closes saved mode; queued old worker signals and pending startup connection cannot contaminate offline data.
+- Added no-overwrite PNG-only re-render saving and camera-free `--capture` launch. Original radiometric sets remain unchanged.
+- Completed operator offline hover/resize/ROI/palette/range validation and saved auto/derived-locked/ROI smoke checks, including source integrity and corrupt-set rejection. Absolute physical accuracy remains unvalidated.
+
 ### Added (Interactive ROI measurements — 2026-09-30)
 - Added one native rectangular ROI selected by left-click/drag, with edge clipping, persistent geometry across resize/palette/range changes, and a clear action. A click selects one pixel; stored bounds are half-open.
 - Added direct current-temperature-slice min/max/mean, pixel count and native extrema coordinates. Numerical ROI readings disappear on non-ready frames and resume for the same geometry on recovery. The sidebar scrolls to keep the additional controls accessible.

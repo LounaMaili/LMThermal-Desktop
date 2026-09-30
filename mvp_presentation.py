@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import math
 
+from radiometric_capture import OfflineCapture
 from diagnostic_preview import preview_gray
 from measurement_baseline import FRAME_WIDTH, IMAGE_HEIGHT
 from radiometric_session import FrameObservation, SessionState
@@ -71,12 +72,20 @@ def native_to_widget(x: int, y: int, widget_width: int,
     return native_edge_to_widget(x + .5, y + .5, widget_width, widget_height)
 
 
-def current_reading(observation: FrameObservation | None,
-                    point: tuple[int, int] | None) -> PixelReading | None:
-    """Read only the immutable native matrix of a currently ready frame."""
-    if observation is None or observation.state != SessionState.RADIOMETRIC_READY:
+def current_measurement(observation):
+    """Distinguish a validated saved capture from a currently ready live frame."""
+    if isinstance(observation, OfflineCapture):
+        return observation
+    if (observation is None or observation.state != SessionState.RADIOMETRIC_READY or
+            observation.measurement is None or
+            observation.measurement.state != SessionState.RADIOMETRIC_READY):
         return None
-    measurement = observation.measurement
+    return observation.measurement
+
+
+def current_reading(observation, point: tuple[int, int] | None) -> PixelReading | None:
+    """Read the stored native matrix, independently of display normalization."""
+    measurement = current_measurement(observation)
     if measurement is None or point is None:
         return None
     x, y = point
@@ -86,11 +95,9 @@ def current_reading(observation: FrameObservation | None,
                         float(measurement.temperature_c[y, x]))
 
 
-def current_extrema(observation: FrameObservation | None):
-    """Expose validated trailer/matrix extrema, never display brightness extrema."""
-    if observation is None or observation.state != SessionState.RADIOMETRIC_READY:
-        return None
-    measurement = observation.measurement
+def current_extrema(observation):
+    """Expose saved or validated live extrema, never display brightness extrema."""
+    measurement = current_measurement(observation)
     if measurement is None:
         return None
     return ((measurement.high_xy, measurement.high_c),

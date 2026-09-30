@@ -1,12 +1,14 @@
 """Native rectangular geometry and unsmoothed current-frame Celsius statistics."""
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from measurement_baseline import FRAME_WIDTH, IMAGE_HEIGHT
-from mvp_presentation import widget_to_native
-from radiometric_session import FrameObservation, SessionState
+if TYPE_CHECKING:
+    from radiometric_capture import OfflineCapture
+    from radiometric_session import FrameObservation
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,8 @@ def roi_from_native_pixels(start: tuple[int, int], end: tuple[int, int]) -> Nati
 def roi_from_widget_drag(start: tuple[float, float], end: tuple[float, float],
                          widget_width: int, widget_height: int) -> NativeROI | None:
     """A drag must start inside the image; an outside endpoint clips to its edge."""
+    from mvp_presentation import widget_to_native
+
     first = widget_to_native(*start, widget_width, widget_height)
     last = widget_to_native(*end, widget_width, widget_height, clip=True)
     if first is None or last is None:
@@ -81,12 +85,12 @@ def roi_statistics(temperature_c: np.ndarray, roi: NativeROI) -> ROIStatistics:
                          (roi.x1 + int(max_x), roi.y1 + int(max_y)))
 
 
-def current_roi_statistics(observation: FrameObservation | None,
+def current_roi_statistics(observation: "FrameObservation | OfflineCapture | None",
                            roi: NativeROI | None) -> ROIStatistics | None:
-    """Geometry can persist; only a current ready measurement supplies numbers."""
-    if (roi is None or observation is None or
-            observation.state != SessionState.RADIOMETRIC_READY or
-            observation.measurement is None or
-            observation.measurement.state != SessionState.RADIOMETRIC_READY):
+    """Use a saved matrix or a currently ready live measurement, never display pixels."""
+    from mvp_presentation import current_measurement
+
+    measurement = current_measurement(observation)
+    if roi is None or measurement is None:
         return None
-    return roi_statistics(observation.measurement.temperature_c, roi)
+    return roi_statistics(measurement.temperature_c, roi)

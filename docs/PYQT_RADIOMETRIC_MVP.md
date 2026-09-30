@@ -74,6 +74,72 @@ orientation are deferred.
 Native-equivalent temperatures; absolute physical accuracy not yet
 independently validated.
 
+## Offline capture inspection
+
+Launch `./.venv/bin/python lmthermal_viewer.py --capture /path/to/capture.json`
+to open a saved capture without starting camera acquisition. The existing
+no-argument launch still starts live display acquisition. **Open radiometric
+capture** also works from a running window. It cancels a pending startup
+connection and stops/releases the worker before loading. If shutdown times
+out, loading is postponed; live and saved data never overlap. **Connect
+camera** clears the offline image, readings and ROI before starting a new
+worker. **Close saved capture** leaves a disconnected window, with no automatic
+connection. Queued camera notices, failures and frame signals are accepted
+only from the current worker and cannot overwrite offline data.
+
+`radiometric_capture.py` owns a frozen `OfflineCapture`: immutable byte-backed
+read-only raw14 and Celsius arrays, optional transport bytes, original JSON,
+palette/range, timestamp, calibration/environment metadata and optional ROI.
+Metadata access returns a separate object. Loading never calls thermometry,
+initialization or acquisition. The loader rejects unsupported, incomplete or
+inconsistent captures with a dialog; the PNG is hash-checked as a required v1
+companion, but never used as measurement or rendering input.
+
+The image widget and pure presentation helpers accept either a currently
+ready live measurement or a validated offline capture. Hover, native extrema,
+centers, letterboxing and ROI use the same coordinate mapping. Saved mode
+shows **Offline — no camera**, filename/timestamp and no FPS; initialization
+and **Save radiometric capture** are disabled. **Saved capture metadata**
+shows the unchanged original metadata, including settings/calibration and
+stored ROI statistics. The ROI panel calculates statistics from the saved
+matrix after the loader verifies the stored values (1e-4 °C absolute / 1e-6
+relative tolerance). Clearing/redrawing affects only inspection geometry.
+
+Initial rendering restores the exact captured effective bounds, including
+an automatic capture's stored percentiles. Subsequent palette/range controls
+use the existing Celsius renderer and auto-range helper; neither array nor
+numerical measurements changes. **Save rendered image** freezes the current
+palette/bounds before the destination dialog and saves a clean native-size
+PNG without overlays. It refuses existing destinations and original capture
+paths; it does not write JSON or NPZ.
+
+## Offline smoke test (2026-09-30)
+
+The surviving live palm capture (`hand-roi`, captured 07:46:24 UTC) reopened
+without a camera. The operator confirmed usable hand/background contrast,
+aligned hover/ROI after resize, clear/new ROI interaction, palette changes and
+auto/locked range changes with unchanged same-region readings, then closed
+the window; the process exited successfully. High `(213,131)` lies on the palm; low `(35,237)` lies on the cool
+background. Literal center remains 34.8705 °C (raw 5658); the separate trailer
+center remains 34.8276 °C (raw 5656).
+
+The older standalone auto/locked files were no longer available. Three
+presentation test sets were therefore derived from the surviving capture's
+unchanged NPZ: original auto-range Inferno without ROI, locked 25–45 °C White
+hot without ROI, and original auto-range Inferno with ROI. This is saved-data
+validation, not new live acquisition. A Qt event-loop check opened each set,
+restored its original presentation, inspected cursor/extrema/centers, drew a
+new cool ROI, resized, changed palette/range and saved a PNG. The new ROI
+`[340,375) × [50,100)` had 1,750 pixels and min/max/mean
+24.0993 / 24.4098 / 24.2463 °C; the original palm ROI restored
+33.4223 / 35.5125 / 34.7923 °C. Values were unchanged by presentation controls,
+and rendered PNG pixels matched direct rendering of the saved matrix.
+Original JSON/NPZ/PNG hashes were unchanged. A deliberately altered future
+version was rejected through the UI; automated cases also reject corrupted
+NPZ, missing companions, malformed metadata and incorrect array layouts.
+Temporary scenes/screenshots were kept outside Git. This test does not add
+physical-temperature accuracy evidence.
+
 ## Live smoke test (2026-09-29)
 
 With the HT-301 reconnected in display mode, the operator confirmed prompt

@@ -39,20 +39,57 @@ native-equivalent range-120 measurement pipeline. The PNG is generated from
 palette or range from the NPZ matrix. Neither the PNG nor its normalized
 8-bit palette levels are thermometry input.
 
-Example independent read:
+Validated independent read:
 
 ```python
-import json
-import numpy as np
 from pathlib import Path
+from radiometric_capture import load_capture
 
-base = Path("capture-name")
-metadata = json.loads(base.with_suffix(".json").read_text())
-with np.load(base.with_suffix(".npz"), allow_pickle=False) as arrays:
-    temperature_c = arrays["temperature_c"]
-    raw14 = arrays["raw14"]
-    raw_transport = arrays["raw_transport"].tobytes()
+capture = load_capture(Path("capture-name.json"))
+temperature_c = capture.temperature_c  # owned, read-only float32[288,384]
+raw14 = capture.raw14                  # owned, read-only uint16[288,384]
+metadata = capture.metadata            # separate JSON object
+raw_transport = capture.raw_transport  # bytes, or None when omitted
 ```
+
+## Loader contract
+
+`load_capture` supports exactly identifier `lmthermal-radiometric-capture`,
+integer version 1, native orientation and the declared native dimensions and
+dtypes. It derives `.npz` and `.png` siblings from the selected JSON filename;
+filename/path fields added to JSON are never followed. All three files and
+`files.png_sha256` / `files.npz_sha256` are required. There is no separate
+Boolean completion flag in v1: JSON publication is the completion marker.
+Hashes detect companion-file corruption; they do not authenticate the JSON
+or the physical measurements.
+
+The loader checks bounded file sizes, NPZ member names and NPY headers before
+allocation, and uses `allow_pickle=False`. It requires C-order little-endian
+float32/uint16 image matrices, finite temperatures and full raw indices below
+`0x4000`. It validates finite structured metadata, UTC times, parameters,
+presentation bounds, native high/low coordinates/values and literal center
+against the stored matrices. Trailer center remains a separate recorded
+reading; no center-region or thermometry algorithm is inferred on import.
+Optional ROI bounds/count/coordinates are checked exactly; min/max/mean are
+checked against the exact matrix slice within 1e-4 °C absolute and 1e-6 relative
+floating-point tolerance. Read-only arrays are backed by owned immutable
+bytes, and metadata access cannot mutate the model.
+
+The current exporter always includes `raw_transport`. The loader also accepts
+a v1 set without preserved transport when the NPZ member **and** JSON
+`transport_bytes` / `raw_transport_sha256` declarations are omitted together.
+When present, transport must be uint8[224256], match its SHA-256, and its image
+bytes must equal raw14. Declared-but-missing transport is rejected. Captures
+without ROI omit `roi`; absence is valid. Unsupported versions, malformed
+metadata, invalid arrays, missing completion/companions and hash mismatches
+raise `CaptureError`; the UI displays the reason without using partial data.
+
+The stored `temperature_c` matrix is authoritative on reopen. The loader does
+not rebuild a LUT or derive temperatures from raw14 or the PNG. Offline
+re-rendering uses `celsius_palette.py` on that matrix and writes a new clean
+PNG only, with no overwrite of any original JSON/NPZ/PNG or other existing
+file. Original metadata keeps the original presentation and ROI even after
+interactive changes.
 
 All three files are required for a complete v1 capture. The exporter writes
 temporary files in the destination directory, publishes complete files without

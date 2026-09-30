@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
 """Minimal PyQt HT-301 viewer backed by the validated radiometric session."""
 
+import argparse
+import json
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
-from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QPointF, QRectF, Qt, QTimer, QSignalBlocker, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QImage, QPainter, QPen
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
-                             QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
-                             QLabel, QMainWindow, QMessageBox, QPushButton,
+                             QDialog, QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
+                             QLabel, QMainWindow, QMessageBox, QPlainTextEdit, QPushButton,
                              QScrollArea, QVBoxLayout, QWidget)
 
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
 from mvp_camera_worker import CameraWorker
-from mvp_presentation import (current_extrema, current_reading, display_image,
+from mvp_presentation import (current_extrema, current_measurement, current_reading, display_image,
                               image_viewport, native_edge_to_widget,
                               native_to_widget, widget_to_native)
+from radiometric_capture import CaptureError, load_capture, save_rendered_image
 from radiometric_export import ACCURACY_WARNING, export_capture, snapshot_capture
 from radiometric_session import SessionState
 from roi_measurement import NativeROI, current_roi_statistics, roi_from_native_pixels
@@ -43,6 +46,7 @@ class ThermalImageWidget(QWidget):
         self.locked_lower = 20.0
         self.locked_upper = 40.0
         self.effective_bounds = None
+        self._restored_bounds = None
         self.roi = None
         self._roi_anchor = None
 
@@ -69,14 +73,16 @@ class ThermalImageWidget(QWidget):
         if palette not in PALETTES:
             raise ValueError("Unsupported Celsius palette")
         CelsiusRange(locked_lower, locked_upper)
+        self._restored_bounds = None
         self.palette = palette
         self.automatic_range = automatic
         self.locked_lower, self.locked_upper = locked_lower, locked_upper
         self._render()
 
-    def set_observation(self, observation) -> None:
+    def set_observation(self, observation, *, restored_bounds=None) -> None:
         """Replace the image; a rejected frame never inherits old measurements."""
         self.observation = observation
+        self._restored_bounds = restored_bounds
         self._render()
 
     def _render(self) -> None:
@@ -85,10 +91,10 @@ class ThermalImageWidget(QWidget):
         self.effective_bounds = None
         if observation is None:
             self.image = None
-        elif observation.state == SessionState.RADIOMETRIC_READY and observation.measurement is not None:
-            matrix = observation.measurement.temperature_c
-            bounds = effective_range(matrix, self.automatic_range,
-                                     self.locked_lower, self.locked_upper)
+        elif current_measurement(observation) is not None:
+            matrix = current_measurement(observation).temperature_c
+            bounds = self._restored_bounds or effective_range(
+                matrix, self.automatic_range, self.locked_lower, self.locked_upper)
             rgb = render_temperature(matrix, bounds.lower, bounds.upper, self.palette)
             self.image = QImage(rgb.data, rgb.shape[1], rgb.shape[0], rgb.strides[0],
                                 QImage.Format.Format_RGB888).copy()
@@ -225,6 +231,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("LMThermal — HT-301 Radiometric MVP")
         self.resize(1100, 760)
         self.worker = None
+        self.offline_capture = None
         self.observation = None
         self.pointer = None
         self.init_requested = False
@@ -236,8 +243,11 @@ class MainWindow(QMainWindow):
         self._fps_timer = QTimer(self)
         self._fps_timer.timeout.connect(self._update_fps)
         self._fps_timer.start(1000)
+        self._auto_connect_timer = QTimer(self)
+        self._auto_connect_timer.setSingleShot(True)
+        self._auto_connect_timer.timeout.connect(self.connect_camera)
         if auto_connect:
-            QTimer.singleShot(0, self.connect_camera)
+            self._auto_connect_timer.start(0)
 
     def _setup_ui(self) -> None:
         central = QWidget()
@@ -255,6 +265,21 @@ class MainWindow(QMainWindow):
         self.connect_button = QPushButton("Connect camera")
         self.connect_button.clicked.connect(self._toggle_camera)
         side.addWidget(self.connect_button)
+        self.open_capture_button = QPushButton("Open radiometric capture")
+        self.open_capture_button.clicked.connect(self._choose_capture)
+        side.addWidget(self.open_capture_button)
+        self.close_capture_button = QPushButton("Close saved capture")
+        self.close_capture_button.setEnabled(False)
+        self.close_capture_button.clicked.connect(self.close_capture)
+        side.addWidget(self.close_capture_button)
+        self.render_button = QPushButton("Save rendered image")
+        self.render_button.setEnabled(False)
+        self.render_button.clicked.connect(self._save_rendered)
+        side.addWidget(self.render_button)
+        self.metadata_button = QPushButton("Saved capture metadata")
+        self.metadata_button.setEnabled(False)
+        self.metadata_button.clicked.connect(self._show_metadata)
+        side.addWidget(self.metadata_button)
         self.initialize_button = QPushButton("Initialize radiometric")
         self.initialize_button.setEnabled(False)
         self.initialize_button.clicked.connect(self._initialize)
@@ -303,6 +328,7 @@ class MainWindow(QMainWindow):
         self.state_label = QLabel("Disconnected")
         self.state_label.setWordWrap(True)
         self.mode_label = QLabel("—")
+        self.mode_label.setWordWrap(True)
         self.fps_label = QLabel("—")
         for title, label in (("Device", self.device_label), ("State", self.state_label),
                              ("Frame", self.mode_label), ("View FPS", self.fps_label)):
@@ -358,15 +384,18 @@ class MainWindow(QMainWindow):
         """Start read-only display acquisition before any explicit control write."""
         if self.worker is not None:
             return
+        self.close_capture()
         self._had_error = False
         self.init_requested = False
         self.session_initialized = False
+        self._view_count = 0
+        self._fps_started = time.monotonic()
         self.state_label.setText("Connecting…")
         self.device_label.setText("Searching for Infiray HT-301")
         worker = CameraWorker(self)
         worker.frame_available.connect(self._on_frame_available)
-        worker.connected.connect(self.device_label.setText)
-        worker.notice.connect(self.state_label.setText)
+        worker.connected.connect(self._on_connected)
+        worker.notice.connect(self._on_notice)
         worker.failed.connect(self._on_failure)
         worker.finished.connect(self._on_worker_finished)
         self.worker = worker
@@ -423,7 +452,8 @@ class MainWindow(QMainWindow):
 
     def _on_frame_available(self) -> None:
         """Consume the newest observation; the Qt event queue stays bounded."""
-        if self.worker is None:
+        if (self.worker is None or self.offline_capture is not None or
+                (self.sender() is not None and self.sender() is not self.worker)):
             return
         observation = self.worker.take_latest()
         if observation is None:
@@ -460,6 +490,9 @@ class MainWindow(QMainWindow):
         measurement = observation.measurement
         self.capture_button.setEnabled(state == SessionState.RADIOMETRIC_READY and
                                        measurement is not None)
+        self._show_measurement(measurement)
+
+    def _show_measurement(self, measurement) -> None:
         if measurement is None:
             self._clear_measurements()
         else:
@@ -495,6 +528,8 @@ class MainWindow(QMainWindow):
 
     def _save_capture(self) -> None:
         """Freeze the displayed ready frame before opening the destination dialog."""
+        if self.offline_capture is not None:
+            return
         observation = self.image_widget.observation
         bounds = self.image_widget.effective_bounds
         if (observation is None or observation.state != SessionState.RADIOMETRIC_READY or
@@ -564,11 +599,15 @@ class MainWindow(QMainWindow):
     def _update_fps(self) -> None:
         now = time.monotonic()
         elapsed = now - self._fps_started
-        self.fps_label.setText(f"{self._view_count / elapsed:.1f}" if elapsed > 0 else "—")
+        self.fps_label.setText(f"{self._view_count / elapsed:.1f}"
+                               if self.worker is not None and elapsed > 0 else "—")
         self._view_count = 0
         self._fps_started = now
 
     def _on_failure(self, message: str) -> None:
+        if (self.offline_capture is not None or
+                (self.sender() is not None and self.sender() is not self.worker)):
+            return
         self._had_error = True
         self.init_requested = False
         self.state_label.setText(f"Error: {message}")
@@ -579,6 +618,122 @@ class MainWindow(QMainWindow):
         self._sync_legend()
         self._clear_measurements()
 
+    def _on_connected(self, device: str) -> None:
+        if self.sender() is self.worker and self.offline_capture is None:
+            self.device_label.setText(device)
+
+    def _on_notice(self, notice: str) -> None:
+        if self.sender() is self.worker and self.offline_capture is None:
+            self.state_label.setText(notice)
+
+    def _choose_capture(self) -> None:
+        selected, _ = QFileDialog.getOpenFileName(
+            self, "Open radiometric capture", "", "Capture completion marker (*.json)")
+        if selected:
+            self.open_capture(Path(selected))
+
+    def open_capture(self, path: Path) -> bool:
+        """Release acquisition first; load matrices without connecting a camera."""
+        self._auto_connect_timer.stop()
+        self.stop_camera()
+        if self.worker is not None:
+            return False
+        self.close_capture()
+        try:
+            capture = load_capture(path)
+        except CaptureError as exc:
+            QMessageBox.warning(self, "Cannot open radiometric capture", str(exc))
+            return False
+        self.offline_capture = capture
+        self.observation = capture
+        self.pointer = None
+        self.image_widget.pointer = None
+        self.image_widget._mouse_widget = None
+        controls = (self.palette_combo, self.auto_range_check, self.min_spin, self.max_spin)
+        blockers = [QSignalBlocker(control) for control in controls]
+        bounds = capture.original_bounds
+        # Expand spin limits when reopening an uncommon but finite stored range.
+        self.min_spin.setRange(min(-273.15, bounds.lower), max(999.99, bounds.upper))
+        self.max_spin.setRange(min(-273.14, bounds.lower), max(1000.0, bounds.upper))
+        self.min_spin.setValue(bounds.lower)
+        self.max_spin.setValue(bounds.upper)
+        self.min_spin.setMaximum(bounds.upper - .01)
+        self.max_spin.setMinimum(bounds.lower + .01)
+        self.palette_combo.setCurrentText(capture.original_palette)
+        self.auto_range_check.setChecked(capture.automatic_range)
+        self.min_spin.setEnabled(not capture.automatic_range)
+        self.max_spin.setEnabled(not capture.automatic_range)
+        del blockers
+        self.image_widget.set_presentation(capture.original_palette, capture.automatic_range,
+                                           bounds.lower, bounds.upper)
+        self.image_widget.set_observation(capture, restored_bounds=bounds)
+        self.image_widget.set_roi(capture.roi)
+        self._sync_legend()
+        self._show_measurement(capture)
+        self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
+        for button in (self.close_capture_button, self.render_button, self.metadata_button):
+            button.setEnabled(True)
+        self.device_label.setText("Offline — no camera")
+        self.state_label.setText(f"Saved capture: {capture.source_path.name}\n"
+                                 f"{capture.metadata['captured_at_utc']}")
+        self.mode_label.setText("Saved raw14 / native-equivalent matrix")
+        self.fps_label.setText("—")
+        return True
+
+    def close_capture(self) -> None:
+        """Return to disconnected mode; never auto-connect or retain saved readings."""
+        if self.offline_capture is None:
+            return
+        self.offline_capture = None
+        self.observation = None
+        self.pointer = None
+        self.image_widget.pointer = None
+        self.image_widget._mouse_widget = None
+        self.image_widget.set_observation(None)
+        self.image_widget.clear_roi()
+        self._sync_legend()
+        self._clear_measurements()
+        for button in (self.close_capture_button, self.render_button, self.metadata_button):
+            button.setEnabled(False)
+        self.device_label.setText("Disconnected")
+        self.state_label.setText("Disconnected")
+        self.mode_label.setText("—")
+        self.fps_label.setText("—")
+
+    def _show_metadata(self) -> None:
+        if self.offline_capture is None:
+            return
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Saved capture metadata — original")
+        dialog.resize(680, 640)
+        layout = QVBoxLayout(dialog)
+        text = QPlainTextEdit()
+        text.setReadOnly(True)
+        text.setPlainText(json.dumps(self.offline_capture.metadata, indent=2, sort_keys=True))
+        layout.addWidget(text)
+        dialog.exec()
+
+    def _save_rendered(self) -> None:
+        capture = self.offline_capture
+        bounds = self.image_widget.effective_bounds
+        if capture is None or bounds is None:
+            return
+        palette = self.image_widget.palette
+        selected, _ = QFileDialog.getSaveFileName(
+            self, "Save rendered image only", "rendered.png", "PNG rendering (*.png)")
+        if not selected:
+            return
+        target = Path(selected)
+        if not target.suffix:
+            target = target.with_suffix(".png")
+        try:
+            saved = save_rendered_image(capture, target, palette, bounds)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "Rendering failed", str(exc))
+            return
+        self.statusBar().showMessage(f"Saved rendered PNG only: {saved}", 10000)
+
     def closeEvent(self, event) -> None:
         self.stop_camera()
         if self.worker is not None:
@@ -588,10 +743,15 @@ class MainWindow(QMainWindow):
 
 
 def main() -> None:
-    """Launch a display-only preview before the user requests initialization."""
+    """Launch live display acquisition or camera-free saved capture inspection."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--capture", type=Path, help="Open a saved capture without camera acquisition")
+    args = parser.parse_args()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    window = MainWindow()
+    window = MainWindow(auto_connect=args.capture is None)
+    if args.capture is not None:
+        window.open_capture(args.capture)
     window.show()
     sys.exit(app.exec())
 
