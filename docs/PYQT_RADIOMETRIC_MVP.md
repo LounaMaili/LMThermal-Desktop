@@ -140,6 +140,35 @@ NPZ, missing companions, malformed metadata and incorrect array layouts.
 Temporary scenes/screenshots were kept outside Git. This test does not add
 physical-temperature accuracy evidence.
 
+## Live measurement logging
+
+The **Live measurement log** group selects 0.5/1/2/5/10 Hz (default 1), a new
+CSV destination, Start/Stop, and duration/count/status. It is enabled only
+with a live camera worker and is disabled for saved captures. A rate is fixed
+until Stop. Logging can start before readiness; invalid periods are explicit
+empty-value rows. It does not restart acquisition or initialization.
+
+`measurement_logger.py` owns pure sample creation/serialization, a latest-slot
+monotonic sampler, sidecar metadata and incremental exclusive file publication.
+`MeasurementLogger` runs sampling and writing on its own thread. The window
+publishes current observations, including invalid ones, and ROI changes without
+queuing frames; its existing status timer only reads logger status. The logger
+copies ready-frame scalar values and uses the existing ROI helper. Rendering
+and thermometry paths are unchanged. Pending mode changes wait for logger
+finalization; disconnect, close, camera failure/termination and offline opening
+stop and close the log. Queued old worker signals retain their existing sender
+guards. Start rechecks mode after the file dialog.
+
+The source capture matrix is never recorded in this feature. Active files use
+`.incomplete` names; a clean stop publishes CSV then complete JSON. Write errors
+retain incomplete evidence and display an error. See
+[time-series v1](MEASUREMENT_TIME_SERIES.md) for columns, cadence, gap handling,
+ROI and completion rules, including the real-camera smoke results. The initial
+1 Hz runs retained median 25 view FPS; an instrumented hand/ROI retry verified
+per-row geometry, warm/cool values, clear behavior and transient gaps. Its
+interactive view counter varied (median 21), so no fixed FPS guarantee is
+claimed. Physical accuracy remains independently unvalidated.
+
 ## Live smoke test (2026-09-29)
 
 With the HT-301 reconnected in display mode, the operator confirmed prompt

@@ -17,6 +17,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
 
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
+from measurement_logger import MeasurementLogger, SUPPORTED_RATES
 from mvp_camera_worker import CameraWorker
 from mvp_presentation import (current_extrema, current_measurement, current_reading, display_image,
                               image_viewport, native_edge_to_widget,
@@ -231,6 +232,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("LMThermal — HT-301 Radiometric MVP")
         self.resize(1100, 760)
         self.worker = None
+        self.logger = None
         self.offline_capture = None
         self.observation = None
         self.pointer = None
@@ -242,6 +244,7 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._fps_timer = QTimer(self)
         self._fps_timer.timeout.connect(self._update_fps)
+        self._fps_timer.timeout.connect(self._update_logging_status)
         self._fps_timer.start(1000)
         self._auto_connect_timer = QTimer(self)
         self._auto_connect_timer.setSingleShot(True)
@@ -323,6 +326,26 @@ class MainWindow(QMainWindow):
         self.min_spin.valueChanged.connect(self._range_changed)
         self.max_spin.valueChanged.connect(self._range_changed)
 
+        log_group = QGroupBox("Live measurement log")
+        log_layout = QVBoxLayout(log_group)
+        self.log_rate_combo = QComboBox()
+        for rate in SUPPORTED_RATES:
+            self.log_rate_combo.addItem(f"{rate:g} Hz", rate)
+        self.log_rate_combo.setCurrentIndex(1)
+        log_layout.addWidget(self.log_rate_combo)
+        self.start_log_button = QPushButton("Start logging")
+        self.start_log_button.setEnabled(False)
+        self.start_log_button.clicked.connect(self._start_logging)
+        self.stop_log_button = QPushButton("Stop logging")
+        self.stop_log_button.setEnabled(False)
+        self.stop_log_button.clicked.connect(lambda: self._stop_logging())
+        log_layout.addWidget(self.start_log_button)
+        log_layout.addWidget(self.stop_log_button)
+        self.log_status_label = QLabel("Not recording — live camera only")
+        self.log_status_label.setWordWrap(True)
+        log_layout.addWidget(self.log_status_label)
+        side.addWidget(log_group)
+
         session_form = QFormLayout()
         self.device_label = QLabel("Disconnected")
         self.state_label = QLabel("Disconnected")
@@ -382,7 +405,7 @@ class MainWindow(QMainWindow):
 
     def connect_camera(self) -> None:
         """Start read-only display acquisition before any explicit control write."""
-        if self.worker is not None:
+        if self.worker is not None or not self._stop_logging("camera_reconnect"):
             return
         self.close_capture()
         self._had_error = False
@@ -400,10 +423,13 @@ class MainWindow(QMainWindow):
         worker.finished.connect(self._on_worker_finished)
         self.worker = worker
         self.connect_button.setText("Disconnect")
+        self._sync_logging_controls()
         worker.start()
 
     def stop_camera(self) -> None:
         """Finish acquisition and close both handles before reconnecting."""
+        if not self._stop_logging("camera_disconnect"):
+            return
         worker = self.worker
         if worker is None:
             return
@@ -423,12 +449,14 @@ class MainWindow(QMainWindow):
         self.state_label.setText("Disconnected")
         self.mode_label.setText("—")
         self.connect_button.setText("Connect camera")
+        self._sync_logging_controls()
         worker.deleteLater()
 
     def _on_worker_finished(self) -> None:
         worker = self.sender()
         if worker is not self.worker:
             return
+        self._stop_logging("camera_finished")
         self.worker = None
         self.observation = None
         self.image_widget.set_observation(None)
@@ -440,6 +468,7 @@ class MainWindow(QMainWindow):
         if not self._had_error:
             self.device_label.setText("Disconnected")
             self.state_label.setText("Disconnected")
+        self._sync_logging_controls()
         worker.deleteLater()
 
     def _initialize(self) -> None:
@@ -459,6 +488,8 @@ class MainWindow(QMainWindow):
         if observation is None:
             return
         self.observation = observation
+        if self.logger is not None:
+            self.logger.update_latest(observation, self.image_widget.roi)
         self.image_widget.set_observation(observation)
         self._sync_legend()
         self._view_count += 1
@@ -512,6 +543,8 @@ class MainWindow(QMainWindow):
         self._update_roi()
 
     def _on_roi_changed(self, roi: NativeROI | None) -> None:
+        if self.logger is not None:
+            self.logger.update_latest(self.observation, roi)
         self.clear_roi_button.setEnabled(roi is not None)
         self.roi_geometry_label.setText(
             "Drag on the image to select a rectangle" if roi is None else
@@ -608,6 +641,7 @@ class MainWindow(QMainWindow):
         if (self.offline_capture is not None or
                 (self.sender() is not None and self.sender() is not self.worker)):
             return
+        self._stop_logging("camera_error")
         self._had_error = True
         self.init_requested = False
         self.state_label.setText(f"Error: {message}")
@@ -617,6 +651,70 @@ class MainWindow(QMainWindow):
         self.image_widget.set_observation(None)
         self._sync_legend()
         self._clear_measurements()
+
+    def _sync_logging_controls(self) -> None:
+        live = self.worker is not None and self.offline_capture is None
+        recording = self.logger is not None
+        self.start_log_button.setEnabled(live and not recording)
+        self.stop_log_button.setEnabled(recording)
+        self.log_rate_combo.setEnabled(not recording)
+
+    def _start_logging(self) -> None:
+        if self.worker is None or self.offline_capture is not None or self.logger is not None:
+            return
+        selected, _ = QFileDialog.getSaveFileName(
+            self, "Start live measurement log", f"measurements-{datetime.now():%Y%m%d-%H%M%S}.csv",
+            "Measurement time series (*.csv)")
+        if not selected:
+            return
+        # A modal dialog can process queued disconnect/failure events.
+        if self.worker is None or self.offline_capture is not None or self.logger is not None:
+            return
+        path = Path(selected)
+        if not path.suffix:
+            path = path.with_suffix(".csv")
+        identity = self.device_label.text() if self.observation is not None else None
+        try:
+            self.logger = MeasurementLogger(path, rate_hz=self.log_rate_combo.currentData(),
+                                            camera_identity=identity,
+                                            observation=self.observation, roi=self.image_widget.roi)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "Cannot start logging", str(exc))
+            return
+        self._sync_logging_controls()
+        self._update_logging_status()
+
+    def _stop_logging(self, reason="operator_stop") -> bool:
+        if self.logger is None:
+            return True
+        logger = self.logger
+        try:
+            status = logger.stop(reason)
+        except TimeoutError as exc:
+            self.log_status_label.setText(str(exc))
+            return False
+        except OSError as exc:
+            self.log_status_label.setText(f"Log incomplete: {exc}\n{logger.status.csv_path}")
+            self.logger = None
+            self._sync_logging_controls()
+            return True
+        self.logger = None
+        self.log_status_label.setText(
+            f"Complete: {status.sample_count} samples ({status.valid_sample_count} valid), "
+            f"{status.duration_s:.1f} s\n{status.csv_path}")
+        self._sync_logging_controls()
+        return True
+
+    def _update_logging_status(self) -> None:
+        if self.logger is None:
+            return
+        status = self.logger.status
+        if status.state != "recording":
+            self._stop_logging()
+            return
+        self.log_status_label.setText(
+            f"Recording: {status.duration_s:.1f} s, {status.sample_count} samples "
+            f"({status.valid_sample_count} valid)\n{status.csv_path}")
 
     def _on_connected(self, device: str) -> None:
         if self.sender() is self.worker and self.offline_capture is None:
@@ -636,7 +734,7 @@ class MainWindow(QMainWindow):
         """Release acquisition first; load matrices without connecting a camera."""
         self._auto_connect_timer.stop()
         self.stop_camera()
-        if self.worker is not None:
+        if self.worker is not None or self.logger is not None:
             return False
         self.close_capture()
         try:
@@ -679,6 +777,7 @@ class MainWindow(QMainWindow):
                                  f"{capture.metadata['captured_at_utc']}")
         self.mode_label.setText("Saved raw14 / native-equivalent matrix")
         self.fps_label.setText("—")
+        self._sync_logging_controls()
         return True
 
     def close_capture(self) -> None:
@@ -735,6 +834,9 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Saved rendered PNG only: {saved}", 10000)
 
     def closeEvent(self, event) -> None:
+        if not self._stop_logging("window_closed"):
+            event.ignore()
+            return
         self.stop_camera()
         if self.worker is not None:
             event.ignore()

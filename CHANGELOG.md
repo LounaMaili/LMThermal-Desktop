@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Live measurement time series — 2026-09-30)
+- Added a camera-independent measurement logger with a bounded latest-observation slot, monotonic 0.5/1/2/5/10 Hz sampling (1 Hz default), ready-frame scalar/ROI samples and explicit empty-value gap rows for invalid or not-new observations. It does not recompute thermometry or record image/video data.
+- Added incremental UTF-8 CSV and versioned session metadata with distinct literal/trailer centers, native high/low coordinates, per-row ROI geometry/statistics, start settings, accuracy warning, counts and completion status. Exclusive incomplete files and no-overwrite final publication preserve interrupted/error evidence.
+- Added live-only Start/Stop/rate/duration/count/path controls; disconnect, close, camera failure and offline opening finalize logs. Presentation changes remain independent of measurement logging.
+- Validated 1 Hz real-camera CSV/JSON publication, natural validity gaps/recovery, verified visible-hand/background ROI changes and clearing, and unchanged same-frame numbers across rendering controls. Initial runs retained median 25 view FPS; the screenshot-instrumented interactive retry had median 21. Physical accuracy remains unvalidated.
+
 ### Added (Offline radiometric viewer — 2026-09-30)
 - Added a camera-independent v1 capture loader with immutable saved matrices, companion hashes/completion checks, bounded NPZ header validation, metadata/coordinate consistency checks, optional transport evidence and verified saved ROI statistics. Reopening uses stored Celsius values without recomputing thermometry.
 - Added explicit saved-capture inspection, original metadata, cursor/raw14, distinct centers, extrema, restored/new ROI and existing Celsius palette/range controls. Opening stops live acquisition; reconnect closes saved mode; queued old worker signals and pending startup connection cannot contaminate offline data.

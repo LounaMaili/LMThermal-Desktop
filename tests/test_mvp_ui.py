@@ -332,6 +332,69 @@ class MVPWindowTests(unittest.TestCase):
             self.assertFalse(self.window.capture_button.isEnabled())
             self.assertFalse(self.window.render_button.isEnabled())
 
+    def start_test_log(self, root):
+        with patch.object(CameraWorker, "start"):
+            self.window.connect_camera()
+        ready = FrameObservation(HAND, 0, SessionState.RADIOMETRIC_READY,
+                                 inspect_frame(HAND), False, None, self.measured)
+        self.window.worker._publish(ready)
+        with patch("lmthermal_viewer.QFileDialog.getSaveFileName",
+                   return_value=(str(Path(root)/"measurements.csv"), "")):
+            self.window.start_log_button.click()
+        return self.window.logger
+
+    def test_logging_controls_sampling_roi_and_presentation(self):
+        with TemporaryDirectory() as root:
+            logger = self.start_test_log(root)
+            self.assertIsNotNone(logger)
+            self.assertFalse(self.window.start_log_button.isEnabled())
+            self.assertTrue(self.window.stop_log_button.isEnabled())
+            self.assertFalse(self.window.log_rate_combo.isEnabled())
+            self.window.image_widget.set_roi(NativeROI(160, 180, 220, 240))
+            first = logger.sampler.sample_due(logger.started+1, "2026-09-30T12:00:00+00:00")
+            self.assertEqual(first["roi_pixel_count"], 3600)
+            self.window.palette_combo.setCurrentText("Turbo")
+            self.window.auto_range_check.setChecked(False)
+            self.window.min_spin.setValue(25)
+            self.window.max_spin.setValue(45)
+            self.window.resize(1200, 800)
+            self.window.worker._publish(replace(self.window.observation))
+            second = logger.sampler.sample_due(logger.started+2, "2026-09-30T12:00:01+00:00")
+            for key in ("high_c", "low_c", "literal_center_c", "trailer_center_c", "roi_mean_c"):
+                self.assertEqual(first[key], second[key])
+            self.window.image_widget.clear_roi()
+            self.window.worker._publish(replace(self.window.observation))
+            third = logger.sampler.sample_due(logger.started+3, "2026-09-30T12:00:02+00:00")
+            self.assertIsNone(third["roi_mean_c"])
+            self.window.stop_log_button.click()
+            self.assertIsNone(self.window.logger)
+            self.assertIn("Complete", self.window.log_status_label.text())
+            self.assertTrue(self.window.start_log_button.isEnabled())
+            self.window.stop_camera()
+            self.assertFalse(self.window.start_log_button.isEnabled())
+
+    def test_disconnect_close_and_open_offline_finalize_logger(self):
+        for action, reason in (("disconnect", "camera_disconnect"),
+                               ("close", "window_closed"), ("offline", "camera_disconnect")):
+            with self.subTest(action=action), TemporaryDirectory() as root:
+                logger = self.start_test_log(root)
+                if action == "disconnect":
+                    self.window.stop_camera()
+                elif action == "close":
+                    self.window.close()
+                else:
+                    self.assertTrue(self.window.open_capture(self.saved_capture(root)))
+                    with patch("lmthermal_viewer.QFileDialog.getSaveFileName") as dialog:
+                        self.window._start_logging()
+                        dialog.assert_not_called()
+                    self.assertFalse(self.window.start_log_button.isEnabled())
+                self.assertIsNone(self.window.logger)
+                self.assertFalse(logger._thread.is_alive())
+                metadata = json.loads((Path(root)/"measurements.json").read_text())
+                self.assertEqual(metadata["completion"], "complete")
+                self.assertEqual(metadata["stop_reason"], reason)
+                self.window.close_capture()
+
     def test_worker_coalesces_gui_notifications_and_stops_publication(self):
         worker = CameraWorker()
         emissions = []

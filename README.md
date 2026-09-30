@@ -90,6 +90,17 @@ Palette and auto/locked Celsius controls change colors only. **Save rendered
 image** writes a separate clean PNG using the current display settings; it
 never replaces original capture files or creates a new JSON/NPZ set.
 
+For live measurements over time, select **Live measurement log** rate and
+click **Start logging**. The default is 1 Hz; 0.5/2/5/10 Hz are also available.
+It records the latest ready frame's high/low, distinct centers and current ROI
+in a small CSV with a versioned JSON sidecar. Invalid or not-new observations
+produce explicit gap rows with empty measurements. Moving/clearing ROI affects
+later rows; palette/range/resize never changes same-frame numbers. **Stop
+logging**, disconnect or normal close finalizes the files. Offline static
+captures cannot be logged. Existing logs are protected; interrupted recordings
+remain identifiable by `.incomplete` files. See the
+[time-series schema and workflow](docs/MEASUREMENT_TIME_SERIES.md).
+
 See [capture format v1](docs/RADIOMETRIC_CAPTURE_FORMAT.md). The exact transport
 frame can contain camera or scene information; review captures before sharing.
 
