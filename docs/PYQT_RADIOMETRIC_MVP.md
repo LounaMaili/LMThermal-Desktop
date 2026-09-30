@@ -136,3 +136,10 @@ were around 25 FPS, with occasional lower rates during interactions/transients.
 The Save action's v1 JSON ROI statistics exactly matched an independent NPZ
 slice calculation; NPZ keys, dimensions and dtypes remained unchanged.
 This is relative scene evidence, not independent absolute calibration.
+
+The final operator check also passed: a background ROI beside the visibly
+present hand showed cooler values than the hand ROI, consistent with the saved
+matrix comparison. Resizing retained alignment with the same scene region.
+Changing palette and switching auto/locked Celsius range changed visualization
+while min/max/mean remained unchanged for the same frame and region. This
+completes the live ROI interaction and presentation validation.

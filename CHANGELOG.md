@@ -8,6 +8,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Added one native rectangular ROI selected by left-click/drag, with edge clipping, persistent geometry across resize/palette/range changes, and a clear action. A click selects one pixel; stored bounds are half-open.
 - Added direct current-temperature-slice min/max/mean, pixel count and native extrema coordinates. Numerical ROI readings disappear on non-ready frames and resume for the same geometry on recovery. The sidebar scrolls to keep the additional controls accessible.
 - Added optional same-frame ROI geometry/statistics in capture format v1 JSON while retaining the complete radiometric NPZ matrices and clean PNG rendering.
+- Completed operator validation of a cooler background ROI beside the visible hand, resize alignment, and unchanged same-frame ROI statistics across palette and auto/locked range changes. Absolute physical accuracy remains unvalidated.
 
 ### Added (Radiometric capture/export — 2026-09-29)
 - Added ready-frame-only PyQt capture from one frozen `MeasurementFrame` and effective palette/range; display, held, shutter and unsettled states disable saving.
