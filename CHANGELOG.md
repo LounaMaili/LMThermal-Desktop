@@ -4,6 +4,13 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Radiometric sequence recording — 2026-09-30)
+- Added distinct v1 `.lmthermal` directory recordings with exact raw14/float32 matrices, per-frame parameters/lookup inputs, scalar/ROI timeline, hashes and native-coordinate accuracy warning. Still-capture v1 and thermometry remain unchanged.
+- Added latest-observation 1/2/5/10/25 Hz sampling (default 5), a four-frame handoff, compressed 16-frame incremental chunks, explicit validity gaps/overload drops and atomic chunk/manifest publication. Interrupted bundles preserve committed chunks; a camera-independent bounded chunk loader validates shapes/dtypes/hashes/mappings/summaries.
+- Added live-only start/stop/rate/status controls, mutually exclusive with CSV scalar logging, and safe finalization on disconnect, camera termination, close and offline opening.
+- Benchmarked NPZ compression with saved data and validated two 60-second 5 Hz runs, 30-second 10 Hz and 15-second 25 Hz stress on the HT-301. Median view FPS remained 25; 5/10 Hz had no recorder drops. The stress run recorded 46 overload drops and 265 matrices (about 17.25 stored/s), so 25 Hz remains experimental. Independent physical accuracy remains unvalidated.
+- Documented format/recovery/rate tradeoffs and persistent aggregate live results; expanded hardware-independent persistence, backpressure, cadence and UI lifecycle tests.
+
 ### Added (Live measurement time series — 2026-09-30)
 - Added a camera-independent measurement logger with a bounded latest-observation slot, monotonic 0.5/1/2/5/10 Hz sampling (1 Hz default), ready-frame scalar/ROI samples and explicit empty-value gap rows for invalid or not-new observations. It does not recompute thermometry or record image/video data.
 - Added incremental UTF-8 CSV and versioned session metadata with distinct literal/trailer centers, native high/low coordinates, per-row ROI geometry/statistics, start settings, accuracy warning, counts and completion status. Exclusive incomplete files and no-overwrite final publication preserve interrupted/error evidence.

@@ -1,0 +1,380 @@
+{
+  "date": "2026-09-30",
+  "accuracy_warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated.",
+  "baseline_view_fps_median": 25.0,
+  "sampling": "latest UI observation at monotonic requested instants; validity unchanged",
+  "runs": [
+    {
+      "rate_hz": 5,
+      "duration_s": 60.23843802299962,
+      "completed": true,
+      "requested_samples": 300,
+      "valid_frames": 244,
+      "gap_samples": 56,
+      "dropped_samples": 0,
+      "name": "baseline-5hz",
+      "total_bytes": 44602634,
+      "decimal_MB_s": 0.7404347699548631,
+      "decimal_MB_min": 44.42608619729178,
+      "stored_frames_s": 4.050569835606269,
+      "view_fps_median": 25.0,
+      "view_fps_min": 18.1,
+      "view_fps_max": 25.1,
+      "max_observed_queue": 0,
+      "chunk_count": 16,
+      "status_counts": {
+        "valid": 244,
+        "awaiting_live_evidence": 32,
+        "mixed_or_out_of_range_words": 23,
+        "summary_mismatch": 1
+      },
+      "roi_history": [
+        {
+          "geometry": [
+            266,
+            94,
+            282,
+            135
+          ],
+          "samples": 300,
+          "valid_means": 244,
+          "mean_c_min": 36.51948882893818,
+          "mean_c_max": 36.924419612419314
+        }
+      ],
+      "manifest_sha256": "527425724c2aab2f31fac3080f8c15659a3bd07c47ff89e4a37e7f971227533e",
+      "selected_frames": [
+        {
+          "sequence": 1,
+          "raw14_min": 5277,
+          "raw14_max": 5730,
+          "matrix_min_c": 27.654804229736328,
+          "matrix_max_c": 37.625362396240234,
+          "raw14_sha256": "3dcfc78647523558a06ef554e7ee4697a42bac6e983a8fc23134bddfb16b63a8",
+          "temperature_sha256": "bcdf47e0d87a2ded306c594aa0fd5647286b705b9766a7d3714eaed134078d22"
+        },
+        {
+          "sequence": 5,
+          "raw14_min": 5274,
+          "raw14_max": 5730,
+          "matrix_min_c": 27.611648559570312,
+          "matrix_max_c": 37.64703369140625,
+          "raw14_sha256": "25a09a74c6fa9abd81b157f959e1e2ccf6f5c85872c793447f730b47a0445be2",
+          "temperature_sha256": "41482526811d604fb2c34ffbce414042b6b8ec133682e668a92bac266a247668"
+        },
+        {
+          "sequence": 300,
+          "raw14_min": 5263,
+          "raw14_max": 5711,
+          "matrix_min_c": 27.291271209716797,
+          "matrix_max_c": 37.20076370239258,
+          "raw14_sha256": "321b97eec8198f0b81d7d45ef6937de7ebf5f3513d7acb8dddb4ba7081c0dbcd",
+          "temperature_sha256": "306af5b4d6bcb0fc11b1647e1f8ec48b6e7563acec98ca86c57372d0d5389620"
+        }
+      ]
+    },
+    {
+      "rate_hz": 5,
+      "duration_s": 60.24299220800094,
+      "completed": true,
+      "requested_samples": 299,
+      "valid_frames": 219,
+      "gap_samples": 80,
+      "dropped_samples": 0,
+      "name": "roi-followup-5hz",
+      "total_bytes": 37551131,
+      "decimal_MB_s": 0.6233277867465021,
+      "decimal_MB_min": 37.39966720479013,
+      "stored_frames_s": 3.635277597830115,
+      "view_fps_median": 25.0,
+      "view_fps_min": 18.0,
+      "view_fps_max": 26.0,
+      "max_observed_queue": 1,
+      "chunk_count": 14,
+      "status_counts": {
+        "valid": 219,
+        "awaiting_live_evidence": 44,
+        "mixed_or_out_of_range_words": 36
+      },
+      "roi_history": [
+        {
+          "geometry": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "samples": 237,
+          "valid_means": 0,
+          "mean_c_min": null,
+          "mean_c_max": null
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            268,
+            81
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.48054504394531,
+          "mean_c_max": 35.48054504394531
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            299,
+            126
+          ],
+          "samples": 55,
+          "valid_means": 41,
+          "mean_c_min": 35.61262346609779,
+          "mean_c_max": 35.66409996022349
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            317,
+            136
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.524456270762855,
+          "mean_c_max": 35.524456270762855
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            346,
+            124
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.487758420279164,
+          "mean_c_max": 35.487758420279164
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            346,
+            164
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.264066312167934,
+          "mean_c_max": 35.264066312167934
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            347,
+            124
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.46115380850705,
+          "mean_c_max": 35.46115380850705
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            355,
+            127
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.46666690874376,
+          "mean_c_max": 35.46666690874376
+        },
+        {
+          "geometry": [
+            267,
+            80,
+            358,
+            132
+          ],
+          "samples": 1,
+          "valid_means": 1,
+          "mean_c_min": 35.42445755649802,
+          "mean_c_max": 35.42445755649802
+        }
+      ],
+      "manifest_sha256": "94c267acc107b5d8e33a4352c75df7bd9b30f7ad773460e216d3c8dc72f52afe",
+      "selected_frames": [
+        {
+          "sequence": 1,
+          "raw14_min": 5193,
+          "raw14_max": 5251,
+          "matrix_min_c": 25.55210304260254,
+          "matrix_max_c": 26.919448852539062,
+          "raw14_sha256": "94ca60196c5f001ebacf5ec7a3b1f22c851bec3235cd749311c71216b19fbf89",
+          "temperature_sha256": "b6c8d44bceb301f74666fd04a3995e416a23ebbf6377c2cf98fc46d2a92953d7"
+        },
+        {
+          "sequence": 116,
+          "raw14_min": 5204,
+          "raw14_max": 5688,
+          "matrix_min_c": 25.820053100585938,
+          "matrix_max_c": 36.661033630371094,
+          "raw14_sha256": "973264f23383e3149df83b1c4a79196d121458ddc4aab8b11b617f595961c5dd",
+          "temperature_sha256": "c92af8a08f75c38d113cd1ac762cbc433ba5dea9b0eb8bf7e8daa71e880d8bf6"
+        },
+        {
+          "sequence": 299,
+          "raw14_min": 5211,
+          "raw14_max": 5673,
+          "matrix_min_c": 25.940757751464844,
+          "matrix_max_c": 36.314361572265625,
+          "raw14_sha256": "49b0a1ee208245461050b30ec95a8d6ef63de575dc467d2c930ad3e4350796af",
+          "temperature_sha256": "ee83898d5ca2d97a027046344d73f8964735772a4640ce1e6583b9c0b7db6f22"
+        }
+      ]
+    },
+    {
+      "rate_hz": 10,
+      "duration_s": 30.433941084000253,
+      "completed": true,
+      "requested_samples": 300,
+      "valid_frames": 219,
+      "gap_samples": 81,
+      "dropped_samples": 0,
+      "name": "throughput-10hz",
+      "total_bytes": 31819454,
+      "decimal_MB_s": 1.0455252545891316,
+      "decimal_MB_min": 62.7315152753479,
+      "stored_frames_s": 7.195913253414714,
+      "view_fps_median": 25.0,
+      "view_fps_min": 21.1,
+      "view_fps_max": 26.3,
+      "max_observed_queue": 2,
+      "chunk_count": 14,
+      "status_counts": {
+        "valid": 219,
+        "mixed_or_out_of_range_words": 32,
+        "awaiting_live_evidence": 44,
+        "no_new_observation": 5
+      },
+      "roi_history": [
+        {
+          "geometry": [
+            93,
+            277,
+            174,
+            279
+          ],
+          "samples": 300,
+          "valid_means": 219,
+          "mean_c_min": 25.576088811144416,
+          "mean_c_max": 25.79764222510067
+        }
+      ],
+      "manifest_sha256": "437f3caf4883150c685cce26bc9c7601f0ba5cb5dd7720412d0d88aca6ab814a",
+      "selected_frames": [
+        {
+          "sequence": 1,
+          "raw14_min": 5161,
+          "raw14_max": 5291,
+          "matrix_min_c": 24.706768035888672,
+          "matrix_max_c": 27.777374267578125,
+          "raw14_sha256": "677e6d3688cf4c55e63fdbd0f6d0aec41ca7260c409cebbbec5664759dc133e5",
+          "temperature_sha256": "2220f1de9899ae376cf03f8f3e74886b28ee9e8adf18354145331d88bbb06752"
+        },
+        {
+          "sequence": 35,
+          "raw14_min": 5159,
+          "raw14_max": 5309,
+          "matrix_min_c": 24.666460037231445,
+          "matrix_max_c": 28.200895309448242,
+          "raw14_sha256": "8ced72931ab5cc4b10554991916b5c489243f10d1abc0bde38b37967165d0a20",
+          "temperature_sha256": "0af4ed18cb989f03d836ec93c945cda1b80305bdb71decddf06679972cd1021d"
+        },
+        {
+          "sequence": 300,
+          "raw14_min": 5153,
+          "raw14_max": 5251,
+          "matrix_min_c": 24.510637283325195,
+          "matrix_max_c": 26.839624404907227,
+          "raw14_sha256": "16e2d8cf76d5fe349e8d4b587cb941d4732994c474fed95aa30cd6c865fe0483",
+          "temperature_sha256": "b6fc0a59e391fbaea1b20b9ee93be8e752670e71fa67a49164497a8482746ed2"
+        }
+      ]
+    },
+    {
+      "rate_hz": 25,
+      "duration_s": 15.361504816999513,
+      "completed": true,
+      "requested_samples": 377,
+      "valid_frames": 265,
+      "gap_samples": 66,
+      "dropped_samples": 46,
+      "name": "stress-25hz",
+      "total_bytes": 44173397,
+      "decimal_MB_s": 2.8755904793335323,
+      "decimal_MB_min": 172.53542876001194,
+      "stored_frames_s": 17.250914097083957,
+      "view_fps_median": 25.0,
+      "view_fps_min": 19.0,
+      "view_fps_max": 25.1,
+      "max_observed_queue": 4,
+      "chunk_count": 17,
+      "status_counts": {
+        "valid": 265,
+        "no_new_observation": 27,
+        "mixed_or_out_of_range_words": 11,
+        "awaiting_live_evidence": 28,
+        "writer_overload": 46
+      },
+      "roi_history": [
+        {
+          "geometry": [
+            93,
+            277,
+            174,
+            279
+          ],
+          "samples": 377,
+          "valid_means": 311,
+          "mean_c_min": 25.593796376828795,
+          "mean_c_max": 29.277284951857578
+        }
+      ],
+      "manifest_sha256": "516712f1c4850f39331fe85048209f7db8711ab32cabef575bf37a067ae81e9b",
+      "selected_frames": [
+        {
+          "sequence": 1,
+          "raw14_min": 5152,
+          "raw14_max": 5582,
+          "matrix_min_c": 24.486560821533203,
+          "matrix_max_c": 34.322208404541016,
+          "raw14_sha256": "8fb8fd64af84f8d38ad272559902a954f870c8695e08dbb7316d0f5662e18702",
+          "temperature_sha256": "23bbc81f682edc01f367cbc136af78dabe5f910062fa547c784eb6da5a30d50f"
+        },
+        {
+          "sequence": 309,
+          "raw14_min": 5150,
+          "raw14_max": 5659,
+          "matrix_min_c": 24.43451499938965,
+          "matrix_max_c": 35.98598098754883,
+          "raw14_sha256": "d19a284b18169bd7ef0fcd41870222bbd3ec6151e3af3bb24f8e8ebc826778aa",
+          "temperature_sha256": "4ce9373e758f7dc6ed1d7f681e09c7672d91e66635573384466323c3ed06268c"
+        },
+        {
+          "sequence": 377,
+          "raw14_min": 5146,
+          "raw14_max": 5506,
+          "matrix_min_c": 24.33814239501953,
+          "matrix_max_c": 32.65061950683594,
+          "raw14_sha256": "43ff0132a643476b1c1ed41c33e2bfdb554f9d4299f3335d7042fc1fd5945c53",
+          "temperature_sha256": "bfccd0c870a1db6180233d1bf3eeb4a8ec518190a6cdd7fc52d3659e0e66f4f3"
+        }
+      ]
+    }
+  ]
+}

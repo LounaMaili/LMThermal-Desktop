@@ -18,6 +18,8 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
 from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
                              effective_range, legend_image, render_temperature)
 from measurement_logger import MeasurementLogger, SUPPORTED_RATES
+from radiometric_recorder import RadiometricRecorder
+from radiometric_recording import RATES as RECORDING_RATES
 from mvp_camera_worker import CameraWorker
 from mvp_presentation import (current_extrema, current_measurement, current_reading, display_image,
                               image_viewport, native_edge_to_widget,
@@ -233,6 +235,7 @@ class MainWindow(QMainWindow):
         self.resize(1100, 760)
         self.worker = None
         self.logger = None
+        self.recorder = None
         self.offline_capture = None
         self.observation = None
         self.pointer = None
@@ -245,6 +248,7 @@ class MainWindow(QMainWindow):
         self._fps_timer = QTimer(self)
         self._fps_timer.timeout.connect(self._update_fps)
         self._fps_timer.timeout.connect(self._update_logging_status)
+        self._fps_timer.timeout.connect(self._update_recording_status)
         self._fps_timer.start(1000)
         self._auto_connect_timer = QTimer(self)
         self._auto_connect_timer.setSingleShot(True)
@@ -346,6 +350,26 @@ class MainWindow(QMainWindow):
         log_layout.addWidget(self.log_status_label)
         side.addWidget(log_group)
 
+        recording_group = QGroupBox("Radiometric recording")
+        recording_layout = QVBoxLayout(recording_group)
+        self.record_rate_combo = QComboBox()
+        for rate in RECORDING_RATES:
+            self.record_rate_combo.addItem(f"{rate} Hz" + (" (experimental)" if rate == 25 else ""), rate)
+        self.record_rate_combo.setCurrentIndex(2)
+        recording_layout.addWidget(self.record_rate_combo)
+        self.start_record_button = QPushButton("Start recording…")
+        self.start_record_button.setEnabled(False)
+        self.start_record_button.clicked.connect(self._start_recording)
+        self.stop_record_button = QPushButton("Stop recording")
+        self.stop_record_button.setEnabled(False)
+        self.stop_record_button.clicked.connect(lambda: self._stop_recording())
+        recording_layout.addWidget(self.start_record_button)
+        recording_layout.addWidget(self.stop_record_button)
+        self.record_status_label = QLabel("Not recording — live camera only; CSV log is exclusive")
+        self.record_status_label.setWordWrap(True)
+        recording_layout.addWidget(self.record_status_label)
+        side.addWidget(recording_group)
+
         session_form = QFormLayout()
         self.device_label = QLabel("Disconnected")
         self.state_label = QLabel("Disconnected")
@@ -405,7 +429,8 @@ class MainWindow(QMainWindow):
 
     def connect_camera(self) -> None:
         """Start read-only display acquisition before any explicit control write."""
-        if self.worker is not None or not self._stop_logging("camera_reconnect"):
+        if (self.worker is not None or not self._stop_recording("camera_reconnect")
+                or not self._stop_logging("camera_reconnect")):
             return
         self.close_capture()
         self._had_error = False
@@ -428,7 +453,7 @@ class MainWindow(QMainWindow):
 
     def stop_camera(self) -> None:
         """Finish acquisition and close both handles before reconnecting."""
-        if not self._stop_logging("camera_disconnect"):
+        if not self._stop_recording("camera_disconnect") or not self._stop_logging("camera_disconnect"):
             return
         worker = self.worker
         if worker is None:
@@ -456,6 +481,7 @@ class MainWindow(QMainWindow):
         worker = self.sender()
         if worker is not self.worker:
             return
+        self._stop_recording("camera_finished")
         self._stop_logging("camera_finished")
         self.worker = None
         self.observation = None
@@ -490,6 +516,8 @@ class MainWindow(QMainWindow):
         self.observation = observation
         if self.logger is not None:
             self.logger.update_latest(observation, self.image_widget.roi)
+        if self.recorder is not None:
+            self.recorder.update_latest(observation, self.image_widget.roi)
         self.image_widget.set_observation(observation)
         self._sync_legend()
         self._view_count += 1
@@ -543,6 +571,8 @@ class MainWindow(QMainWindow):
         self._update_roi()
 
     def _on_roi_changed(self, roi: NativeROI | None) -> None:
+        if self.recorder is not None:
+            self.recorder.update_latest(self.observation, roi)
         if self.logger is not None:
             self.logger.update_latest(self.observation, roi)
         self.clear_roi_button.setEnabled(roi is not None)
@@ -641,6 +671,7 @@ class MainWindow(QMainWindow):
         if (self.offline_capture is not None or
                 (self.sender() is not None and self.sender() is not self.worker)):
             return
+        self._stop_recording("camera_error")
         self._stop_logging("camera_error")
         self._had_error = True
         self.init_requested = False
@@ -655,12 +686,16 @@ class MainWindow(QMainWindow):
     def _sync_logging_controls(self) -> None:
         live = self.worker is not None and self.offline_capture is None
         recording = self.logger is not None
-        self.start_log_button.setEnabled(live and not recording)
+        self.start_log_button.setEnabled(live and not recording and self.recorder is None)
         self.stop_log_button.setEnabled(recording)
         self.log_rate_combo.setEnabled(not recording)
+        self.start_record_button.setEnabled(live and not recording and self.recorder is None)
+        self.stop_record_button.setEnabled(self.recorder is not None)
+        self.record_rate_combo.setEnabled(self.recorder is None)
 
     def _start_logging(self) -> None:
-        if self.worker is None or self.offline_capture is not None or self.logger is not None:
+        if (self.worker is None or self.offline_capture is not None
+                or self.logger is not None or self.recorder is not None):
             return
         selected, _ = QFileDialog.getSaveFileName(
             self, "Start live measurement log", f"measurements-{datetime.now():%Y%m%d-%H%M%S}.csv",
@@ -668,7 +703,8 @@ class MainWindow(QMainWindow):
         if not selected:
             return
         # A modal dialog can process queued disconnect/failure events.
-        if self.worker is None or self.offline_capture is not None or self.logger is not None:
+        if (self.worker is None or self.offline_capture is not None
+                or self.logger is not None or self.recorder is not None):
             return
         path = Path(selected)
         if not path.suffix:
@@ -716,6 +752,65 @@ class MainWindow(QMainWindow):
             f"Recording: {status.duration_s:.1f} s, {status.sample_count} samples "
             f"({status.valid_sample_count} valid)\n{status.csv_path}")
 
+    def _start_recording(self) -> None:
+        if (self.worker is None or self.offline_capture is not None
+                or self.logger is not None or self.recorder is not None):
+            return
+        selected, _ = QFileDialog.getSaveFileName(
+            self, "New radiometric recording directory", f"recording-{datetime.now():%Y%m%d-%H%M%S}.lmthermal",
+            "Radiometric recording (*.lmthermal)", options=QFileDialog.Option.DontConfirmOverwrite)
+        if not selected:
+            return
+        if (self.worker is None or self.offline_capture is not None
+                or self.logger is not None or self.recorder is not None):
+            return
+        path = Path(selected)
+        if not path.suffix:
+            path = path.with_suffix(".lmthermal")
+        try:
+            self.recorder = RadiometricRecorder(
+                path, rate_hz=self.record_rate_combo.currentData(),
+                observation=self.observation, roi=self.image_widget.roi,
+                camera_identity=self.device_label.text() if self.observation is not None else None)
+        except (OSError, ValueError) as exc:
+            QMessageBox.warning(self, "Cannot start recording", str(exc))
+            return
+        self._sync_logging_controls()
+        self._update_recording_status()
+
+    def _stop_recording(self, reason="operator_stop") -> bool:
+        if self.recorder is None:
+            return True
+        recorder = self.recorder
+        try:
+            status = recorder.stop(reason)
+        except TimeoutError as exc:
+            self.record_status_label.setText(str(exc))
+            return False
+        except OSError as exc:
+            self.record_status_label.setText(f"Recording incomplete: {exc}\n{recorder.directory}")
+            self.recorder = None
+            self._sync_logging_controls()
+            return True
+        self.recorder = None
+        self.record_status_label.setText(
+            f"Complete: {status.duration_s:.1f} s, {status.requested_samples} samples, "
+            f"{status.valid_frames} stored, {status.gaps} gaps, {status.dropped} dropped\n{status.directory}")
+        self._sync_logging_controls()
+        return True
+
+    def _update_recording_status(self) -> None:
+        if self.recorder is None:
+            return
+        status = self.recorder.status
+        if status.state != "recording":
+            self._stop_recording()
+            return
+        self.record_status_label.setText(
+            f"Recording: {status.duration_s:.1f} s, {status.requested_samples} samples\n"
+            f"{status.valid_frames} committed, {status.gaps} gaps, {status.dropped} dropped\n"
+            f"Queue {status.queue_depth}/4; chunks {status.bytes_written/1e6:.2f} MB\n{status.directory}")
+
     def _on_connected(self, device: str) -> None:
         if self.sender() is self.worker and self.offline_capture is None:
             self.device_label.setText(device)
@@ -734,7 +829,7 @@ class MainWindow(QMainWindow):
         """Release acquisition first; load matrices without connecting a camera."""
         self._auto_connect_timer.stop()
         self.stop_camera()
-        if self.worker is not None or self.logger is not None:
+        if self.worker is not None or self.logger is not None or self.recorder is not None:
             return False
         self.close_capture()
         try:
@@ -834,7 +929,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Saved rendered PNG only: {saved}", 10000)
 
     def closeEvent(self, event) -> None:
-        if not self._stop_logging("window_closed"):
+        if not self._stop_recording("window_closed") or not self._stop_logging("window_closed"):
             event.ignore()
             return
         self.stop_camera()

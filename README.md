@@ -283,3 +283,18 @@ temperature approximation is not used by `lmthermal_viewer.py`.
 ## License
 
 To be determined.
+
+## Radiometric sequence recording
+
+In the live viewer, scroll to **Radiometric recording**. Select 1/2/5/10/25 Hz
+(default 5; 25 experimental), choose **Start recording…** and a new `.lmthermal`
+directory, then **Stop recording**. This stores exact native raw14/float32
+measurement matrices, per-frame settings, ROI summaries and valid/gap/drop
+history in compressed 16-frame chunks. A four-frame handoff bounds backlog;
+overload produces explicit drops. CSV scalar logging and matrix recording are
+mutually exclusive. Closing/disconnecting/opening an offline still finalizes
+recording. Still-capture v1 is unchanged; playback UI is deferred.
+
+See [recording v1 documentation](docs/RADIOMETRIC_RECORDING_FORMAT.md) for the
+hardware-independent loader, recovery rules and measured storage tradeoffs.
+Native-equivalent temperatures; absolute physical accuracy not yet independently validated.

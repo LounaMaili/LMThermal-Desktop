@@ -182,3 +182,10 @@ valid = [row for row in rows if row["measurement_valid"] == "true"]
 ```
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## Coexistence with radiometric recording
+
+The new [sequence recorder](RADIOMETRIC_RECORDING_FORMAT.md) stores raw14 and
+Celsius matrices in chunks and has its own timeline/manifest. In v1, CSV logging
+and sequence recording are mutually exclusive in the viewer; stop one before
+starting the other. CSV schema and completion semantics remain unchanged.

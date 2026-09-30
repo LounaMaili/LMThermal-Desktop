@@ -395,6 +395,70 @@ class MVPWindowTests(unittest.TestCase):
                 self.assertEqual(metadata["stop_reason"], reason)
                 self.window.close_capture()
 
+    def start_test_recording(self, root):
+        with patch.object(CameraWorker, "start"):
+            self.window.connect_camera()
+        ready = FrameObservation(HAND, 0, SessionState.RADIOMETRIC_READY,
+                                 inspect_frame(HAND), False, None, self.measured)
+        self.window.worker._publish(ready)
+        with patch("lmthermal_viewer.QFileDialog.getSaveFileName",
+                   return_value=(str(Path(root)/"recording.lmthermal"), "")):
+            self.window.start_record_button.click()
+        return self.window.recorder
+
+    def test_recording_controls_latest_roi_and_csv_exclusion(self):
+        with TemporaryDirectory() as root:
+            recorder = self.start_test_recording(root)
+            self.assertIsNotNone(recorder)
+            self.assertEqual(recorder.rate_hz, 5)
+            self.assertFalse(self.window.start_log_button.isEnabled())
+            self.assertFalse(self.window.start_record_button.isEnabled())
+            self.assertTrue(self.window.stop_record_button.isEnabled())
+            self.assertFalse(self.window.record_rate_combo.isEnabled())
+            with patch("lmthermal_viewer.QFileDialog.getSaveFileName") as dialog:
+                self.window._start_logging()
+                dialog.assert_not_called()
+            self.window.image_widget.set_roi(NativeROI(10,20,30,40))
+            self.assertEqual(recorder._latest[1], NativeROI(10,20,30,40))
+            self.window.worker._publish(replace(self.window.observation))
+            self.assertIs(recorder._latest[0], self.window.observation)
+            self.window.stop_record_button.click()
+            self.assertIsNone(self.window.recorder)
+            self.assertIn("Complete",self.window.record_status_label.text())
+            self.assertTrue(self.window.start_log_button.isEnabled())
+            self.window.stop_camera()
+            self.assertFalse(self.window.start_record_button.isEnabled())
+
+    def test_active_csv_blocks_radiometric_recording(self):
+        with TemporaryDirectory() as root:
+            self.start_test_log(root)
+            self.assertFalse(self.window.start_record_button.isEnabled())
+            with patch("lmthermal_viewer.QFileDialog.getSaveFileName") as dialog:
+                self.window._start_recording()
+                dialog.assert_not_called()
+            self.window._stop_logging()
+
+    def test_disconnect_close_and_offline_finalize_recording(self):
+        for action, reason in (("disconnect", "camera_disconnect"),
+                               ("close", "window_closed"), ("offline", "camera_disconnect")):
+            with self.subTest(action=action), TemporaryDirectory() as root:
+                recorder=self.start_test_recording(root)
+                if action == "disconnect": self.window.stop_camera()
+                elif action == "close": self.window.close()
+                else:
+                    self.assertTrue(self.window.open_capture(self.saved_capture(root)))
+                    with patch("lmthermal_viewer.QFileDialog.getSaveFileName") as dialog:
+                        self.window._start_recording()
+                        dialog.assert_not_called()
+                    self.assertFalse(self.window.start_record_button.isEnabled())
+                self.assertIsNone(self.window.recorder)
+                self.assertFalse(recorder._writer_thread.is_alive())
+                self.assertFalse(recorder._sampler_thread.is_alive())
+                metadata=json.loads((Path(root)/"recording.lmthermal/manifest.json").read_text())
+                self.assertTrue(metadata["completed"])
+                self.assertEqual(metadata["stop_reason"],reason)
+                self.window.close_capture()
+
     def test_worker_coalesces_gui_notifications_and_stops_publication(self):
         worker = CameraWorker()
         emissions = []

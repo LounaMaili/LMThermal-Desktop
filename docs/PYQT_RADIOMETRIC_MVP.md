@@ -238,3 +238,17 @@ matrix comparison. Resizing retained alignment with the same scene region.
 Changing palette and switching auto/locked Celsius range changed visualization
 while min/max/mean remained unchanged for the same frame and region. This
 completes the live ROI interaction and presentation validation.
+
+## Radiometric sequence recording
+
+**Radiometric recording** is a separate live-only group below the CSV logger.
+Choose 1/2/5/10/25 Hz (default 5), start a new `.lmthermal` directory, and stop
+without restarting acquisition. It preserves original raw14 and float32
+Celsius matrices in bounded compressed chunks, per-frame parameters and a
+valid/gap/drop timeline. The UI shows committed-frame counts, gaps, drops,
+queue depth and approximate chunk bytes. Scroll the side panel to see controls.
+CSV logging and matrix recording are mutually exclusive in v1; neither changes
+still-capture semantics. Offline opening/disconnect/close finalize the active
+recorder. 25 Hz is experimental, and readiness is never weakened for recording.
+See [recording v1](RADIOMETRIC_RECORDING_FORMAT.md) for format, loader, memory
+bounds, interruption behavior, benchmark and live storage figures.
