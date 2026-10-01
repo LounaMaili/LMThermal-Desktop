@@ -4,7 +4,7 @@
 
 This is the primary development repository for the LMThermal desktop application for the Infiray HT-301 / T3-317-13 thermal camera.
 
-When the sibling repository `LMThermal` is available in the same workspace, treat it as the source of truth for hardware reverse engineering, thermometry research, protocol documentation, and functional specifications.
+When the sibling repository `LMThermal` is available in the same workspace, treat it as the primary Android product repository and the source of truth for hardware reverse engineering, thermometry research, protocol documentation, and functional specifications. This Desktop repository is the executable reference/diagnostic implementation, not the final product target.
 
 Before changing camera parsing or thermometry, read the relevant documentation from `LMThermal`, especially:
 
