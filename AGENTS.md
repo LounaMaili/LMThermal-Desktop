@@ -146,6 +146,42 @@ Only then continue the desktop MVP:
 
 Advanced measurement regions, CSV/radiometric exports, recording, gallery/comparison, and Android work come later.
 
+## Code readability and human maintainability
+
+The codebase must remain understandable to a human developer who did not participate in the reverse-engineering work. Prefer clarity over cleverness.
+
+### Comments and docstrings
+
+Add meaningful comments or docstrings when code encodes:
+
+- non-obvious HT-301 protocol behavior or camera-specific invariants;
+- binary offsets, trailer fields, UVC controls, timing requirements, or state transitions;
+- measurement-validity and frame-rejection rules;
+- threading, synchronization, buffering, or lifecycle decisions;
+- coordinate transforms or distinctions between native measurement data and presentation-only transforms;
+- thermometry formulas and floating-point behavior that must match validated reference behavior;
+- platform/device workarounds whose rationale would otherwise be lost.
+
+Comments should explain **why** a behavior exists, what evidence or invariant it protects, and what must not be simplified casually. Do not comment obvious syntax or restate trivial code.
+
+### Named constants instead of unexplained magic values
+
+Do not scatter unexplained camera-specific numbers through implementation code. Frame dimensions, byte offsets, UVC control values, trailer locations, thresholds, and timing values must use descriptive constants where practical.
+
+When a value is reverse-engineered or non-obvious, add a short rationale/source comment or reference the relevant LMThermal documentation. Values such as the radiometric initialization controls `32772`, `32800`, and `32768` must not appear as unexplained literals throughout the codebase.
+
+### Structure and naming
+
+Prefer descriptive identifiers and focused functions. If one function mixes USB/camera I/O, frame parsing, session-state decisions, thermometry, and rendering, split responsibilities instead of compensating with a large comment block.
+
+Public or architecturally important classes/functions should document their responsibility, important invariants, coordinate/data semantics, ownership/lifetime where relevant, and failure states. Do not add verbose documentation to trivial private helpers merely to satisfy a quota.
+
+### Reverse-engineered behavior
+
+When implementation behavior comes from validated LMThermal research or the Desktop reference path, leave enough context for a future maintainer to recognize that unusual behavior is intentional. Reference the corresponding research/documentation file when useful rather than duplicating large notes in source code.
+
+A future maintainer should be able to understand what a component does, why unusual camera-specific behavior exists, which assumptions are confirmed facts versus unresolved approximations, and which parts must not be changed casually without reproducing the underlying evidence.
+
 ## Testing
 
 Measurement code should be testable without the physical camera for every run.
