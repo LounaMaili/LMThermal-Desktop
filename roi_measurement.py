@@ -89,6 +89,10 @@ def current_roi_statistics(observation: "FrameObservation | OfflineCapture | Non
                            roi: NativeROI | None) -> ROIStatistics | None:
     """Use a saved matrix or a currently ready live measurement, never display pixels."""
     from mvp_presentation import current_measurement
+    from offline_measurement import OfflineMeasurement, Rectangle
+    if isinstance(observation, OfflineMeasurement):
+        if roi is None: return None
+        return observation.roi_statistics(Rectangle(roi.x1, roi.y1, roi.x2, roi.y2))
 
     measurement = current_measurement(observation)
     if roi is None or measurement is None:

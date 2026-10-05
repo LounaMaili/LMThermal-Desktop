@@ -10,8 +10,36 @@ which holds the hardware and reverse-engineering documentation.
 
 ## Requirements
 
-Use the repository virtual environment when available. The desktop viewer
-needs Python, OpenCV, NumPy and PyQt6.
+Use the repository virtual environment when available. Python 3.10 or newer
+and the dependencies in [requirements.txt](requirements.txt) are required
+(NumPy, OpenCV, PyQt6 and Pillow for bounded PNG/JPEG validation).
+
+```bash
+./.venv/bin/python -m pip install -r requirements.txt
+```
+
+## Camera-free LMTX still analysis
+
+Open Android-exported LMThermal Exchange Format v1 captures without a camera:
+
+```bash
+./.venv/bin/python lmthermal_viewer.py --lmtx /path/to/capture.lmtx
+```
+
+Use **Open still capture (.lmtx / legacy)** in an existing window. The strict
+reader validates the complete archive before displaying data. Saved float32
+Celsius values are authoritative; importing never rebuilds thermometry.
+Hover and half-open rectangular ROI use the imported native geometry and
+validity mask. Palette/range and saved rotation/mirroring affect presentation
+only. Preview-only captures have no Celsius readings or legend. PNG rerender
+saves separately; analysis edits stay in memory and never modify the source.
+
+The exact 11 Android conformance files and a real Pixel-exported capture pass
+Linux validation, including operator hover/ROI/resize/presentation checks.
+**Real Windows offline validation remains pending**; no Windows camera driver
+is provided. See [LMTX import architecture and validation](docs/LMTX_IMPORT.md)
+for the canonical specification, resource limits, interoperability evidence,
+Windows commands and legacy-format coexistence.
 
 ## Radiometric desktop MVP
 
@@ -77,7 +105,7 @@ Saved captures can be inspected without the camera:
 ./.venv/bin/python lmthermal_viewer.py --capture /path/to/capture.json
 ```
 
-Alternatively use **Open radiometric capture**. Opening releases any live
+Alternatively use **Open still capture (.lmtx / legacy)**. Opening releases any live
 camera first. **Close saved capture** returns to disconnected mode; **Connect
 camera** closes the saved view. The sidebar identifies **Saved capture** and
 **Offline — no camera**. The loader verifies the complete v1 set and hashes,

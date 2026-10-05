@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import math
 import sys
 import time
 from datetime import datetime
@@ -20,13 +21,19 @@ from celsius_palette import (DEFAULT_PALETTE, PALETTES, CelsiusRange,
 from measurement_logger import MeasurementLogger, SUPPORTED_RATES
 from radiometric_recorder import RadiometricRecorder
 from radiometric_recording import RATES as RECORDING_RATES
-from mvp_camera_worker import CameraWorker
+# Acquisition modules (including Linux-only ioctl code) are loaded only on Connect.
+def CameraWorker(*args, **kwargs):
+    from mvp_camera_worker import CameraWorker as Worker
+    return Worker(*args, **kwargs)
+
+from offline_measurement import OfflineMeasurement, Geometry, Rectangle, Transform, adapt_legacy, save_offline_png
+from offline_load_worker import OfflineLoadWorker
+from lmtx_json import dumps as metadata_text
 from playback_worker import PlaybackWorker
-from radiometric_playback import PlaybackFrame, save_playback_png
 from mvp_presentation import (current_extrema, current_measurement, current_reading, display_image,
                               image_viewport, native_edge_to_widget,
                               native_to_widget, widget_to_native)
-from radiometric_capture import CaptureError, load_capture, save_rendered_image
+from radiometric_capture import CaptureError, load_capture
 from radiometric_export import ACCURACY_WARNING, export_capture, snapshot_capture
 from radiometric_session import SessionState
 from roi_measurement import NativeROI, current_roi_statistics, roi_from_native_pixels
@@ -66,12 +73,26 @@ class ThermalImageWidget(QWidget):
         self._roi_anchor = None
         self.set_roi(None)
 
+    def _geometry(self):
+        return self.observation.geometry if isinstance(self.observation, OfflineMeasurement) else Geometry(384, 288)
+
+    def _mapping(self):
+        return {'geometry': self._geometry(),
+                'transform': self.observation.transform if isinstance(self.observation, OfflineMeasurement) else Transform()}
+
+    def _rectangle(self, first, last):
+        if not isinstance(self.observation, OfflineMeasurement):
+            return roi_from_native_pixels(first, last)
+        x1, x2 = sorted((first[0], last[0]))
+        y1, y2 = sorted((first[1], last[1]))
+        return Rectangle(x1, y1, x2+1, y2+1).validate(self._geometry())
+
     def _drag_roi(self, position) -> None:
         if self._roi_anchor is not None:
             endpoint = widget_to_native(position.x(), position.y(), self.width(),
-                                         self.height(), clip=True)
+                                         self.height(), clip=True, **self._mapping())
             if endpoint is not None:
-                self.set_roi(roi_from_native_pixels(self._roi_anchor, endpoint))
+                self.set_roi(self._rectangle(self._roi_anchor, endpoint))
 
     def set_presentation(self, palette: str, automatic: bool,
                          locked_lower: float, locked_upper: float) -> None:
@@ -97,6 +118,15 @@ class ThermalImageWidget(QWidget):
         self.effective_bounds = None
         if observation is None:
             self.image = None
+        elif isinstance(observation, OfflineMeasurement):
+            bounds = None
+            if observation.has_readings:
+                bounds = self._restored_bounds or (observation.auto_bounds() if self.automatic_range else
+                                                  CelsiusRange(self.locked_lower, self.locked_upper))
+            rgb = observation.render(self.palette, bounds)
+            self.image = None if rgb is None else QImage(rgb.data, rgb.shape[1], rgb.shape[0], rgb.strides[0],
+                                                        QImage.Format.Format_RGB888).copy()
+            self.effective_bounds = bounds
         elif current_measurement(observation) is not None:
             matrix = current_measurement(observation).temperature_c
             bounds = self._restored_bounds or effective_range(
@@ -113,7 +143,7 @@ class ThermalImageWidget(QWidget):
 
     def _move(self, position) -> None:
         self._mouse_widget = position
-        self.pointer = widget_to_native(position.x(), position.y(), self.width(), self.height())
+        self.pointer = widget_to_native(position.x(), position.y(), self.width(), self.height(), **self._mapping())
         self.hovered.emit(self.pointer)
         self.update()
 
@@ -126,7 +156,7 @@ class ThermalImageWidget(QWidget):
             self._move(event.position())
             if self.image is not None and self.pointer is not None:
                 self._roi_anchor = self.pointer
-                self.set_roi(roi_from_native_pixels(self.pointer, self.pointer))
+                self.set_roi(self._rectangle(self.pointer, self.pointer))
 
     def mouseReleaseEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
@@ -146,10 +176,43 @@ class ThermalImageWidget(QWidget):
         super().resizeEvent(event)
 
     def _marker(self, painter, point, color, radius=8) -> None:
-        x, y = native_to_widget(*point, self.width(), self.height())
+        x, y = native_to_widget(*point, self.width(), self.height(), **self._mapping())
         painter.setPen(QPen(color, 2))
         painter.drawLine(QPointF(x - radius, y), QPointF(x + radius, y))
         painter.drawLine(QPointF(x, y - radius), QPointF(x, y + radius))
+
+    def _saved_analysis(self, painter):
+        """Paint understood native annotations; future shapes remain metadata."""
+        if not isinstance(self.observation, OfflineMeasurement):
+            return
+        analysis = self.observation.manifest.get('analysis', {})
+        anchors = {}
+        for point in analysis.get('points', ()):
+            if point['coordinate_space'] != 'native':
+                continue
+            anchors[point['id']] = (point['x_px'], point['y_px'])
+            self._marker(painter, anchors[point['id']], QColor('white'), 4)
+        for shape in analysis.get('shapes', ()):
+            if shape['type'] != 'rectangle' or shape['coordinate_space'] != 'native':
+                continue
+            b = shape['bounds']
+            first = native_edge_to_widget(b['x1_px'], b['y1_px'], self.width(), self.height(), **self._mapping())
+            last = native_edge_to_widget(b['x2_px'], b['y2_px'], self.width(), self.height(), **self._mapping())
+            painter.setPen(QPen(QColor('white'), 1, Qt.PenStyle.DashLine))
+            painter.drawRect(QRectF(QPointF(*first), QPointF(*last)).normalized())
+            anchors[shape['id']] = (b['x1_px'], b['y1_px'])
+        for annotation in analysis.get('annotations', ()):
+            if annotation['coordinate_space'] != 'native':
+                continue
+            anchor = annotation.get('anchor')
+            point = ((anchor['x_px'], anchor['y_px']) if anchor else
+                     anchors.get(annotation.get('target_id')))
+            if point is None:
+                continue
+            x, y = native_to_widget(*point, self.width(), self.height(), **self._mapping())
+            painter.setPen(QColor('white'))
+            # drawText is plain text: no HTML, external resource or script handling.
+            painter.drawText(QPointF(x+6, y-6), annotation['text'])
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)
@@ -158,19 +221,20 @@ class ThermalImageWidget(QWidget):
             painter.setPen(QColor("white"))
             painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, self.empty_text)
             return
-        area = image_viewport(self.width(), self.height())
+        area = image_viewport(self.width(), self.height(), **self._mapping())
         painter.drawImage(QRectF(area.left, area.top, area.width, area.height), self.image)
+        self._saved_analysis(painter)
         if self.roi is not None:
             left, top = native_edge_to_widget(self.roi.x1, self.roi.y1,
-                                               self.width(), self.height())
+                                               self.width(), self.height(), **self._mapping())
             right, bottom = native_edge_to_widget(self.roi.x2, self.roi.y2,
-                                                   self.width(), self.height())
-            rectangle = QRectF(left, top, right - left, bottom - top)
+                                                   self.width(), self.height(), **self._mapping())
+            rectangle = QRectF(min(left, right), min(top, bottom), abs(right-left), abs(bottom-top))
             painter.setPen(QPen(QColor("black"), 4))
             painter.drawRect(rectangle)
             painter.setPen(QPen(QColor(80, 255, 150), 2))
             painter.drawRect(rectangle)
-        self._marker(painter, (192, 144), QColor(255, 220, 0), 10)
+        self._marker(painter, (self._geometry().width//2, self._geometry().height//2), QColor(255, 220, 0), 10)
         extrema = current_extrema(self.observation)
         if extrema is not None:
             self._marker(painter, extrema[0][0], QColor(255, 70, 70))
@@ -178,8 +242,9 @@ class ThermalImageWidget(QWidget):
         reading = current_reading(self.observation, self.pointer)
         if reading is not None:
             self._marker(painter, (reading.x, reading.y), QColor("white"), 4)
-            text = f"({reading.x},{reading.y}) raw {reading.raw14}; {reading.native_equivalent_c:.2f} °C"
-            x, y = native_to_widget(reading.x, reading.y, self.width(), self.height())
+            native = f" raw {reading.raw14};" if reading.raw14 is not None else ''
+            text = f"({reading.x},{reading.y}){native} {reading.native_equivalent_c:.2f} °C"
+            x, y = native_to_widget(reading.x, reading.y, self.width(), self.height(), **self._mapping())
             box_width = painter.fontMetrics().horizontalAdvance(text) + 12
             left = min(max(area.left, x + 12), area.left + area.width - box_width)
             top = min(max(area.top, y + 12), area.top + area.height - 24)
@@ -240,6 +305,8 @@ class MainWindow(QMainWindow):
         self.logger = None
         self.recorder = None
         self.offline_capture = None
+        self.offline_loader = None
+        self._offline_token = 0
         self.playback = None
         self.playback_worker = None
         self._playback_token = 0
@@ -322,7 +389,7 @@ class MainWindow(QMainWindow):
         self.connect_button = QPushButton("Connect camera")
         self.connect_button.clicked.connect(self._toggle_camera)
         side.addWidget(self.connect_button)
-        self.open_capture_button = QPushButton("Open radiometric capture")
+        self.open_capture_button = QPushButton("Open still capture (.lmtx / legacy)")
         self.open_capture_button.clicked.connect(self._choose_capture)
         side.addWidget(self.open_capture_button)
         self.open_recording_button = QPushButton("Open radiometric recording")
@@ -482,12 +549,15 @@ class MainWindow(QMainWindow):
 
     def connect_camera(self) -> None:
         """Start read-only display acquisition before any explicit control write."""
+        if not sys.platform.startswith('linux'):
+            self.statusBar().showMessage('Live HT-301 acquisition is Linux-only; open a saved capture for offline analysis', 10000)
+            return
         if (self.worker is not None or not self._stop_recording("camera_reconnect")
                 or not self._stop_logging("camera_reconnect")):
             return
         if not self.close_recording():
             return
-        self.close_capture()
+        if not self.close_capture(): return
         self.image_widget.empty_text = "Camera disconnected"
         self._had_error = False
         self.init_requested = False
@@ -610,6 +680,19 @@ class MainWindow(QMainWindow):
     def _show_measurement(self, measurement) -> None:
         if measurement is None:
             self._clear_measurements()
+        elif isinstance(measurement, OfflineMeasurement):
+            self._clear_measurements()
+            if measurement.has_readings:
+                self.high_label.setText(f"{measurement.high_c:.2f} °C at {measurement.high_xy}")
+                self.low_label.setText(f"{measurement.low_c:.2f} °C at {measurement.low_xy}")
+                center = measurement.literal_center_c
+                if center is not None:
+                    coordinate = (measurement.geometry.width//2, measurement.geometry.height//2)
+                    raw = f"raw {measurement.literal_center_index}, " if measurement.literal_center_index is not None else ''
+                    self.center_pixel_label.setText(f"{center:.2f} °C ({raw}{coordinate})")
+                if measurement.reported_center is not None:
+                    self.trailer_center_label.setText(f"{measurement.trailer_center_c:.2f} °C (raw {measurement.trailer_center_index})")
+                self._update_cursor()
         else:
             self.high_label.setText(f"{measurement.high_c:.2f} °C at {measurement.high_xy}")
             self.low_label.setText(f"{measurement.low_c:.2f} °C at {measurement.low_xy}")
@@ -642,11 +725,16 @@ class MainWindow(QMainWindow):
 
     def _update_roi(self) -> None:
         stats = current_roi_statistics(self.observation, self.image_widget.roi)
-        self.roi_values_label.setText("Unavailable" if stats is None else
-                                     f"Min: {stats.min_c:.2f} °C at {stats.min_xy}\n"
-                                     f"Max: {stats.max_c:.2f} °C at {stats.max_xy}\n"
-                                     f"Mean: {stats.mean_c:.2f} °C\n"
-                                     f"Pixels: {stats.pixel_count}")
+        if stats is None:
+            self.roi_values_label.setText('Unavailable')
+        elif stats.min_c is None:
+            self.roi_values_label.setText(f'Unavailable\nPixels: {stats.pixel_count}; valid: {stats.valid_pixel_count}')
+        else:
+            self.roi_values_label.setText(f"Min: {stats.min_c:.2f} °C at {stats.min_xy}\n"
+                                          f"Max: {stats.max_c:.2f} °C at {stats.max_xy}\n"
+                                          f"Mean: {stats.mean_c:.2f} °C\n"
+                                          f"Pixels: {stats.pixel_count}" +
+                                          (f"; valid: {stats.valid_pixel_count}" if hasattr(stats, 'valid_pixel_count') else ''))
 
     def _save_capture(self) -> None:
         """Freeze the displayed ready frame before opening the destination dialog."""
@@ -684,12 +772,18 @@ class MainWindow(QMainWindow):
         self.max_spin.setEnabled(not automatic)
         self._apply_presentation()
 
+    def _range_gap(self):
+        # QDoubleSpinBox rounds constraints to its configured decimal precision.
+        # A sub-precision nextafter constraint can collapse Min and Max together.
+        return max(10.0**(-self.min_spin.decimals()), math.ulp(self.min_spin.value()),
+                   math.ulp(self.max_spin.value()))
+
     def _range_changed(self) -> None:
         """Keep manual Celsius bounds ordered, even during interactive edits."""
         if self.sender() is self.min_spin:
-            self.max_spin.setMinimum(self.min_spin.value() + .01)
+            self.max_spin.setMinimum(self.min_spin.value() + self._range_gap())
         elif self.sender() is self.max_spin:
-            self.min_spin.setMaximum(self.max_spin.value() - .01)
+            self.min_spin.setMaximum(self.max_spin.value() - self._range_gap())
         self._apply_presentation()
 
     def _apply_presentation(self) -> None:
@@ -714,8 +808,9 @@ class MainWindow(QMainWindow):
 
     def _update_cursor(self) -> None:
         reading = current_reading(self.observation, self.pointer)
+        native = f" raw {reading.raw14};" if reading is not None and reading.raw14 is not None else ''
         self.cursor_label.setText("Unavailable" if reading is None else
-                                  f"({reading.x},{reading.y}) raw {reading.raw14}; "
+                                  f"({reading.x},{reading.y}){native} "
                                   f"{reading.native_equivalent_c:.2f} °C")
 
     def _update_fps(self) -> None:
@@ -891,7 +986,7 @@ class MainWindow(QMainWindow):
             return False
         if not self.close_recording():
             return False
-        self.close_capture()
+        if not self.close_capture(): return False
         self.playback_group.show()
         self.playback_status_label.setText("Validating manifest, timeline and committed chunks…")
         self.image_widget.empty_text = "Opening recording…"
@@ -986,19 +1081,19 @@ class MainWindow(QMainWindow):
         model = self.playback
         entry = model.entries[index] if model.entries else None
         completion = "Complete" if model.completed else "INCOMPLETE — recovered committed chunks"
-        self.observation = frame
+        self.observation = adapt_legacy(frame) if frame is not None else None
         reason = "Empty recording" if entry is None else {
             "valid": "Valid recorded matrix", "gap": "Invalid camera/session gap",
             "drop": "Recorder drop", "uncommitted": "Uncommitted matrix unavailable"}[entry.kind]
         self.image_widget.empty_text = reason + (f"\n{entry.reason}" if entry else "")
-        self.image_widget.set_observation(frame)
+        self.image_widget.set_observation(self.observation)
         self._restoring_roi = True
         try:
             self.image_widget.set_roi(entry.roi if entry else None)
         finally:
             self._restoring_roi = False
         self._sync_legend()
-        self._show_measurement(frame)
+        self._show_measurement(self.observation)
         self.render_button.setEnabled(frame is not None)
         self.render_button.setText("Save selected frame PNG…")
         self.state_label.setText(f"{completion}\n{reason}" + (f" — {entry.reason}" if entry else ""))
@@ -1079,24 +1174,76 @@ class MainWindow(QMainWindow):
 
     def _choose_capture(self) -> None:
         selected, _ = QFileDialog.getOpenFileName(
-            self, "Open radiometric capture", "", "Capture completion marker (*.json)")
+            self, "Open still capture", "", "Still capture (*.lmtx *.json);;All files (*)")
         if selected:
             self.open_capture(Path(selected))
 
     def open_capture(self, path: Path) -> bool:
         """Release acquisition first; load matrices without connecting a camera."""
+        path = Path(path)
+        try:
+            with path.open('rb') as stream:
+                zip_header = stream.read(4) == b'PK\x03\x04'
+        except OSError:
+            zip_header = False
+        if path.suffix.lower() == '.lmtx' or zip_header:
+            return self.open_lmtx(path)
         self._auto_connect_timer.stop()
         self.stop_camera()
         if self.worker is not None or self.logger is not None or self.recorder is not None:
             return False
         if not self.close_recording():
             return False
-        self.close_capture()
+        if not self.close_capture(): return False
         try:
-            capture = load_capture(path)
+            capture = adapt_legacy(load_capture(path))
         except CaptureError as exc:
             QMessageBox.warning(self, "Cannot open radiometric capture", str(exc))
             return False
+        return self._publish_offline(capture)
+
+    def open_lmtx(self, path):
+        self._auto_connect_timer.stop()
+        self.stop_camera()
+        if self.worker is not None or self.logger is not None or self.recorder is not None: return False
+        if not self.close_recording() or not self.close_capture(): return False
+        self.observation = None
+        self.image_widget.empty_text = 'Validating LMTX…'
+        self.image_widget.set_observation(None)
+        self.image_widget.clear_roi()
+        self._clear_measurements()
+        self._sync_legend()
+        self.device_label.setText('Offline — no camera')
+        self.state_label.setText('Validating LMTX…')
+        self.initialize_button.setEnabled(False)
+        self.capture_button.setEnabled(False)
+        self.render_button.setEnabled(False)
+        self._offline_token += 1
+        worker = OfflineLoadWorker(path, self._offline_token, self)
+        worker.result_available.connect(self._on_offline_result)
+        self.offline_loader = worker
+        self.close_capture_button.setEnabled(True)
+        worker.start()
+        self._sync_logging_controls()
+        return True
+
+    def _on_offline_result(self):
+        worker = self.offline_loader
+        if worker is None or self.sender() is not worker or worker.result is None: return
+        token, capture, timings, error = worker.result
+        if token != self._offline_token: return
+        if error:
+            self.state_label.setText('LMTX import failed: '+error)
+            self.observation = None
+            self.image_widget.set_observation(None)
+            self._clear_measurements()
+            self._sync_legend()
+            self.render_button.setEnabled(False)
+        else:
+            self._publish_offline(capture)
+            self.statusBar().showMessage(f"LMTX validated in {timings['total_ms']:.1f} ms", 10000)
+
+    def _publish_offline(self, capture):
         self.offline_capture = capture
         self.observation = capture
         self.pointer = None
@@ -1104,14 +1251,18 @@ class MainWindow(QMainWindow):
         self.image_widget._mouse_widget = None
         controls = (self.palette_combo, self.auto_range_check, self.min_spin, self.max_spin)
         blockers = [QSignalBlocker(control) for control in controls]
-        bounds = capture.original_bounds
+        bounds = capture.original_bounds or capture.auto_bounds() or CelsiusRange(20, 40)
         # Expand spin limits when reopening an uncommon but finite stored range.
+        span = bounds.upper-bounds.lower
+        decimals = max(2, min(323, 3-math.floor(math.log10(span)))) if math.isfinite(span) else 2
+        self.min_spin.setDecimals(decimals)
+        self.max_spin.setDecimals(decimals)
         self.min_spin.setRange(min(-273.15, bounds.lower), max(999.99, bounds.upper))
         self.max_spin.setRange(min(-273.14, bounds.lower), max(1000.0, bounds.upper))
         self.min_spin.setValue(bounds.lower)
         self.max_spin.setValue(bounds.upper)
-        self.min_spin.setMaximum(bounds.upper - .01)
-        self.max_spin.setMinimum(bounds.lower + .01)
+        self.min_spin.setMaximum(bounds.upper - self._range_gap())
+        self.max_spin.setMinimum(bounds.lower + self._range_gap())
         self.palette_combo.setCurrentText(capture.original_palette)
         self.auto_range_check.setChecked(capture.automatic_range)
         self.min_spin.setEnabled(not capture.automatic_range)
@@ -1119,6 +1270,7 @@ class MainWindow(QMainWindow):
         del blockers
         self.image_widget.set_presentation(capture.original_palette, capture.automatic_range,
                                            bounds.lower, bounds.upper)
+        self.image_widget.empty_text = 'No primary image / generic analysis unavailable'
         self.image_widget.set_observation(capture, restored_bounds=bounds)
         self.image_widget.set_roi(capture.roi)
         self._sync_legend()
@@ -1128,17 +1280,29 @@ class MainWindow(QMainWindow):
         for button in (self.close_capture_button, self.render_button, self.metadata_button):
             button.setEnabled(True)
         self.device_label.setText("Offline — no camera")
+        source = capture.manifest['source']
         self.state_label.setText(f"Saved capture: {capture.source_path.name}\n"
-                                 f"{capture.metadata['captured_at_utc']}")
-        self.mode_label.setText("Saved raw14 / native-equivalent matrix")
+                                 f"{source['module_id']} / {source['model_id']} / {source['origin']}")
+        warning = capture.accuracy_warning or f"Provenance: {dict(capture.provenance)}"
+        self.mode_label.setText(f"{capture.geometry.width} × {capture.geometry.height} | {capture.format_id}\n{warning}" +
+                               (f"\nUnknown palette {capture.original_palette_id}; using White hot" if capture.palette_fallback else ''))
+        self.render_button.setEnabled(self.image_widget.image is not None)
         self.fps_label.setText("—")
         self._sync_logging_controls()
         return True
 
-    def close_capture(self) -> None:
+    def close_capture(self) -> bool:
         """Return to disconnected mode; never auto-connect or retain saved readings."""
-        if self.offline_capture is None:
-            return
+        self._offline_token += 1
+        loader = self.offline_loader
+        if loader is not None:
+            loader.request_stop()
+            if not loader.wait(10000):
+                self.state_label.setText('Still closing offline loader; wait before switching')
+                return False
+            self.offline_loader = None
+            loader.deleteLater()
+        if self.offline_capture is None and loader is None: return True
         self.offline_capture = None
         self.observation = None
         self.pointer = None
@@ -1154,34 +1318,35 @@ class MainWindow(QMainWindow):
         self.state_label.setText("Disconnected")
         self.mode_label.setText("—")
         self.fps_label.setText("—")
+        return True
 
     def _show_metadata(self) -> None:
         if self.offline_capture is None and self.playback is None:
             return
-        metadata = self.offline_capture.metadata if self.offline_capture else {
+        metadata = self.offline_capture.diagnostic_metadata if self.offline_capture else {
             "manifest": self.playback.recording.manifest,
             "timeline_entry": self.playback.recording.timeline[self.playback.index] if self.playback.entries else None,
-            "frame": self.observation.metadata if isinstance(self.observation, PlaybackFrame) else None}
+            "frame": self.observation.diagnostic_metadata if isinstance(self.observation, OfflineMeasurement) else None}
         dialog = QDialog(self)
         dialog.setWindowTitle("Saved capture metadata — original" if self.offline_capture else "Recording/sample metadata — original")
         dialog.resize(680, 640)
         layout = QVBoxLayout(dialog)
         text = QPlainTextEdit()
         text.setReadOnly(True)
-        text.setPlainText(json.dumps(metadata, indent=2, sort_keys=True))
+        text.setPlainText(metadata_text(metadata))
         layout.addWidget(text)
         dialog.exec()
 
     def _save_rendered(self) -> None:
-        capture = self.offline_capture or (self.observation if isinstance(self.observation, PlaybackFrame) else None)
+        capture = self.offline_capture or (self.observation if isinstance(self.observation, OfflineMeasurement) else None)
         bounds = self.image_widget.effective_bounds
-        if capture is None or bounds is None:
+        if capture is None:
             return
         palette = self.image_widget.palette
         suggested = "rendered.png"
-        if isinstance(capture, PlaybackFrame):
+        if self.playback is not None:
             bundle = capture.source_path.parent
-            suggested = str(bundle.parent / f"{bundle.stem}-sample-{capture.payload.sequence:06d}.png")
+            suggested = str(bundle.parent / f"{bundle.stem}-sample-{self.playback.entry.sequence:06d}.png")
         selected, _ = QFileDialog.getSaveFileName(
             self, "Save rendered image only", suggested, "PNG rendering (*.png)")
         if not selected:
@@ -1190,15 +1355,14 @@ class MainWindow(QMainWindow):
         if not target.suffix:
             target = target.with_suffix(".png")
         try:
-            exporter = save_playback_png if isinstance(capture, PlaybackFrame) else save_rendered_image
-            saved = exporter(capture, target, palette, bounds)
+            saved = save_offline_png(capture, target, palette, bounds)
         except (OSError, ValueError) as exc:
             QMessageBox.warning(self, "Rendering failed", str(exc))
             return
         self.statusBar().showMessage(f"Saved rendered PNG only: {saved}", 10000)
 
     def closeEvent(self, event) -> None:
-        if not self.close_recording():
+        if not self.close_capture() or not self.close_recording():
             event.ignore()
             return
         if not self._stop_recording("window_closed") or not self._stop_logging("window_closed"):
@@ -1216,15 +1380,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     offline = parser.add_mutually_exclusive_group()
     offline.add_argument("--capture", type=Path, help="Open a saved capture without camera acquisition")
+    offline.add_argument("--lmtx", type=Path, help="Open an LMTX still without camera acquisition")
     offline.add_argument("--recording", type=Path, help="Open a recording bundle without camera acquisition")
     args = parser.parse_args()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    window = MainWindow(auto_connect=args.capture is None and args.recording is None)
+    window = MainWindow(auto_connect=args.capture is None and args.recording is None and args.lmtx is None)
     if args.capture is not None:
         window.open_capture(args.capture)
     elif args.recording is not None:
         window.open_recording(args.recording)
+    elif args.lmtx is not None:
+        window.open_lmtx(args.lmtx)
     window.show()
     sys.exit(app.exec())
 

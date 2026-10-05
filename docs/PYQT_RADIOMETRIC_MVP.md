@@ -78,8 +78,8 @@ independently validated.
 
 Launch `./.venv/bin/python lmthermal_viewer.py --capture /path/to/capture.json`
 to open a saved capture without starting camera acquisition. The existing
-no-argument launch still starts live display acquisition. **Open radiometric
-capture** also works from a running window. It cancels a pending startup
+no-argument launch still starts live display acquisition. **Open still capture
+(.lmtx / legacy)** also works from a running window. It cancels a pending startup
 connection and stops/releases the worker before loading. If shutdown times
 out, loading is postponed; live and saved data never overlap. **Connect
 camera** clears the offline image, readings and ROI before starting a new
@@ -87,7 +87,8 @@ worker. **Close saved capture** leaves a disconnected window, with no automatic
 connection. Queued camera notices, failures and frame signals are accepted
 only from the current worker and cannot overwrite offline data.
 
-`radiometric_capture.py` owns a frozen `OfflineCapture`: immutable byte-backed
+The unchanged legacy reader in `radiometric_capture.py` owns a frozen
+`OfflineCapture`: immutable byte-backed
 read-only raw14 and Celsius arrays, optional transport bytes, original JSON,
 palette/range, timestamp, calibration/environment metadata and optional ROI.
 Metadata access returns a separate object. Loading never calls thermometry,
@@ -96,8 +97,9 @@ inconsistent captures with a dialog; the PNG is hash-checked as a required v1
 companion, but never used as measurement or rendering input.
 
 The image widget and pure presentation helpers accept either a currently
-ready live measurement or a validated offline capture. Hover, native extrema,
-centers, letterboxing and ROI use the same coordinate mapping. Saved mode
+ready live measurement or the generic owned `OfflineMeasurement` adapted from
+a validated legacy still, recording frame or LMTX still. Hover, native extrema,
+centers, letterboxing and ROI use the actual source geometry. Saved mode
 shows **Offline — no camera**, filename/timestamp and no FPS; initialization
 and **Save radiometric capture** are disabled. **Saved capture metadata**
 shows the unchanged original metadata, including settings/calibration and
@@ -110,8 +112,40 @@ an automatic capture's stored percentiles. Subsequent palette/range controls
 use the existing Celsius renderer and auto-range helper; neither array nor
 numerical measurements changes. **Save rendered image** freezes the current
 palette/bounds before the destination dialog and saves a clean native-size
-PNG without overlays. It refuses existing destinations and original capture
+PNG without overlays (presentation transforms apply to LMTX renders). It
+refuses existing destinations and original capture
 paths; it does not write JSON or NPZ.
+
+## LMTX source integration (2026-10-05)
+
+`--lmtx FILE` opens directly without starting a camera. The file picker detects
+ZIP content independently of its suffix and the strict reader validates the
+manifest identity/profile. `OfflineLoadWorker` performs complete validation
+off the UI thread; cooperative stop plus sender/generation guards prevent
+obsolete results after close/source switches. Errors clear readings and the
+legend. Linux acquisition imports are deferred until explicit Connect; the
+Windows Connect path explains that live support is Linux-only.
+
+`offline_measurement.py` retains exact owned float32/mask/native planes,
+metadata/evidence, actual geometry, provenance and presentation. Generic
+point/ROI/extrema use saved Celsius without thermometry. Invalid cells have
+no reading; preview-only and all-invalid sources have no Celsius legend.
+Saved quarter-turn/mirror presentation transforms are inverted for interactions;
+numeric matrices/ROIs remain native. Live camera orientation is unchanged.
+Known saved native analysis is displayed, while future shapes and unregistered
+visible-image spaces remain metadata rather than guessed overlays.
+
+The original HT literal/trailer center distinction survives legacy adaptation.
+For generic sources the literal center comes from their own dimensions;
+optional HT trailer observations are separately supplied evidence. Offline
+extrema now derive from stored matrix values, preserving camera summaries in
+metadata. The first saved rectangle seeds inspection ROI. Changing/clearing it
+or changing palette/range does not edit source metadata or bytes.
+
+Linux operator validation on the actual Android export passed hover,
+saved/new/cleared ROI, resizing and Turbo/Locked range controls. See
+[LMTX import](LMTX_IMPORT.md) for canonical-contract links, exact corpus and
+interop results, limits, error codes and the pending real Windows check.
 
 ## Offline smoke test (2026-09-30)
 

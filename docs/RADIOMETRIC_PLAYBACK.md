@@ -87,6 +87,15 @@ It has one replaceable pending request and one coalesced result notification;
 tokens and sender checks reject obsolete loads after scrubbing or mode changes.
 The window reuses existing rendering, cursor, ROI, legend and export panels.
 
+As of the LMTX import milestone, a selected validated `PlaybackFrame` adapts
+into `OfflineMeasurement` for these shared panels. Exact Celsius/raw14,
+recorded metadata and separate literal/trailer centers are preserved.
+Original transport remains absent in recording v1. Offline extrema derive
+from the stored matrix; recorded camera/trailer observations remain metadata.
+The adapter does not change timeline, cache, recovery, source validity or
+integrity checks. [LMTX stills](LMTX_IMPORT.md) use the same generic analysis
+model after their separate strict reader succeeds.
+
 Opening scans committed chunks sequentially for full integrity validation,
 then discards their matrices. Subsequent frame access is lazy and uses a
 **two-chunk LRU cache** (one chunk is also supported by the pure model). Scrubs
@@ -104,6 +113,11 @@ dialog, then saves a clean native 384×288 PNG without overlays. The suggested n
 directory, outside the bundle. Existing files and destinations anywhere inside
 the source bundle are refused. Gap/drop
 entries disable export. No source hashes or recording files change.
+
+The shared `save_offline_png` path uses exclusive new-file creation, sync
+where supported and cleanup of its own ordinary failed write. It retains
+whole-bundle protection and avoids a Unix hard-link requirement. This does
+not promise atomic publication or power-loss safety on every filesystem.
 
 Extraction to still radiometric v1 is deferred: the existing still export path
 requires live transport evidence that recording v1 does not retain. Playback

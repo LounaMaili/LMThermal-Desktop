@@ -1,5 +1,14 @@
 # Radiometric capture format v1
 
+This historical Desktop format remains supported alongside
+[LMThermal Exchange Format v1 import](LMTX_IMPORT.md). It is not renamed or
+silently converted to `.lmtx`. The strict legacy loader and completion/
+integrity semantics below remain unchanged. Validated stills adapt in memory
+to the common `OfflineMeasurement` used for LMTX and selected recording frames,
+retaining exact arrays, supplied transport and original metadata/centers.
+The shared offline PNG saver protects source files using exclusive creation
+without requiring Unix hard links; it does not write new radiometric sets.
+
 The PyQt viewer's **Save radiometric capture** button is enabled only for a
 current `radiometric_ready` observation with a valid `MeasurementFrame`.
 Clicking it first freezes the displayed measurement, palette, effective Celsius

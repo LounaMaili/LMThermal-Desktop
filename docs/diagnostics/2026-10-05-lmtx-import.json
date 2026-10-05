@@ -1,0 +1,131 @@
+{
+  "validation_date": "2026-10-05",
+  "environment": {
+    "os": "Linux",
+    "python": "3.14.7",
+    "numpy": "2.5.3",
+    "opencv": "5.0.0",
+    "pillow": "12.3.0"
+  },
+  "operator_offline_smoke": "All checks passed: hover, saved/inspection ROI, resize, palette/range independence; operator reported All works great.",
+  "shared_corpus": {
+    "source_commit": "1cbdd776a485c43e1e7cfa104e3741d1b7e99658",
+    "cases": 11,
+    "accepted": 8,
+    "expected_rejections": 3,
+    "exact_bytes": true
+  },
+  "android_interop": {
+    "source": "Actual Android SAF export; independent Android source-bit proof",
+    "geometry": [
+      384,
+      288
+    ],
+    "float32_source_sha256": "6a4508cdbe2e76dbd6ec870351cc4e2d2eb7fb364e230f93d7038c2d18fab7a6",
+    "exact_float32_bits_match": true,
+    "raw14_min_max": [
+      5109,
+      5625
+    ],
+    "native_bytes": 221184,
+    "transport_bytes": 224256,
+    "roi": [
+      169,
+      76,
+      291,
+      168
+    ],
+    "roi_statistics": {
+      "pixel_count": 11224,
+      "valid_pixel_count": 11224,
+      "min_c": 35.85474395751953,
+      "max_c": 37.58372497558594,
+      "mean_c": 36.80378652077781,
+      "min_xy": [
+        173,
+        76
+      ],
+      "max_xy": [
+        196,
+        149
+      ]
+    },
+    "presentation": {
+      "palette_id": "turbo",
+      "range_mode": "manual",
+      "effective_bounds": {
+        "min": 25.0,
+        "max": 45.0,
+        "unit": "Cel"
+      }
+    },
+    "ht_metadata_retained": true,
+    "archive_unchanged_after_analysis_render_png": true,
+    "load_median_ms": {
+      "metadata_ms": 2.32051600005434,
+      "integrity_ms": 2.1587769997495343,
+      "binary_model_ms": 6.65248099994642,
+      "total_ms": 11.109445000329288
+    },
+    "render_per_palette_median_ms": 1.0180299999774434,
+    "retained_payload_bytes": 982020,
+    "decoded_primary_rgb_bytes": 331776,
+    "tracemalloc_peak_bytes": 5273019,
+    "repetitions": 5,
+    "physical_accuracy_warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated."
+  },
+  "performance_without_tracemalloc": {
+    "actual_android_ht301": {
+      "geometry": [
+        384,
+        288
+      ],
+      "archive_bytes": 408638,
+      "load_median_ms": {
+        "metadata_ms": 0.6056260003788339,
+        "integrity_ms": 1.9762779998018232,
+        "binary_model_ms": 4.1374349998477555,
+        "total_ms": 6.672920000255544
+      },
+      "render_median_ms": 0.5023969997637323,
+      "full_grid_roi_median_ms": 0.8454750000055355,
+      "retained_payload_bytes": 982020,
+      "decoded_primary_rgb_bytes": 331776,
+      "single_load_and_render_tracemalloc_peak_bytes": 4029607,
+      "repetitions": 5
+    },
+    "synthetic_1024x1024": {
+      "geometry": [
+        1024,
+        1024
+      ],
+      "archive_bytes": 2589458,
+      "load_median_ms": {
+        "metadata_ms": 0.39320799987763166,
+        "integrity_ms": 13.069660999917687,
+        "binary_model_ms": 11.438530999839713,
+        "total_ms": 24.9444000000949
+      },
+      "render_median_ms": 5.646506000175577,
+      "full_grid_roi_median_ms": 7.4293550001129915,
+      "retained_payload_bytes": 4194304,
+      "decoded_primary_rgb_bytes": 0,
+      "single_load_and_render_tracemalloc_peak_bytes": 29390263,
+      "repetitions": 5,
+      "provenance": "Synthetic sequential float32 values; resource/performance test only, no physical scene or accuracy claim."
+    }
+  },
+  "memory_note": "tracemalloc measures Python-tracked allocations, not total process RSS or all NumPy/OpenCV/Pillow native allocations. Timings are local medians; no performance guarantee. Android interop timings include tracemalloc; performance_without_tracemalloc timings do not. Memory peaks are collected separately.",
+  "windows": "Pending real Windows camera-free corpus, real-export, numeric/ROI/presentation/path and operator validation. Linux tests and mocked platform guard are not Windows validation.",
+  "source_immutability": true,
+  "application_camera_controls": "None: only existing files were opened.",
+  "hardware_independent_tests": {
+    "passed": 189,
+    "skipped": 0,
+    "command": "QT_QPA_PLATFORM=offscreen ./.venv/bin/python -m unittest discover -s tests"
+  },
+  "issues": {
+    "desktop_1": "OPEN; real Windows acceptance pending",
+    "android_5": "OPEN; real Android to Desktop Linux interoperability demonstrated"
+  }
+}
