@@ -75,7 +75,7 @@ class RadiometricDiagnosticTests(unittest.TestCase):
                 result = set_thermviewer_output_zero(Path("/dev/example"))
         command = run.call_args.args[0]
         self.assertEqual(command, [
-            "v4l2-ctl", "--device", "/dev/example", "--set-ctrl=zoom_absolute=32773"
+            "v4l2-ctl", "--device", str(Path("/dev/example")), "--set-ctrl=zoom_absolute=32773"
         ])
         self.assertEqual(result["control_id"], "0x009a090d")
 

@@ -4,6 +4,7 @@ import hashlib
 import math
 from pathlib import Path
 import struct
+import sys
 import tempfile
 import unittest
 
@@ -166,6 +167,7 @@ class ArithmeticTests(unittest.TestCase):
         self.assertFalse(np.array_equal(before.image_y, after.image_y))
 
 
+@unittest.skipUnless(sys.platform.startswith('linux'), 'Linux /dev and sysfs discovery')
 class DiscoveryTests(unittest.TestCase):
     """Exercise stable and VID/PID discovery without connecting the camera."""
 

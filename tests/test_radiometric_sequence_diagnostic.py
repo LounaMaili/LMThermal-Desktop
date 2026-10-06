@@ -3,9 +3,13 @@
 import json
 from pathlib import Path
 import struct
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+
+if not sys.platform.startswith('linux'):
+    raise unittest.SkipTest('Linux V4L2 sequence diagnostic; offline readers do not import it')
 
 from measurement_baseline import IMAGE_BYTES
 from radiometric_mode_diagnostic import frame_metrics

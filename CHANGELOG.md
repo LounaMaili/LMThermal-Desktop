@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Validated (Real Windows LMTX interoperability — 2026-10-06)
+- Validated the unchanged LMTX v1 importer on Windows 11 Pro 25H2 x64 / Python 3.12.10: all eleven original Android archives retain their hashes/sizes, eight are accepted and three rejected with the expected codes. The same private Android SAF export that passed Linux has exact Float32 bits, ROI values, native/full transport and retained HT evidence/provenance on Windows.
+- Confirmed native Windows camera-free GUI hover, restored/cleared/new ROI, resize alignment, Turbo/manual 25–45 °C, palette/range changes and PNG saving with the operator. Unsettled data remains preview-only without stale Celsius/statistics; all thirteen original private validation files retain their hashes. Drive-letter, space and Unicode host paths pass. Recorded representative load/render/memory evidence without committing private captures or host paths.
+- Fixed test portability: use a camera-free Qt signal stub for UI lifecycle checks instead of importing Linux acquisition, explicitly model mocked Linux reconnects, and skip Linux discovery/worker/sequence tests on Windows. Added host-path/PNG/source-integrity and acquisition-import regressions. Windows LMTX tests pass 44/44; full discovery runs 184 tests, 180 pass and four Linux-only skips. No application, camera, thermometry or format semantics changed.
+- Updated Windows acceptance evidence for Desktop #1 and Android #5; both are ready for closure review after the previously recorded Linux and Android producer checks. No issue is closed or branch merged automatically. Independent physical accuracy remains unresolved.
+
 ### Added (LMTX v1 import and generic offline analysis — 2026-10-05)
 - Added a strict camera-free LMThermal Exchange Format v1 still reader using the accepted canonical contract: bounded ZIP/JSON/image validation, exact inventory/CRC/SHA/length/dtype/shape checks, required-feature/version handling, safe paths and clean error codes. Unknown optional JSON retains semantic numeric precision; opaque payload bytes remain exact.
 - Added an immutable owned offline measurement model with actual native geometry, optional Celsius/mask/native planes, provenance/evidence and presentation. Point and half-open ROI measurements use valid saved float32 values, first row-major extrema ties and sequential float64 means; import never recomputes thermometry. Preview-only/all-invalid sources produce no Celsius readings or legend.

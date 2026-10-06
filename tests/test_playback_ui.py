@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import QApplication
 
 from celsius_palette import CelsiusRange
 from lmthermal_viewer import MainWindow
-from mvp_camera_worker import CameraWorker
+from camera_worker_support import CameraWorkerStub as CameraWorker
 from measurement_logger import MeasurementLogger
 from radiometric_recorder import RadiometricRecorder
 from radiometric_export import snapshot_capture, export_capture
@@ -30,6 +30,12 @@ class PlaybackUITests(unittest.TestCase):
         cls.frames=observations()
 
     def setUp(self):
+        self.worker_patch = patch('lmthermal_viewer.CameraWorker', CameraWorker)
+        self.platform_patch = patch('lmthermal_viewer.sys.platform', 'linux')
+        self.worker_patch.start()
+        self.platform_patch.start()
+        self.addCleanup(self.worker_patch.stop)
+        self.addCleanup(self.platform_patch.stop)
         self.tmp=TemporaryDirectory();self.root=Path(self.tmp.name)
         self.path=build_bundle(self.root/'test.lmthermal',self.frames)
         self.window=MainWindow(auto_connect=False)

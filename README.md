@@ -34,10 +34,12 @@ validity mask. Palette/range and saved rotation/mirroring affect presentation
 only. Preview-only captures have no Celsius readings or legend. PNG rerender
 saves separately; analysis edits stay in memory and never modify the source.
 
-The exact 11 Android conformance files and a real Pixel-exported capture pass
-Linux validation, including operator hover/ROI/resize/presentation checks.
-**Real Windows offline validation remains pending**; no Windows camera driver
-is provided. See [LMTX import architecture and validation](docs/LMTX_IMPORT.md)
+The exact 11 Android conformance files and the same real Pixel-exported capture
+pass Linux and real Windows 11 offline validation, including exact Float32/ROI/
+native/transport parity and operator hover/ROI/resize/presentation/PNG checks.
+Windows drive-letter paths with spaces and non-ASCII characters also pass;
+live camera acquisition remains Linux-only.
+See [LMTX import architecture and validation](docs/LMTX_IMPORT.md)
 for the canonical specification, resource limits, interoperability evidence,
 Windows commands and legacy-format coexistence.
 

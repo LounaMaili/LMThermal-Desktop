@@ -369,6 +369,52 @@ load_lmtx('tests/fixtures/lmtx/ht301-rich-sanitized.lmtx')
         result = subprocess.run([sys.executable,'-c',code],cwd=CORPUS.parents[2],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_host_paths_with_spaces_and_unicode_keep_source_and_archive_rules(self):
+        root = self.root / 'Windows path with spaces é'
+        root.mkdir()
+        path = root / 'capture é.lmtx'
+        original = (CORPUS / 'validity-mask.lmtx').read_bytes()
+        path.write_bytes(original)
+        source, _ = load_lmtx(path)
+        bits = source.temperature_c.tobytes()
+        for palette in ('Turbo', 'White hot'):
+            destination = root / f'rendered {palette} é.png'
+            save_offline_png(source, destination, palette, CelsiusRange(25, 45))
+            self.assertTrue(destination.exists())
+        self.assertEqual(source.temperature_c.tobytes(), bits)
+        self.assertEqual(path.read_bytes(), original)
+        # Host Unicode/drive paths never relax the ASCII archive member rules.
+        for member in ('data/é.bin', 'C:/data/temperature.bin'):
+            with self.assertRaises(LmtxError):
+                safe_path(member)
+
+    def test_viewer_entry_import_does_not_load_linux_acquisition(self):
+        code = '''import builtins
+original=builtins.__import__
+def guarded(name,*args,**kwargs):
+ if name in ('ht301_camera','mvp_camera_worker','radiometric_sequence_diagnostic','fcntl'):
+  raise AssertionError('Forbidden acquisition import: '+name)
+ return original(name,*args,**kwargs)
+builtins.__import__=guarded
+from lmthermal_viewer import MainWindow
+from PyQt6.QtWidgets import QApplication
+import time
+app=QApplication([])
+window=MainWindow(auto_connect=False)
+assert window.open_lmtx('tests/fixtures/lmtx/ht301-rich-sanitized.lmtx')
+deadline=time.monotonic()+5
+while window.offline_capture is None and time.monotonic()<deadline:
+ app.processEvents()
+ time.sleep(.002)
+assert window.offline_capture is not None, window.state_label.text()
+assert window.worker is None
+window.close()
+'''
+        environment = dict(os.environ, QT_QPA_PLATFORM='offscreen')
+        result = subprocess.run([sys.executable, '-c', code], cwd=CORPUS.parents[2],
+                                capture_output=True, text=True, env=environment, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
 
 class ContainerTests(unittest.TestCase):
     def setUp(self):

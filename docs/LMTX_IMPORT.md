@@ -239,20 +239,76 @@ Retained payloads are about 0.98 MB / 4.19 MB respectively; the HT preview adds
 is not total process RSS. These are local observations, not performance
 guarantees. The synthetic values test allocation/throughput, not calibration.
 
-## Windows acceptance boundary
+## Real Windows validation — 2026-10-06
 
-**Real Windows offline validation is pending.** Linux tests, Windows-safe path
-checks, mocked platform guards and avoiding Linux acquisition imports do not
-prove Windows interoperability. No Windows host was available in this task.
-Desktop #1 remains open; its Windows criterion is unsatisfied. Linux real
-Android → Desktop interoperability now satisfies the producer-consumer proof
-for Android #5; broader cross-platform acceptance and issue closure remain
-review decisions. No issues are closed automatically.
+**Real Android → Desktop offline interoperability passes on Linux and Windows.**
+Windows 11 Pro 25H2, build 26200.9550, x64, Python 3.12.10 was used with the
+Desktop implementation `be8e15343944ca3719a0d9f37d868923e656e889`. Dependencies:
+NumPy 2.5.3, opencv-python 5.0.0.93, Pillow 12.3.0, PyQt6 6.11.0,
+PyQt6-Qt6 6.11.2 and PyQt6-sip 13.13.0.
+
+The eleven original shared archives retain their exact corpus hashes/sizes:
+eight accepted; unsupported major, required feature and corrupt SHA rejected
+with `unsupported_major`, `unsupported_required_feature` and
+`integrity_mismatch`. All 44 LMTX-specific tests pass. Full camera-free discovery
+runs 184 tests: 180 pass, four Linux-only skips (two discovery tests, the
+acquisition worker and the V4L2 sequence module containing eight Linux tests).
+The corresponding Linux suite contains 191 tests after these two new regressions;
+that revised Linux suite was not executed on this Windows host.
+
+The private published 408638-byte Android export is identical to the copied live
+archive. Its matching proof is selected by capture UUID, sequence and temperature
+SHA, not its filename; the earlier ready proof belongs to another frame and has
+no temperature hash. Every stored Float32 bit and all ROI/native/transport values
+match the Linux results above. Geometry, HT calibration/trailer evidence and
+native-equivalent provenance remain intact. No thermometry is recomputed.
+
+The operator confirmed all native GUI checks: opening/thermal image, native point
+temperature, saved/cleared/new ROI, resize alignment, Turbo, Manual 25–45 °C,
+palette/range changes and PNG saving. The GUI reports **Offline — no camera**;
+live controls are disabled. A fresh-process regression rejects any acquisition/
+`fcntl` import while loading an HT-rich LMTX through the actual Qt window.
+The Windows Connect guard leaves the current offline model/readings intact.
+
+The private unsettled capture validates as `unavailable` /
+`not_available_for_frame`, retaining a preview but no Celsius plane, statistics,
+point/ROI readings or effective Celsius bounds. All thirteen original private
+files have identical SHA-256 values before and after validation/operator checks.
+Drive-letter paths, paths with spaces and non-ASCII `é` load/render/save PNG
+successfully; internal ASCII archive path restrictions remain unchanged.
+
+Five-repeat Windows medians without tracemalloc:
+
+| Input | Metadata / integrity / binary model | Total load | Render | Full-grid ROI |
+| --- | --- | --- | --- | --- |
+| Same actual Android HT still | 0.966 / 3.062 / 4.990 ms | 8.967 ms | 1.465 ms | 1.085 ms |
+| Synthetic 1024×1024 | 0.665 / 13.759 / 13.477 ms | 27.947 ms | 16.486 ms | 9.047 ms |
+
+Separate load/render tracemalloc peaks are 4.01 MB and 29.37 MB, excluding some
+native allocations and total RSS. The synthetic archive uses the test writer's
+DEFLATE settings; it is a throughput sample, not the Linux benchmark's archive
+bytes or physical calibration evidence. Curated numeric results are in
+[the Windows diagnostic report](diagnostics/2026-10-06-windows-lmtx.json).
+
+Only test scaffolding required fixes: offline/legacy UI lifecycle tests now use
+a Qt signal stub instead of importing Linux acquisition, mocked reconnects
+explicitly exercise the Linux branch, and Linux-only tests skip on Windows.
+New regressions cover Unicode/space host paths, PNG/source immutability, a fresh
+Qt import without Linux acquisition and preservation of saved mode by the
+Windows camera guard. Application and LMTX v1 semantics are unchanged.
+
+Desktop #1's Windows boundary and Android #5's exact consumer interoperability
+criterion are now satisfied. Together with the existing Linux evidence and
+[Android producer acceptance](https://github.com/LounaMaili/LMThermal/blob/1cbdd776a485c43e1e7cfa104e3741d1b7e99658/docs/ANDROID_VALIDATION.md),
+both issues are ready for closure review. Issues stay open and no branch is
+merged automatically. This establishes data preservation, not independent
+physical accuracy. Edited LMTX persistence and Windows live acquisition remain
+outside this milestone.
 
 On a Windows host, create a Python 3.10+ environment and run in PowerShell:
 
 ```powershell
-py -3 -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 $env:QT_QPA_PLATFORM = 'offscreen'
 .\.venv\Scripts\python.exe -m unittest discover -s tests -p 'test_lmtx*.py'

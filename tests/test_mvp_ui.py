@@ -2,6 +2,7 @@
 
 import json
 import os
+import sys
 from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -16,7 +17,7 @@ from PyQt6.QtGui import QImage, QMouseEvent
 
 from lmthermal_viewer import MainWindow
 from mvp_presentation import native_to_widget
-from mvp_camera_worker import CameraWorker, WorkerStopped
+from camera_worker_support import CameraWorkerStub as CameraWorker
 from radiometric_export import export_capture, snapshot_capture
 from celsius_palette import CelsiusRange
 from radiometric_session import FrameObservation, SessionState, inspect_frame, make_measurement
@@ -45,6 +46,13 @@ class MVPWindowTests(unittest.TestCase):
         cls.measured = make_measurement(HAND, 0.0)
 
     def setUp(self):
+        # Test lifecycle signals independently of the host's acquisition backend.
+        self.worker_patch = patch('lmthermal_viewer.CameraWorker', CameraWorker)
+        self.platform_patch = patch('lmthermal_viewer.sys.platform', 'linux')
+        self.worker_patch.start()
+        self.platform_patch.start()
+        self.addCleanup(self.worker_patch.stop)
+        self.addCleanup(self.platform_patch.stop)
         self.window = MainWindow(auto_connect=False)
 
     def tearDown(self):
@@ -459,8 +467,10 @@ class MVPWindowTests(unittest.TestCase):
                 self.assertEqual(metadata["stop_reason"],reason)
                 self.window.close_capture()
 
+    @unittest.skipUnless(sys.platform.startswith('linux'), 'Linux acquisition worker')
     def test_worker_coalesces_gui_notifications_and_stops_publication(self):
-        worker = CameraWorker()
+        from mvp_camera_worker import CameraWorker as AcquisitionWorker, WorkerStopped
+        worker = AcquisitionWorker()
         emissions = []
         worker.frame_available.connect(lambda: emissions.append(1))
         display = FrameObservation(DISPLAY, 0.0, SessionState.DISPLAY_STREAM,

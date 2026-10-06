@@ -154,7 +154,8 @@ class OfflineUITests(unittest.TestCase):
         self.open('alternate-7x19.lmtx')
         self.assertIsNone(self.window.playback_worker)
         self.window._on_playback_result();self.assertEqual(self.window.observation.geometry,Geometry(7,19))
-        with patch('lmthermal_viewer.CameraWorker') as camera:
+        # Exercise the Linux reconnect lifecycle with a mock on every test host.
+        with patch('lmthermal_viewer.sys.platform', 'linux'), patch('lmthermal_viewer.CameraWorker') as camera:
             worker=camera.return_value;worker.wait.return_value=True
             self.window.connect_camera()
             camera.assert_called_once()
@@ -181,11 +182,13 @@ class OfflineUITests(unittest.TestCase):
         with self.assertRaises(ValueError):s.temperature_c.setflags(write=True)
 
     def test_windows_offline_entry_does_not_import_linux_acquisition(self):
+        source = self.open('temperature-only.lmtx')
         with patch('lmthermal_viewer.sys.platform', 'win32'), patch('lmthermal_viewer.CameraWorker') as camera:
             self.window.connect_camera()
             camera.assert_not_called()
             self.assertIn('Linux-only', self.window.statusBar().currentMessage())
-        # This exercises the branch only; it is not a claim of Windows execution.
+            self.assertIs(self.window.offline_capture, source)
+            self.assertIs(self.window.observation, source)
 
     def test_very_narrow_saved_range_remains_valid_after_palette_change(self):
         source=self.open('temperature-only.lmtx')
