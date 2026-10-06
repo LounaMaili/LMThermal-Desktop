@@ -1,0 +1,60 @@
+{
+  "validation_date": "2026-10-06",
+  "environment": {
+    "os": "Linux",
+    "python": "3.14.7",
+    "qt_platform": "offscreen"
+  },
+  "main_commit": "c723b66ef5b1104a15245a8cb62328c3df9d9fb2",
+  "initial_main_run": {
+    "run": 191,
+    "passed": 190,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "failing_test": "test_lmtx_import.ImportTests.test_viewer_entry_import_does_not_load_linux_acquisition",
+    "cause": "The test banned fcntl, which Python 3.14 pathlib legitimately imports on Linux; no camera acquisition import caused the failure."
+  },
+  "fix_branch": "fix/linux-lmtx-import-guard",
+  "fix": "Test now guards camera acquisition modules rather than the general-purpose standard-library fcntl import. Application and LMTX semantics are unchanged.",
+  "corrected_full_suite": {
+    "command": "QT_QPA_PLATFORM=offscreen ./.venv/bin/python -m unittest discover -s tests -v",
+    "run": 191,
+    "passed": 191,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "module_counts": {
+      "test_celsius_palette": 5,
+      "test_experimental_thermometry": 6,
+      "test_lmtx_import": 32,
+      "test_lmtx_ui": 12,
+      "test_measurement_baseline": 12,
+      "test_measurement_logger": 14,
+      "test_mvp_presentation": 7,
+      "test_mvp_ui": 16,
+      "test_physical_validation": 4,
+      "test_playback_ui": 7,
+      "test_radiometric_capture": 13,
+      "test_radiometric_export": 5,
+      "test_radiometric_mode_diagnostic": 4,
+      "test_radiometric_playback": 12,
+      "test_radiometric_recording": 16,
+      "test_radiometric_sequence_diagnostic": 8,
+      "test_radiometric_session": 10,
+      "test_roi_measurement": 8
+    }
+  },
+  "linux_only_checks": "Both stable/VID-PID discovery tests, actual worker coalescing/publication test and all eight V4L2 sequence diagnostic tests passed without hardware.",
+  "diff_check": "passed",
+  "physical_interoperability_repeated": false,
+  "acceptance_evidence": {
+    "linux_import_report": "2026-10-05-lmtx-import.json",
+    "real_windows_report": "2026-10-06-windows-lmtx.json",
+    "android_producer_commit": "1cbdd776a485c43e1e7cfa104e3741d1b7e99658",
+    "shared_corpus": "11 exact producer archives: eight accepted and three expected rejections",
+    "real_android_export": "Existing Linux and Windows source-bit/ROI/native/transport/provenance/immutability evidence reviewed; not recaptured."
+  },
+  "main_merge": "Not performed; correction remains on the dedicated review branch.",
+  "physical_accuracy_warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated."
+}

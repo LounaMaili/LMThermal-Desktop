@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Final Linux LMTX regression — 2026-10-06)
+- Corrected the Windows-added viewer import test's false positive on Linux/Python 3.14: `pathlib` legitimately imports the general-purpose standard-library `fcntl` module. The test continues to reject HT-301 acquisition modules and verifies camera-free LMTX opening without a camera worker.
+- The complete Linux suite passes 191 tests with no skips, including all LMTX, legacy capture/recording/playback, ROI/presentation/offline and Linux discovery/acquisition/sequence checks. Application code, thermometry and LMTX v1 semantics are unchanged; the correction remains on its dedicated review branch.
+
 ### Validated (Real Windows LMTX interoperability — 2026-10-06)
 - Validated the unchanged LMTX v1 importer on Windows 11 Pro 25H2 x64 / Python 3.12.10: all eleven original Android archives retain their hashes/sizes, eight are accepted and three rejected with the expected codes. The same private Android SAF export that passed Linux has exact Float32 bits, ROI values, native/full transport and retained HT evidence/provenance on Windows.
 - Confirmed native Windows camera-free GUI hover, restored/cleared/new ROI, resize alignment, Turbo/manual 25–45 °C, palette/range changes and PNG saving with the operator. Unsettled data remains preview-only without stale Celsius/statistics; all thirteen original private validation files retain their hashes. Drive-letter, space and Unicode host paths pass. Recorded representative load/render/memory evidence without committing private captures or host paths.

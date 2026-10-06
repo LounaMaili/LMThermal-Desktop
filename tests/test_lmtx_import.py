@@ -389,10 +389,12 @@ load_lmtx('tests/fixtures/lmtx/ht301-rich-sanitized.lmtx')
                 safe_path(member)
 
     def test_viewer_entry_import_does_not_load_linux_acquisition(self):
+        # Python 3.14 pathlib imports fcntl on Linux. That general-purpose
+        # standard-library import is not acquisition; guard the camera modules.
         code = '''import builtins
 original=builtins.__import__
 def guarded(name,*args,**kwargs):
- if name in ('ht301_camera','mvp_camera_worker','radiometric_sequence_diagnostic','fcntl'):
+ if name in ('ht301_camera','mvp_camera_worker','radiometric_sequence_diagnostic'):
   raise AssertionError('Forbidden acquisition import: '+name)
  return original(name,*args,**kwargs)
 builtins.__import__=guarded

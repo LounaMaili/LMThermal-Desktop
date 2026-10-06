@@ -239,6 +239,26 @@ Retained payloads are about 0.98 MB / 4.19 MB respectively; the HT preview adds
 is not total process RSS. These are local observations, not performance
 guarantees. The synthetic values test allocation/throughput, not calibration.
 
+## Final Linux regression — 2026-10-06
+
+Desktop `main` at `c723b66ef5b1104a15245a8cb62328c3df9d9fb2` contains the
+Windows portability changes. Its first Linux run executed 191 tests: 190
+passed and the new viewer import guard failed on Python 3.14 because standard
+library `pathlib` imports `fcntl`. No acquisition module caused that failure.
+
+The dedicated `fix/linux-lmtx-import-guard` branch corrects only that test's
+overbroad import ban, retaining the checks against `ht301_camera`,
+`mvp_camera_worker` and `radiometric_sequence_diagnostic`, plus a camera-free
+Qt opening with no camera worker. The revised complete Linux suite passes
+**191 tests with zero failures/errors/skips**. This includes all 44 LMTX tests,
+strict legacy capture, recording/playback, ROI/presentation/offline UI and
+the Linux discovery/acquisition/V4L2 sequence checks omitted on Windows.
+`git diff --check` passes. No application, camera, thermometry or accepted
+format code changed, and no physical Android/HT-301 test was repeated.
+The fix is left on its review branch; `main` is not merged automatically.
+The [persistent Linux regression report](diagnostics/2026-10-06-linux-lmtx-regression.json)
+records the initial main failure, corrected result and per-module test counts.
+
 ## Real Windows validation — 2026-10-06
 
 **Real Android → Desktop offline interoperability passes on Linux and Windows.**
