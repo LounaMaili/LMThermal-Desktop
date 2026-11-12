@@ -36,7 +36,8 @@ decompression work runs there. A slider does not eagerly load duration-sized mat
 or a timeline list. Timer requests wait for an in-flight request instead of endlessly
 superseding slow work. User scrubs can supersede pending work; obsolete results do not
 publish. Shutdown cancels between records; one synchronous operation has no proven
-latency bound and Close refuses rather than abandoning a running worker.
+latency bound. Close disables/clears the window immediately and completes asynchronously
+when its worker releases the descriptor; it never blocks the GUI or terminates a thread.
 
 One decoded-CHUNK cache is at most64MiB; evict before loading. This is **retained decoded
 bytes**, not total process memory. Reference input body up to65MiB, decompression/
@@ -46,13 +47,13 @@ again to materialize analysis blocks; no claim of zero-copy or memory-admission 
 Navigation caches retain at most16 records/8MiB raw bodies, at most two pages/depth.
 Reference reporting state has a65536-record/hash local budget. Desktop's current slider
 admits at most1000000 events; recovered fixed ranges cap65536 CHUNKs. These are explicit
-local refusals, not v1 wire changes. Large-file/indefinite-runtime performance is unproven.
+local refusals, not v1 wire changes. Large-file/indefinite-runtime performance is unproven beyond the finite probes below.
 
 Intake seek compares exact integer nanoseconds. Display/playback seconds are derived
 presentation values, never sensor-time substitutes. All events (including gaps and
 segment boundaries) remain navigable. Tied intake times may share a display position.
-Point/ROI use stored native geometry and validity; geometry changes clear incompatible
-inspection rectangles. Source metadata stays separate from inspection edits. Palette,
+Point/ROI use stored native geometry and validity; source/session/native-grid changes clear inspection rectangles and pointers,
+even when the old bounds would still fit. Gaps disable new image gestures. Source metadata stays separate from inspection edits. Palette,
 range and PNG change presentation only. PNG uses exclusive creation and protects the
 original file; it is not an archive rewrite or physical power-loss guarantee.
 
@@ -91,3 +92,43 @@ requires a future authorized real Android LMTR source with independent Float32/n
 transport/chronology parity, gaps, ROI, UI and source-immutability checks on both hosts.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+
+## Phase 2 local qualification (2026-11-12)
+
+See [qualification and review gates](LMTR_R5_QUALIFICATION.md) and the short
+[Linux/Windows operator recipe](LMTR_R5_OPERATOR_CHECK.md). These supersede the
+historical Linux count above for this corrective branch; Windows run43241547022
+only validates its pinned older runtime, never the new changes.
+
+`LmtrReadLimits` adds local refusal before CHUNK body allocation and before numerical
+or DEFLATE decode. Default decoded cache is64MiB and working charge128MiB. The latter
+charges serialized body + all decoded blocks + logical payload lengths (including
+views) + largest stored block +8×serialized metadata. This is an explicit conservative
+buffer estimate, **not a proven Python-object/RSS ceiling**. Graphics, owned frames,
+metadata object graphs and runtime overhead remain separate. A valid wire file can
+exceed local admission; there is no silent partial decode or weakened validation.
+The original R3 decode still runs in full after these checks.
+
+HEADER/entry values crossing the worker boundary are owned copies. Public logical
+payload bytes are immutable, including opaque observations without primary geometry.
+No invented grid or Celsius view is made for those observations. A native plane with
+another grid remains exact evidence but cannot supply primary-grid hover raw indices.
+Full verification evicts the old decoded cache first; close releases cache/navigation
+ownership. Path and descriptor identity are checked before and after source operations.
+They are change detectors, not a filesystem snapshot/security boundary.
+
+A source-opening generation barrier keeps old scrubs from cancelling a new Open.
+PNG freezes its immutable frame/palette/range before the destination dialog, which can
+run a nested Qt event loop. Invalid locked range edits are explicit; Auto is independent
+of them. No archive rewrite, converter, measurement transform or R6 export is added.
+
+### Maintaining the vendored validator
+
+`lmtr_reference/PROVENANCE.json` pins the accepted upstream Git revision, three source
+hashes and exact schema hash. `test_vendored_algorithms_and_registry_match_pinned_source_hashes`
+checks the normalized schema-path relocation only. Do not edit vendor algorithms or
+repin hashes to hide differences. An update requires explicit upstream revision review,
+algorithm/schema diff, all51 original hash/verdict checks, adapter/ownership/resource/UI
+regressions and new Windows verification. Keep original corpus/manifest receipts;
+new engineering sources are noncanonical and never replace those fixtures.

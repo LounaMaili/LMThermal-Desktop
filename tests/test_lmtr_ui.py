@@ -20,7 +20,9 @@ class LmtrUiTests(unittest.TestCase):
     def setUp(self):
         self.window=LmtrWindow();self.window.show()
     def tearDown(self):
-        self.window.close();self.app.processEvents()
+        self.window.close()
+        self.wait(lambda:not self.window.worker.isRunning())
+        self.app.processEvents()
         self.assertFalse(self.window.worker.isRunning())
     def wait(self, condition):
         deadline=time.monotonic()+10

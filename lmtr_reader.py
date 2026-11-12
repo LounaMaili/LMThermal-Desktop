@@ -11,6 +11,7 @@ from pathlib import Path
 import struct
 import os
 import time
+import weakref
 
 import numpy as np
 from lmtr_reference import Reader, ContractError
@@ -23,6 +24,54 @@ from offline_measurement import (Geometry, NativePlane, OfflineMeasurement,
 MAX_UI_ENTRIES = 1_000_000
 MAX_RECOVERY_CHUNKS = 65536
 MAX_CACHE_BYTES = 64 * 1024**2
+
+
+@dataclass(frozen=True)
+class LmtrReadLimits:
+    """Local CHUNK admission, separate from wire limits and total process RSS.
+
+    The working charge conservatively includes serialized body, all decoded and
+    logical bytes, largest stored scratch and 8x metadata. Python object/graphics
+    overhead and a displayed owned frame remain separate; this is not an RSS cap.
+    """
+    decoded_cache_bytes: int = MAX_CACHE_BYTES
+    working_bytes: int = 128 * 1024**2
+
+    def __post_init__(self):
+        if (type(self.decoded_cache_bytes) is not int or
+                not 1 <= self.decoded_cache_bytes <= MAX_CACHE_BYTES or
+                type(self.working_bytes) is not int or not 1 <= self.working_bytes <= 512 * 1024**2):
+            raise ValueError('Invalid local LMTR resource limits')
+
+
+class _DesktopReader(Reader):
+    """Add pre-allocation local refusals without changing the pinned R3 validator."""
+    def __init__(self, path, limits):
+        self.limits = limits
+        try:
+            super().__init__(path)
+        except BaseException:
+            if hasattr(self, 'file'): self.file.close()
+            raise
+
+    def envelope(self, offset):
+        info = super().envelope(offset)
+        if info['kind'] == 2 and info['length'] - 112 > self.limits.working_bytes:
+            raise ContractError('local_resource_limit', 'Desktop CHUNK body budget before body allocation')
+        return info
+
+    def decode(self, record):
+        # The original metadata checker establishes lengths/features/closure before
+        # any source length is used here. Full R3 decode still follows independently.
+        meta = self.metadata(record)
+        decoded = sum(int(b['decoded']) for b in meta['blocks'])
+        logical = sum(int(p['length']) for e in meta['entries'] for p in e.get('payloads', ()))
+        stored = max((int(b['stored']) for b in meta['blocks']), default=0)
+        metadata_bytes = 4 + struct.unpack_from('<I', record['body'])[0]
+        charge = len(record['body']) + decoded + logical + stored + 8 * metadata_bytes
+        if decoded > self.limits.decoded_cache_bytes or charge > self.limits.working_bytes:
+            raise ContractError('local_resource_limit', 'Desktop CHUNK decoded/working budget before decompression')
+        return super().decode(record)
 
 
 @dataclass(frozen=True)
@@ -40,7 +89,7 @@ class LmtrEntry:
 
 class _Entries:
     """Sequence facade for existing slider controls without a duration-sized list."""
-    def __init__(self, owner): self.owner = owner
+    def __init__(self, owner): self.owner = weakref.proxy(owner)
     def __len__(self): return self.owner.entry_count
     def __getitem__(self, index):
         if not isinstance(index, int) or not 0 <= index < len(self): raise IndexError(index)
@@ -49,7 +98,7 @@ class _Entries:
 
 class _Times:
     """Bisect-compatible lazy recorder-intake times; original sensor clocks stay metadata."""
-    def __init__(self, owner): self.owner = owner
+    def __init__(self, owner): self.owner = weakref.proxy(owner)
     def __len__(self): return self.owner.entry_count
     def __getitem__(self, index): return self.owner.entries[index].elapsed_s
 
@@ -62,14 +111,16 @@ class LmtrPlaybackModel:
     admitted prefix first; it never converts salvage into a completed recording.
     Cache accounting excludes bounded parsing/decompression scratch and UI frame copies.
     """
-    def __init__(self, path, *, recover=False, cancelled=lambda: False):
+    def __init__(self, path, *, recover=False, cancelled=lambda: False, limits=None):
         self.path = Path(path).absolute()
-        self.reader = Reader(self.path)
-        self._source_identity = self._identity()
+        self.limits = limits or LmtrReadLimits()
+        self.reader = _DesktopReader(self.path, self.limits)
         self.cancelled = cancelled
         self._cache = None
         self._recovery_refs = []
         try:
+            self._source_identity = self._descriptor_identity()
+            self._assert_source_unchanged()
             self.report = deepcopy(self.reader.check(full=recover, recover=recover, cancelled=cancelled))
             self.recovered = self.report['status'] == 'recovered'
             self.summary = self.report['summary']
@@ -100,10 +151,9 @@ class LmtrPlaybackModel:
             self.index, self.playing, self.speed = 0, False, 1.0
             self._anchor_time = self._anchor_elapsed = 0.0
             # Existing metadata dialog accepts this recording-shaped immutable summary.
-            self.recording = self
             self.manifest = {'header': self.reader.head, 'validation': self.report,
                              'completed': self.completed}
-            self.timeline = self.entries
+            self._assert_source_unchanged()
         except BaseException:
             self.reader.close()
             raise
@@ -124,6 +174,12 @@ class LmtrPlaybackModel:
     def close(self):
         """Drop bounded payload ownership and release the source descriptor exactly once."""
         self._cache = None
+        self._recovery_refs.clear()
+        self.reader.cache.clear()
+        self.reader.cache_bytes = 0
+        self.reader.logical.clear()
+        self.reader.selected.clear()
+        self.reader.validated_records.clear()
         self.reader.close()
 
     def _identity(self):
@@ -131,11 +187,20 @@ class LmtrPlaybackModel:
         st = self.path.stat()
         return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns
 
+    def _descriptor_identity(self):
+        st = os.fstat(self.reader.file.fileno())
+        return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns
+
+    def _assert_source_unchanged(self):
+        """Compare path and owned descriptor before AND after admitted source operations."""
+        if self._identity() != self._source_identity or self._descriptor_identity() != self._source_identity:
+            raise ValueError('source_changed: reopen and validate an immutable source')
+
     def _chunk(self, index):
         """Fully validate the selected CHUNK and navigation before exposing any bytes."""
         if self.cancelled(): raise InterruptedError('LMTR load cancelled')
-        if self._identity() != self._source_identity:
-            raise ValueError('source_changed: reopen and validate an immutable source')
+        if type(index) is not int or not 0 <= index < self.entry_count: raise IndexError(index)
+        self._assert_source_unchanged()
         if self._cache:
             offset, meta, _ = self._cache
             if int(meta['entries'][0]['entry_id']) <= index <= int(meta['entries'][-1]['entry_id']):
@@ -159,21 +224,48 @@ class LmtrPlaybackModel:
         # owned blocks for analysis without changing that independent validation path.
         for b in meta['blocks']:
             total += int(b['decoded'])
-            if total > MAX_CACHE_BYTES: raise ValueError('local_resource_limit: decoded cache budget')
+            if total > self.limits.decoded_cache_bytes: raise ValueError('local_resource_limit: decoded cache budget')
             start = prefix+int(b['offset'])
             stored = record['body'][start:start+int(b['stored'])]
             data = stored if b['codec'] == 0 else inflate(stored, int(b['decoded']))
             if sha(data) != b['hash']: raise ValueError('committed_payload_integrity')
             blocks[b['id']] = data
+        self._assert_source_unchanged()
         self._cache = record['offset'], meta, blocks
         return self._cache
 
-    def original_entry(self, index):
+    def _entry_view(self, index):
         _, meta, _ = self._chunk(index)
         return meta['entries'][index-int(meta['entries'][0]['entry_id'])]
 
+    def original_entry(self, index):
+        """Owned semantic metadata: callers cannot alter validated cached descriptors."""
+        return deepcopy(self._entry_view(index))
+
+    @property
+    def header(self):
+        """Return owned metadata across the worker/UI boundary."""
+        return deepcopy(self.reader.head)
+
+    def read_payloads(self, index):
+        """Return exact immutable logical bytes, including observations without a grid."""
+        _, meta, blocks = self._chunk(index)
+        entry = self._entry_view(index)
+        if entry['kind'] != 'observation': return freeze({})
+        payloads = {}
+        for p in entry['payloads']:
+            if p['kind'] == 'materialized':
+                start, length = int(p['offset']), int(p['length'])
+                payloads[p['id']] = blocks[p['block_id']][start:start+length]
+        for p in entry['payloads']:
+            if p['kind'] == 'view':
+                start, length = int(p['offset']), int(p['length'])
+                payloads[p['id']] = payloads[p['parent_payload_id']][start:start+length]
+        self._assert_source_unchanged()
+        return freeze(payloads)
+
     def describe(self, index):
-        entry = self.original_entry(index)
+        entry = self._entry_view(index)
         kind = entry['kind']
         if kind == 'observation':
             kind = 'valid' if entry['measurement']['status'] == 'available' else 'unavailable'
@@ -191,22 +283,16 @@ class LmtrPlaybackModel:
         index = self.index if index is None else index
         if not self.entry_count: return None
         _, meta, blocks = self._chunk(index)
-        entry = self.original_entry(index)
+        entry = self._entry_view(index)
         if entry['kind'] != 'observation': return None
         segment = next(s for s in meta['segments'] if s['id'] == entry['segment_id'])
         stream = next(s for s in segment['streams'] if s['stream_id'] == entry['stream_id'])
         context = next(c['value'] for c in meta['contexts'] if c['id'] == entry['context_id'])
+        if stream['geometry'] is None:
+            return None  # Opaque-only observations have evidence/metadata, no invented pixel grid.
         geometry = Geometry(stream['geometry']['width_px'], stream['geometry']['height_px'])
-        payloads = {}
+        payloads = self.read_payloads(index)
         descriptors = {p['id']: p for p in entry['payloads']}
-        for p in entry['payloads']:
-            if p['kind'] == 'materialized':
-                start, length = int(p['offset']), int(p['length'])
-                payloads[p['id']] = blocks[p['block_id']][start:start+length]
-        for p in entry['payloads']:
-            if p['kind'] == 'view':
-                start, length = int(p['offset']), int(p['length'])
-                payloads[p['id']] = payloads[p['parent_payload_id']][start:start+length]
         measurement = entry['measurement']
         temperature = payloads.get(measurement.get('temperature_payload_id'))
         mask = payloads.get(measurement.get('mask_payload_id'))
@@ -214,7 +300,10 @@ class LmtrPlaybackModel:
         for p in entry['payloads']:
             if p['role'] == 'native_samples' and p['dtype'] != 'bytes':
                 dtype = ('<' if p['byte_order'] == 'little' else '>')+{'u8':'u1','i8':'i1','u16':'u2','i16':'i2','u32':'u4','i32':'i4','u64':'u8','i64':'i8','f32':'f4','f64':'f8'}[p['dtype']]
-                encoding = 'ht301.raw14' if p['encoding_id'] == 'org.lmthermal.ht301.raw14' else p['encoding_id']
+                # A typed native plane can use a different grid. Keep its evidence,
+                # but never use its indices for primary-grid hover without correspondence.
+                encoding = ('ht301.raw14' if p['encoding_id'] == 'org.lmthermal.ht301.raw14'
+                            and p['shape'] == list(geometry.shape) else p['encoding_id'])
                 natives.append(NativePlane(p['id'], encoding, dtype, p['shape'], payloads[p['id']]))
         preview = None
         # Only explicit standardized raw visual encodings are interpreted. Opaque
@@ -234,9 +323,10 @@ class LmtrPlaybackModel:
         stats = None if temperature is None else statistics(
             np.frombuffer(temperature, dtype='<f4').reshape(geometry.shape),
             None if mask is None else np.frombuffer(mask, dtype='u1').reshape(geometry.shape))
-        manifest = {'measurement': measurement, 'source': stream['source'],
+        manifest = {'recording_id': self.reader.head['recording_id'], 'measurement': measurement, 'source': stream['source'],
                     'entry': entry, 'context': context, 'segment': segment,
                     'integrity_scope': 'selected_chunks', 'file_validation': self.report}
+        self._assert_source_unchanged()
         return OfflineMeasurement(self.path, 'lmthermal-recording', geometry, temperature,
                                   mask, tuple(natives), freeze(manifest),
                                   evidence=freeze({'descriptors': descriptors}),
@@ -245,8 +335,10 @@ class LmtrPlaybackModel:
 
     def verify_full(self):
         """Explicit background scan; never label merely selected access full integrity."""
-        if self._identity() != self._source_identity: raise ValueError('source_changed')
+        self._assert_source_unchanged()
+        self._cache = None
         self.report = deepcopy(self.reader.check(full=True, recover=self.recovered, cancelled=self.cancelled))
+        self._assert_source_unchanged()
         self.manifest['validation'] = self.report
         return self.report
 
@@ -261,7 +353,7 @@ class LmtrPlaybackModel:
         low, high = 0, self.entry_count
         while low < high:
             mid = (low+high)//2
-            if int(self.original_entry(mid)['timeline_ns']) < timeline_ns: low = mid+1
+            if int(self._entry_view(mid)['timeline_ns']) < timeline_ns: low = mid+1
             else: high = mid
         index = low
         return None if index >= self.entry_count else self.seek(index)

@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (R5 ownership and resource qualification — 2026-11-12)
+- Prevent old-file navigation from superseding a pending Open; clear readings on error/gaps/source changes, reset ROI/pointer across sessions and make cooperative Close asynchronous without retaining pending results.
+- Freeze immutable PNG inputs before the destination dialog; keep Auto independent of invalid manual bounds and report invalid Locked edits. Preserve differently sized native planes without inventing primary-pixel correspondence.
+- Add predecode local body/cache/working-budget refusals, owned metadata copies, opaque no-grid evidence access and prompt descriptor/cache cleanup without validator/wire changes.
+- Qualify Linux with the unchanged51-case corpus, deterministic UI/ownership/resource regressions, a4M-pixel plane and sparse>4GiB indexed access. Publish explicit current Windows/native-window/operator gates; prior Windows evidence is historical only.
+
 ### Validated (R5 camera-free Linux / native Windows — 2026-11-12)
 - Linux passes207 tests with no skips. Windows run43241547022 passes196/200 with four expected Linux-only skips, preserving all51 canonical outcomes and legacy readers. Retain the preceding Windows cleanup failure separately.
 - Independently verify155 retained synthetic ART R4 measurements in the R5 adapter, with exact Float32/native/transport oracle hashes, full-grid ROI parity and unchanged sources. All245 missing observations remain explicit gaps; physical Android LMTR interoperability and operator acceptance remain pending.
