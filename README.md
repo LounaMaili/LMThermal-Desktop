@@ -21,6 +21,12 @@ radiometric initialization remain explicit. Up to four documents reuse existing 
 measurements, ROI, palette, metadata and separate PNG tools. LMTR stays read-only.
 See [workspace behavior and qualification](docs/PRODUCT_WORKSPACE.md).
 
+## Distribution preparation
+
+See [private Linux prototype and Windows installer preparation](docs/PACKAGING.md)
+and [Windows development with Codex](docs/WINDOWS_DEVELOPMENT.md). No public release
+is available; native Windows qualification and licensing decisions remain pending.
+
 ## Requirements
 
 Use the repository virtual environment when available. Python 3.10 or newer

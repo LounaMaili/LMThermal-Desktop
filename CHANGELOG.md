@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Private packaging preparation — 2026-11-12)
+- Add a native one-directory PyInstaller recipe with explicit schema data, pinned isolated Qt6/headless-OpenCV environment, dependency notice inventory, SHA-256 manifest and runtime self-check. Linux portable directory is a private host prototype, not a distribution certification.
+- Prepare native Windows build and non-admin Inno Setup templates, Windows/Codex setup, AppImage/Flatpak tradeoffs and explicit license/signing/runtime gates. No installer, device, hosted CI or public release is implied.
+
+
 ### Added (Desktop product workspace — 2026-11-12)
 - Added a Home/document shell for Linux live acquisition and camera-free LMTX, LMTR and historical analysis, reusing existing engines and native coordinates. Camera connection remains explicit; common LMTR recording is not enabled.
 - Bound open documents to four, retain workers through cooperative asynchronous Close, reject queued live publication during Close, and expose per-user rotating local diagnostics without automatic upload.
