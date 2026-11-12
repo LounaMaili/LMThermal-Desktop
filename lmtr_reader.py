@@ -312,6 +312,15 @@ class LmtrPlaybackModel:
             p = next((p for p in entry['payloads'] if p['role'] == role), None)
             if p and p['geometry'] and p['shape'][:2] == list(geometry.shape):
                 data = payloads[p['id']]
+                channels = {'org.lmthermal.visual.gray8-v1': 1,
+                            'org.lmthermal.visual.rgb8-v1': 3,
+                            'org.lmthermal.visual.rgba8-v1': 4}.get(p['encoding_id'])
+                expected = list(geometry.shape) + ([] if channels == 1 else [channels])
+                if channels is not None and (p['dtype'] != 'u8' or p['byte_order'] != 'not_applicable'
+                        or p['shape'] != expected or len(data) != geometry.width * geometry.height * channels):
+                    # Fail on the worker, before a malformed standard visual reaches a Qt slot.
+                    # This local guard does not edit or weaken the pinned R3 validator.
+                    raise ContractError('invalid_payload', 'Malformed standardized visual descriptor')
                 if p['encoding_id'] == 'org.lmthermal.visual.rgb8-v1': preview = data
                 elif p['encoding_id'] == 'org.lmthermal.visual.gray8-v1':
                     preview = np.repeat(np.frombuffer(data,dtype='u1'),3).tobytes()

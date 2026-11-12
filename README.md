@@ -65,7 +65,8 @@ bytes, optional JSON precision and source files are preserved. PNG renderings sa
 exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
 
 See [R5 architecture and limits](docs/LMTR_READER.md),
-[qualification gates](docs/LMTR_R5_QUALIFICATION.md) and the camera-free
+[qualification gates](docs/LMTR_R5_QUALIFICATION.md),
+[phase3 integration review](docs/LMTR_R5_INTEGRATION_REVIEW.md) and the camera-free
 [operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md). This is camera-free fixture/
 emulator evidence, not real Android R4→Desktop interoperability or physical accuracy.
 

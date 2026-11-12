@@ -1,0 +1,31 @@
+{
+  "base": "9e57f227933ccffc23b400b710b6f76b4d9264cc",
+  "reviewed_delta": [
+    "8f167244de86fcb3efc79c9abd9c9e92567c8a33",
+    "9e57f227933ccffc23b400b710b6f76b4d9264cc"
+  ],
+  "linux_tests": {
+    "tests": 232,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "native_window": "unavailable before window creation: xcb/display:0",
+  "windows": "pending exact new runtime; old evidence only",
+  "new_actions_runs": 0,
+  "device_access": false,
+  "source_sha256": {
+    "lmtr_reader.py": "4dfdd65002389441b1da63bf16c0415d4ec432e8aaf1e7915fe4e363bff03a69",
+    "lmtr_viewer.py": "eeb6c30764ff324a4eeed9e65881128ffd8d213ab08b9e36628debf4b0f0c363",
+    "tests/test_lmtr_phase3.py": "d7dfc5df0c25ad8b7bf44993d75576d2548eeae46b68fd42d42381f3c0bb5cb5",
+    "tests/test_lmtr_hardening_ui.py": "30e1cef4e059585a072ec20c38a082b94b816f552708068105859c9ddf99c969"
+  },
+  "canonical_corpus_unchanged": true,
+  "vendor_algorithms_unchanged": true,
+  "findings": [
+    "standard visual descriptor local worker guard",
+    "obsolete cooperative scan cancellation",
+    "same-size/mtime atomic replacement refusal"
+  ],
+  "warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated."
+}

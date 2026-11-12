@@ -147,3 +147,33 @@ class LmtrHardeningUiTests(unittest.TestCase):
             with patch('lmtr_viewer.QFileDialog.getSaveFileName',return_value=(str(target),'')):w._save()
             actual=cv2.cvtColor(cv2.imread(str(target)),cv2.COLOR_BGR2RGB)
             np.testing.assert_array_equal(expected,actual)
+    def test_new_open_cancels_old_scan_at_its_cooperative_boundary(self):
+        self.opened();w=self.window
+        entered=threading.Event();observed=[]
+        def scan(model):
+            entered.set();deadline=time.monotonic()+2
+            while not model.cancelled() and time.monotonic()<deadline:time.sleep(.002)
+            observed.append(model.cancelled())
+            if observed[-1]:raise InterruptedError('obsolete source operation cancelled')
+            return model.report
+        with patch.object(LmtrPlaybackModel,'verify_full',scan):
+            w._request('verify');self.wait(entered.is_set)
+            w.open_path(ROOT/'illustration-02-stored.lmtr')
+            self.wait(lambda:w.state is not None)
+            self.assertEqual([True],observed,'New Open must invalidate cooperative old-source work')
+            self.assertEqual(ROOT.joinpath('illustration-02-stored.lmtr').absolute(),w.state['source_path'])
+    def test_malformed_visual_is_worker_error_then_valid_file_can_reopen(self):
+        from test_lmtr_phase3 import visual_plan
+        from lmtr_reference.container import write_plan
+        self.opened();w=self.window
+        with TemporaryDirectory() as temp:
+            path=Path(temp)/'bad-rgb.lmtr';write_plan(visual_plan(1,'org.lmthermal.visual.rgb8-v1'),path)
+            w.open_path(path);self.wait(lambda:not w._in_flight)
+            w._request('seek',1);self.wait(lambda:not w._in_flight)
+            self.assertIsNone(w.frame);self.assertIsNone(w.image.image)
+            self.assertIn('invalid_payload',w.status.text())
+            w.open_path(ROOT/'illustration-01-stored.lmtr')
+            self.wait(lambda:w.state is not None)
+            w._request('seek',1);self.wait(lambda:not w._in_flight)
+            self.assertEqual(30,w.frame.point(1,0))
+            w.close();self.wait(lambda:not w.worker.isRunning())

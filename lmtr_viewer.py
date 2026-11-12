@@ -79,6 +79,11 @@ class LmtrWorker(QThread):
             self.ready_generation = None
             self.condition.notify()
 
+    def _cancelled(self, generation):
+        """Source replacement cancels old work at the same reference-reader boundaries as Stop."""
+        with self.condition:
+            return self.stopped.is_set() or generation != self.requested_generation
+
     def _close(self, model):
         """Retain a bounded cleanup diagnostic, never an exception/payload graph."""
         if model is None: return
@@ -103,7 +108,7 @@ class LmtrWorker(QThread):
                         self._close(model)
                         model = None
                         if self.close_error: raise OSError('Previous source close failed: '+self.close_error)
-                        model = LmtrPlaybackModel(value[0], recover=value[1], cancelled=self.stopped.is_set)
+                        model = LmtrPlaybackModel(value[0], recover=value[1], cancelled=lambda source_generation=generation: self._cancelled(source_generation))
                     elif model is None: raise ValueError('Open a recording first')
                     elif action == 'verify': model.verify_full()
                     elif action == 'seek': model.seek(value)

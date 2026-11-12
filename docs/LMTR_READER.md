@@ -132,3 +132,10 @@ repin hashes to hide differences. An update requires explicit upstream revision 
 algorithm/schema diff, all51 original hash/verdict checks, adapter/ownership/resource/UI
 regressions and new Windows verification. Keep original corpus/manifest receipts;
 new engineering sources are noncanonical and never replace those fixtures.
+
+
+## Phase3 integration review
+
+[Independent review and integration proposal](LMTR_R5_INTEGRATION_REVIEW.md) records
+additional malformed-visual and obsolete-scan corrections,232 passing Linux tests,
+and exact pending Windows/operator gates. Historical phase2 evidence remains pinned.

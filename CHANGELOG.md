@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (R5 integration review — 2026-11-12)
+- Refuse inconsistent standardized RGB/RGBA/gray descriptors on the worker before conversion/Qt rendering; keep accepted R3 algorithms and canonical bytes unchanged.
+- Cancel obsolete cooperative source work when a newer Open generation supersedes it; preserve bounded slots and asynchronous Close. Cover equal-size/mtime path replacement and worker-error recovery.
+- Record232 passing Linux tests, unavailable native display, and a non-executed fast-forward/Windows/operator integration proposal for PR4. No PR mutation, merge, hosted CI or device access.
+
 ### Fixed (R5 ownership and resource qualification — 2026-11-12)
 - Prevent old-file navigation from superseding a pending Open; clear readings on error/gaps/source changes, reset ROI/pointer across sessions and make cooperative Close asynchronous without retaining pending results.
 - Freeze immutable PNG inputs before the destination dialog; keep Auto independent of invalid manual bounds and report invalid Locked edits. Preserve differently sized native planes without inventing primary-pixel correspondence.
