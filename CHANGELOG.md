@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Validated (R5 camera-free Linux / native Windows — 2026-11-12)
+- Linux passes207 tests with no skips. Windows run43241547022 passes196/200 with four expected Linux-only skips, preserving all51 canonical outcomes and legacy readers. Retain the preceding Windows cleanup failure separately.
+- Independently verify155 retained synthetic ART R4 measurements in the R5 adapter, with exact Float32/native/transport oracle hashes, full-grid ROI parity and unchanged sources. All245 missing observations remain explicit gaps; physical Android LMTR interoperability and operator acceptance remain pending.
+
+
 ### Fixed (R5 native Windows test ownership — 2026-11-12)
 - Retained failed run43240927585: all LMTR corpus/adapter/UI checks passed, but one test removed its temporary directory before closing its model descriptor. Close the model in `finally` before directory cleanup and assert descriptor closure; application behavior and refusal checks are unchanged. The failed Windows run counted200 tests with one error and four Linux-only skips.
 

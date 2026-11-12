@@ -5,9 +5,32 @@
   "Linux_skipped": 0,
   "Python": "3.15.2",
   "Qt_mode": "offscreen",
-  "Windows": "pending hosted run",
+  "Windows": {
+    "run": 43241547022,
+    "state": "success",
+    "total_tests": 200,
+    "passed": 196,
+    "Linux_only_skipped": 4,
+    "Python": "3.13.17",
+    "runner": "windows-2022",
+    "Qt": "offscreen"
+  },
   "physical": "not authorized, not performed",
   "real_Android_LMTR_interop": "not validated",
   "wire_changed": false,
-  "legacy_readers_changed": false
+  "legacy_readers_changed": false,
+  "tested_runtime_sha": "4c73e9f75fe0eaa836e8a9ac8bdd8d1e014f09f9",
+  "retained_negative_run": {
+    "id": 43240927585,
+    "cause": "test descriptor closed after TemporaryDirectory cleanup",
+    "source_refusal_assertion": "passed; teardown failed"
+  },
+  "synthetic_hosted_ART_R4_to_R5": {
+    "STORED_retained": 81,
+    "DEFLATE_retained": 74,
+    "original_Float32_native_transport_oracle_parity": true,
+    "full_grid_ROI_parity": true,
+    "source_unchanged": true,
+    "physical": false
+  }
 }

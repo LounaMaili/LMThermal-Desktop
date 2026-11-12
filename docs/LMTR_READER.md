@@ -67,7 +67,21 @@ QT_QPA_PLATFORM=offscreen .venv/bin/python -m unittest discover -s tests -v
 The new tests include all51 pinned corpus cases,33 positive adapters, masks/signed zero,
 full/recovery corruption, native-only refusal of Celsius, cache ownership, source-change
 rejection, exact time seek, ROI/palette/PNG and asynchronous UI states/shutdown.
-Linux full suite at the first checkpoint:207 pass. Later receipts supersede counts.
+Linux full suite:207 pass, no skips. Native Windows2022/Python3.13.17 run
+[43241547022](https://github.com/LounaMaili/LMThermal-Desktop/actions/runs/43241547022)
+on runtime/test source4c73e9f:200 tests,196 pass and four Linux-only skips. The earlier
+run43240927585 remains a recorded failure: one test closed its descriptor only after
+Windows tried to remove its temporary directory. Moving that close into `finally`
+corrected test ownership without changing application behavior or assertions.
+
+The actual new R5 adapter also consumes81 STORED and74 DEFLATE retained observations
+from synthetic hosted ART R4 run43238655791, comparing every Float32/native/acquisition
+hash and length with the original module oracle, whole-grid ROI with matrix statistics,
+and unchanged source hashes. All245 represented missing observations remain gaps;
+no temperatures are invented. This is synthetic interoperability, not physical Android.
+The displayed Linux offscreen layout was inspected; real operator interaction remains
+unperformed. The final evidence-only commit uses `[skip ci]` to avoid an unnecessary
+extra run; the above SHAs identify the exact tested runtime sources.
 Native Windows is a separate hosted validation, not inferred from Linux or portable
 syntax. Offscreen Qt tests are not an operator aiming/visual/usability acceptance.
 
