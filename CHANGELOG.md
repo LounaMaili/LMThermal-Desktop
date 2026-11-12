@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (LMTR R5 offline recording analysis — 2026-11-12)
+- Added a pinned independent R3 reader, all 51 unchanged canonical files, lazy indexed event/measurement access and one decoded-CHUNK cache. Open/selected/full integrity scopes remain explicit; incomplete recovery is opt-in with an unknown tail and never repairs sources.
+- Added a camera-free timeline window using existing immutable offline measurements, native cursor/ROI, palettes/ranges and exclusive separate PNG saving. Reader work stays on one coalesced worker, with cancellation, obsolete-result guards and no timer-induced loading starvation. Stored Float32/native/transport data never enter thermometry.
+- Preserve legacy still/LMTX/recording readers and source coordinates. Physical R4 interoperability and operator/Windows runtime acceptance remain separate gates.
+
+
 ### Fixed (Final Linux LMTX regression — 2026-10-06)
 - Corrected the Windows-added viewer import test's false positive on Linux/Python 3.14: `pathlib` legitimately imports the general-purpose standard-library `fcntl` module. The test continues to reject HT-301 acquisition modules and verifies camera-free LMTX opening without a camera worker.
 - The complete Linux suite passes 191 tests with no skips, including all LMTX, legacy capture/recording/playback, ROI/presentation/offline and Linux discovery/acquisition/sequence checks. Application code, thermometry and LMTX v1 semantics are unchanged; the correction remains on its dedicated review branch.

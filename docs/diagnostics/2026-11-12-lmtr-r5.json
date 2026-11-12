@@ -1,0 +1,13 @@
+{
+  "phase": "R5 work in progress",
+  "canonical_cases": 51,
+  "Linux_tests_passed": 207,
+  "Linux_skipped": 0,
+  "Python": "3.15.2",
+  "Qt_mode": "offscreen",
+  "Windows": "pending hosted run",
+  "physical": "not authorized, not performed",
+  "real_Android_LMTR_interop": "not validated",
+  "wire_changed": false,
+  "legacy_readers_changed": false
+}

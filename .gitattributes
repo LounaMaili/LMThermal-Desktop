@@ -1,2 +1,5 @@
 tests/fixtures/*.raw binary
 *.lmtx binary
+
+# Canonical LMTR source bytes must remain identical on Linux and Windows.
+tests/fixtures/lmtr/files/*.lmtr binary
