@@ -105,9 +105,16 @@ class LmtrReaderTests(unittest.TestCase):
     def test_source_change_is_refused_even_for_cached_chunk(self):
         with TemporaryDirectory() as root:
             path=Path(root)/'copy.lmtr'; path.write_bytes((ROOT/'files/illustration-01-stored.lmtr').read_bytes())
-            model=LmtrPlaybackModel(path); self.addCleanup(model.close);model.frame(1)
-            path.write_bytes(path.read_bytes()+b'x')
-            with self.assertRaisesRegex(ValueError,'source_changed'): model.frame(1)
+            model=LmtrPlaybackModel(path)
+            try:
+                model.frame(1)
+                path.write_bytes(path.read_bytes()+b'x')
+                with self.assertRaisesRegex(ValueError,'source_changed'): model.frame(1)
+            finally:
+                # Windows refuses unlinking an open descriptor; close before the
+                # temporary directory's context exits, not in later unittest cleanup.
+                model.close()
+            self.assertTrue(model.reader.file.closed)
     def test_cancellation_closes_without_publishing_partial_measurement(self):
         with self.assertRaises(ContractError) as error:
             self.model(cancelled=lambda:True)

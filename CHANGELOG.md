@@ -4,6 +4,9 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (R5 native Windows test ownership — 2026-11-12)
+- Retained failed run43240927585: all LMTR corpus/adapter/UI checks passed, but one test removed its temporary directory before closing its model descriptor. Close the model in `finally` before directory cleanup and assert descriptor closure; application behavior and refusal checks are unchanged. The failed Windows run counted200 tests with one error and four Linux-only skips.
+
 ### Added (LMTR R5 offline recording analysis — 2026-11-12)
 - Added a pinned independent R3 reader, all 51 unchanged canonical files, lazy indexed event/measurement access and one decoded-CHUNK cache. Open/selected/full integrity scopes remain explicit; incomplete recovery is opt-in with an unknown tail and never repairs sources.
 - Added a camera-free timeline window using existing immutable offline measurements, native cursor/ROI, palettes/ranges and exclusive separate PNG saving. Reader work stays on one coalesced worker, with cancellation, obsolete-result guards and no timer-induced loading starvation. Stored Float32/native/transport data never enter thermometry.
