@@ -1,0 +1,10 @@
+{
+  "repository": "LounaMaili/LMThermal",
+  "source_commit": "8eb4aceaf8bb36a8061c932b3121f898b81b4af3",
+  "changes": "Only default schema resource location is relocated; reader algorithms and schema unchanged. Writer helpers are inherited but not exposed by Desktop.",
+  "files": {
+    "container.py": "6a27ddb4af5ef7ed1e312cf9983738fb32d2fd33d91cb0da212b56c058d37cf9",
+    "jsoncodec.py": "2da37a4664dcbbf50f779af11285aa0c465d1956685ffa7d6b59296bfc46641b",
+    "metadata.py": "4726115d46429b0d537c3dfc90e0c59d86300ea33e1396d9c225542bbf762748"
+  }
+}

@@ -43,6 +43,30 @@ See [LMTX import architecture and validation](docs/LMTX_IMPORT.md)
 for the canonical specification, resource limits, interoperability evidence,
 Windows commands and legacy-format coexistence.
 
+## Camera-free LMTR recording analysis (R5 development)
+
+```bash
+./.venv/bin/python lmthermal_viewer.py --lmtr /path/to/recording.lmtr
+# Explicit incomplete-file recovery; never repairs or rewrites the source:
+./.venv/bin/python lmthermal_viewer.py --lmtr /path/to/incomplete.lmtr --recover-lmtr
+# The same offline window can be launched without an initial file:
+./.venv/bin/python lmtr_viewer.py
+```
+
+This separate offline window reuses the native-grid image, cursor, ROI, palettes and
+Celsius legend. Navigate events with the slider/Previous/Next, seek recorder-intake
+time, or play at 0.5/1/2/4×. Gaps and segment events are blank with no readings.
+Stored Float32 values are authoritative; no thermometry is recomputed. Only one
+decoded CHUNK is cached. File navigation is asynchronous and latest-request bounded.
+**Verify entire file / prefix** requests independent full validation; normal open
+certifies opening/navigation and each visited CHUNK, not unseen payloads. Explicit
+recovery visibly retains unknown-tail status. Original metadata, native/transport
+bytes, optional JSON precision and source files are preserved. PNG renderings save
+exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
+
+See [R5 architecture and limits](docs/LMTR_READER.md). This is camera-free fixture/
+emulator evidence, not real Android R4→Desktop interoperability or physical accuracy.
+
 ## Radiometric desktop MVP
 
 Launch the viewer with the HT-301 connected:
