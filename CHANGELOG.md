@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Desktop product workspace — 2026-11-12)
+- Added a Home/document shell for Linux live acquisition and camera-free LMTX, LMTR and historical analysis, reusing existing engines and native coordinates. Camera connection remains explicit; common LMTR recording is not enabled.
+- Bound open documents to four, retain workers through cooperative asynchronous Close, reject queued live publication during Close, and expose per-user rotating local diagnostics without automatic upload.
+- Cover format routing, exact source preservation, reader ownership, responsive pending Close, runtime/schema self-check and logging fallback. Native graphical/Windows runtime qualification remains separate from Linux offscreen tests.
+
+
 ### Fixed (R5 integration review — 2026-11-12)
 - Refuse inconsistent standardized RGB/RGBA/gray descriptors on the worker before conversion/Qt rendering; keep accepted R3 algorithms and canonical bytes unchanged.
 - Cancel obsolete cooperative source work when a newer Open generation supersedes it; preserve bounded slots and asynchronous Close. Cover equal-size/mtime path replacement and worker-error recovery.

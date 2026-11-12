@@ -1,12 +1,25 @@
 # LMThermal-Desktop
 
-Experimental desktop tooling for the Infiray HT-301 / T3-317-13. The first
+Desktop companion application for Linux and Windows, with a Linux acquisition backend for the Infiray HT-301 / T3-317-13. The first
 radiometric PyQt MVP now uses the evidence-gated native-equivalent measurement
 session. Absolute physical accuracy has not been independently validated.
 Historical `thermal_capture.py` calculations are not part of this viewer.
 
 This desktop repository is paired with [LMThermal](https://github.com/LounaMaili/LMThermal),
 which holds the hardware and reverse-engineering documentation.
+
+## Product workspace (development branch)
+
+```bash
+./.venv/bin/python lmthermal_desktop.py
+./.venv/bin/python lmthermal_desktop.py --open /path/to/recording.lmtr
+```
+
+Home routes live acquisition, LMTX/legacy stills, LMTR and historical recordings into
+owned document tabs. Starting the workspace or Live tab never opens USB; Connect and
+radiometric initialization remain explicit. Up to four documents reuse existing readers,
+measurements, ROI, palette, metadata and separate PNG tools. LMTR stays read-only.
+See [workspace behavior and qualification](docs/PRODUCT_WORKSPACE.md).
 
 ## Requirements
 

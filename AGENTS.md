@@ -23,7 +23,7 @@ Before changing camera parsing or thermometry, read the relevant documentation f
 - Do not bury new thermometry logic inside UI widgets.
 - Do not present approximations as validated measurements.
 - Prefer small, testable changes over large rewrites.
-- Avoid unrelated cosmetic work while measurement fundamentals are unresolved.
+- Develop the full Linux/Windows companion product while preserving established measurement and format invariants. Do not change scientific behavior to simplify UI.
 - Do not commit credentials, tokens, private machine data, virtual environments, or temporary capture files unless deliberately added as sanitized test fixtures.
 
 ## Python environment
@@ -122,7 +122,7 @@ See `docs/MEASUREMENT_AUDIT.md` and the sibling repository's
 
 ## Measurement-first development order
 
-Do not begin with a GUI redesign.
+The measurement foundation below is established. Product UI and packaging work may build on it without reopening protocol research.
 
 First establish a trustworthy and reproducible measurement layer:
 
@@ -144,7 +144,7 @@ Only then continue the desktop MVP:
 5. palette selection;
 6. image capture with useful measurement metadata.
 
-Advanced measurement regions, CSV/radiometric exports, recording, gallery/comparison, and Android work come later.
+Point/ROI, legacy recording and offline LMTX/LMTR analysis are implemented. Production common LMTR recording remains a separately gated milestone; offline reader support does not authorize it.
 
 ## Testing
 
