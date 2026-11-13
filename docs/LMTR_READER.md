@@ -52,6 +52,12 @@ local refusals, not v1 wire changes. Large-file/indefinite-runtime performance i
 Intake seek compares exact integer nanoseconds. Display/playback seconds are derived
 presentation values, never sensor-time substitutes. All events (including gaps and
 segment boundaries) remain navigable. Tied intake times may share a display position.
+The UI initially lands on the first observation in the already validated initial
+CHUNK. This avoids a blank segment-declaration screen for normal recordings and the
+canonical examples. It does not scan later CHUNKs or choose only favorable/available
+measurements. Control-only/empty initial CHUNKs keep event zero. Previous/seek still
+select every original segment/gap and clear the image; the model's default index is
+unchanged. No source bytes, order, validation scope or cache/resource limit changes.
 Point/ROI use stored native geometry and validity; source/session/native-grid changes clear inspection rectangles and pointers,
 even when the old bounds would still fit. Gaps disable new image gestures. Source metadata stays separate from inspection edits. Palette,
 range and PNG change presentation only. PNG uses exclusive creation and protects the

@@ -17,10 +17,13 @@ acceptance. On Windows PowerShell use `.venv\Scripts\python.exe` in both command
 Record Git SHA, Python/Qt versions, OS/build/scaling and pass/fail observations.
 Windows must rerun the full suite on this new code; older Windows runs do not qualify it.
 
-1. The opening event is blank (segment start). Next selects a3×2 synthetic masked
+1. Normal open selects the first initial-CHUNK observation automatically: a3×2 synthetic masked
    matrix: max30 at(1,0), min−0 at(2,0); (0,1) is invalid. Hover, draw/clear a small
    ROI, resize, switch palettes and Auto/Locked. Same native cells keep their values;
-   mask pixels have no temperature. Invalid Locked bounds show a warning; Auto works.
+   mask pixels have no temperature. Previous returns to the blank segment start;
+   Next restores the observation. Invalid Locked bounds show a warning; Auto works.
+   `illustration-02-stored.lmtr` similarly opens a384×288 plane whose samples are all
+   25°C: a uniform color is correct. Neither canonical file is a photographic scene.
 2. Play/pause/step/seek, then rapidly scrub while opening `illustration-02-stored.lmtr`.
    Only the new source may publish. Verify entire file changes integrity scope to full;
    normal opening alone only certifies opened/navigation records and selected CHUNKs.

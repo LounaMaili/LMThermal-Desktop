@@ -109,6 +109,11 @@ class LmtrWorker(QThread):
                         model = None
                         if self.close_error: raise OSError('Previous source close failed: '+self.close_error)
                         model = LmtrPlaybackModel(value[0], recover=value[1], cancelled=lambda source_generation=generation: self._cancelled(source_generation))
+                        # Event zero commonly declares the segment and has no image.
+                        # Land on the first initial-CHUNK observation, keeping every
+                        # preceding event accessible through Previous/seek.
+                        initial = model.initial_observation_index()
+                        if initial is not None:model.seek(initial)
                     elif model is None: raise ValueError('Open a recording first')
                     elif action == 'verify': model.verify_full()
                     elif action == 'seek': model.seek(value)

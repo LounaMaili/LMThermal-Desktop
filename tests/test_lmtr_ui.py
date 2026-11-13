@@ -32,8 +32,21 @@ class LmtrUiTests(unittest.TestCase):
     def opened(self):
         self.window.open_path(ROOT/'illustration-01-stored.lmtr')
         self.wait(lambda:self.window.state is not None)
-        self.window.slider.setValue(1)
         self.wait(lambda:self.window.frame is not None)
+
+    def test_normal_open_publishes_initial_observation_without_seek_or_next(self):
+        for filename,shape in [('illustration-01-stored.lmtr',(2,3)),('illustration-02-stored.lmtr',(288,384))]:
+            self.window.open_path(ROOT/filename)
+            self.wait(lambda:self.window.state is not None and not self.window._in_flight)
+            self.assertEqual(1,self.window.state['index'])
+            self.assertEqual(shape,self.window.frame.geometry.shape)
+            self.assertIsNotNone(self.window.image.image)
+            self.assertIsNotNone(self.window.legend.bounds)
+            self.assertTrue(self.window.save_button.isEnabled())
+            # The original segment is still truthful and navigable, never erased or painted with the observation.
+            self.window.previous.click();self.wait(lambda:not self.window._in_flight)
+            self.assertEqual(0,self.window.state['index']);self.assertIsNone(self.window.frame)
+            self.assertIsNone(self.window.image.image)
     def test_ready_frame_hover_roi_palette_and_resize_do_not_change_measurements(self):
         self.opened();w=self.window;frame=w.frame
         w._point((1,0));self.assertIn('30',w.point.text())

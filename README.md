@@ -90,6 +90,9 @@ Celsius legend. Navigate events with the slider/Previous/Next, seek recorder-int
 time, or play at 0.5/1/2/4×. Gaps and segment events are blank with no readings.
 Stored Float32 values are authoritative; no thermometry is recomputed. Only one
 decoded CHUNK is cached. File navigation is asynchronous and latest-request bounded.
+Opening lands on the first observation in the initial CHUNK; Previous/seek retain
+the original blank segment/gap events. The canonical 384×288 example is uniformly
+25°C, not a photographic thermal scene.
 **Verify entire file / prefix** requests independent full validation; normal open
 certifies opening/navigation and each visited CHUNK, not unseen payloads. Explicit
 recovery visibly retains unknown-tail status. Original metadata, native/transport

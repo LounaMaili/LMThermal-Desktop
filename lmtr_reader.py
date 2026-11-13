@@ -278,6 +278,19 @@ class LmtrPlaybackModel:
                          (int(entry['timeline_ns'])-self.first_time_ns)/1e9,
                          entry['kind'], reason, kind)
 
+    def initial_observation_index(self):
+        """Find an observation in the initial validated CHUNK without scanning the recording.
+
+        Segment/gap events remain at their original indices. This is a UI landing choice,
+        not a change to timeline order or a search for favorable/valid temperatures.
+        Work and cache stay bounded by the same one-CHUNK limits as an ordinary frame read.
+        A control-only/empty initial CHUNK retains the normal event-zero landing.
+        """
+        if not self.entry_count:return None
+        _, metadata, _ = self._chunk(0)
+        return next((int(entry['entry_id']) for entry in metadata['entries']
+                     if entry['kind']=='observation'),None)
+
     def frame(self, index=None):
         """Return exact stored planes or no reading, never reconstructed thermometry."""
         index = self.index if index is None else index

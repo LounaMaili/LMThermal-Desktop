@@ -76,8 +76,11 @@ def run(app, window, path, output, *, expect_error=False):
         else:
             if lmtr:
                 result['ready_wait_after_test_settle_ms'] = wait(lambda: viewer.state is not None, 'LMTR open')
-                viewer.slider.setValue(1)
-                wait(lambda: viewer.frame is not None and not viewer._in_flight, 'LMTR observation')
+                result['initial_event_index']=viewer.state['index']
+                result['initial_event_kind']=viewer.state['entry'].state if viewer.state['entry'] else None
+                # Exercise normal opening. A forced seek used to hide an empty
+                # segment-start landing in the installed application's acceptance checks.
+                assert viewer.frame is not None and not viewer._in_flight,'Initial LMTR observation not published'
             else:
                 result['ready_wait_after_test_settle_ms'] = wait(lambda: viewer.observation is not None, 'legacy/LMTX open')
             frame = viewer.frame if lmtr else viewer.observation

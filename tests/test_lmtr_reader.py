@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from lmtr_reference import Reader, ContractError
 from lmtr_reader import LmtrPlaybackModel, MAX_CACHE_BYTES
@@ -14,6 +15,19 @@ ROOT = Path(__file__).parent/'fixtures/lmtr'
 
 
 class LmtrReaderTests(unittest.TestCase):
+    def test_initial_landing_is_one_chunk_and_does_not_skip_unavailable_observations(self):
+        model=self.model()
+        with patch.object(model,'_chunk',return_value=(0,{'entries':[
+            {'kind':'segment_start','entry_id':'0'},{'kind':'gap','entry_id':'1'}]},{})) as chunk:
+            self.assertIsNone(model.initial_observation_index())
+            chunk.assert_called_once_with(0)
+        with patch.object(model,'_chunk',return_value=(0,{'entries':[
+            {'kind':'segment_start','entry_id':'0'},
+            {'kind':'observation','entry_id':'1','measurement':{'status':'unavailable'}},
+            {'kind':'observation','entry_id':'2','measurement':{'status':'available'}}]},{})):
+            self.assertEqual(1,model.initial_observation_index())
+        self.assertEqual(0,model.index)  # Reader navigation defaults remain separate from the UI choice.
+
     def model(self, name='illustration-01-stored', **kwargs):
         model = LmtrPlaybackModel(ROOT/'files'/f'{name}.lmtr',**kwargs)
         self.addCleanup(model.close)
