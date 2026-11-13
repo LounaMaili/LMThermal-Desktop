@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Phase 5 Desktop qualification — 2026-11-13)
+- Keep a refused legacy finalization retryable and abort application Close without discarding its owner or weakening recorder safety. Split LMTR controls into laptop-width rows while retaining source/native-coordinate/reader behavior.
+- Add opt-in camera-free source/frozen window qualification with strict native exposure, metadata/ROI/palette/PNG/timeline/source-hash/Close checks; record the current locked-session boundary instead of claiming operator/native visual acceptance.
+- Require Python's actual runtime notice, refuse in-checkout build output and detected source changes, and add independent byte/link/ELF ABI audits. Keep physical, clean-distro, licensing, native Windows and release gates explicit.
+
+
 ### Added (Private packaging preparation — 2026-11-12)
 - Add a native one-directory PyInstaller recipe with explicit schema data, pinned isolated Qt6/headless-OpenCV environment, dependency notice inventory, SHA-256 manifest and runtime self-check. Linux portable directory is a private host prototype, not a distribution certification.
 - Prepare native Windows build and non-admin Inno Setup templates, Windows/Codex setup, AppImage/Flatpak tradeoffs and explicit license/signing/runtime gates. No installer, device, hosted CI or public release is implied.

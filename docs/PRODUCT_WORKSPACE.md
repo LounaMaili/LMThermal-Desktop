@@ -60,3 +60,10 @@ The Linux host suite passes 242 tests with no skips. Offscreen Home and syntheti
 LMTR screenshots were inspected; controls, native-grid view and legend are visible.
 The native xcb attempt failed before window creation because the current display is
 unavailable. No graphical configuration was changed. No physical or Windows test ran.
+
+## Phase 5 review
+
+Refused legacy finalization now aborts application Close without disabling the document
+permanently; ownership and safety refusals remain intact. LMTR navigation/palette controls
+are split into narrower rows without changing native measurements. See
+[qualification and the explicit window-check tool](phase5/QUALIFICATION.md).

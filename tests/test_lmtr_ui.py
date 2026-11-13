@@ -67,3 +67,12 @@ class LmtrUiTests(unittest.TestCase):
         with patch.object(w.worker,'request') as request:
             for _ in range(50):w._tick()
             request.assert_not_called()
+
+    def test_laptop_width_keeps_navigation_and_palette_controls_inside_window(self):
+        self.opened();self.window.resize(1000,740);self.app.processEvents()
+        self.assertLessEqual(self.window.width(),1000)
+        for control in [self.window.open_button,self.window.metadata_button,self.window.verify_button,
+                        self.window.save_button,self.window.seek_button,self.window.palette,self.window.clear]:
+            rect=control.geometry();point=control.mapTo(self.window,control.rect().topLeft())
+            self.assertGreaterEqual(point.x(),0)
+            self.assertLessEqual(point.x()+rect.width(),self.window.width())

@@ -27,6 +27,13 @@ See [private Linux prototype and Windows installer preparation](docs/PACKAGING.m
 and [Windows development with Codex](docs/WINDOWS_DEVELOPMENT.md). No public release
 is available; native Windows qualification and licensing decisions remain pending.
 
+## Phase 5 qualification
+
+See [current qualification, fixes and deferred gates](docs/phase5/QUALIFICATION.md).
+The session may accept X11 connections while locked; native window exposure is an
+explicit check, separate from offscreen tests and operator validation. No hardware
+or native Windows acceptance is implied by source/package checks.
+
 ## Requirements
 
 Use the repository virtual environment when available. Python 3.10 or newer

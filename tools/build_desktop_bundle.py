@@ -18,6 +18,12 @@ def write_inventory(folder):
     """Retain installed distribution metadata/license texts; legal completeness needs human review."""
     notices = folder / 'THIRD_PARTY'
     notices.mkdir()
+    candidates = [Path(sys.base_prefix)/'LICENSE.txt',
+        Path(sys.base_prefix)/sys.platlibdir/f'python{sys.version_info.major}.{sys.version_info.minor}'/'LICENSE.txt']
+    python_notice = next((p for p in candidates if p.is_file()), None)
+    if python_notice is None:
+        raise RuntimeError('Locate the exact Python runtime license before bundling')
+    shutil.copyfile(python_notice, notices/'Python-LICENSE.txt')
     inventory = []
     for dist in sorted(importlib.metadata.distributions(), key=lambda d: d.metadata['Name'].lower()):
         name = dist.metadata['Name']
@@ -39,9 +45,25 @@ def write_inventory(folder):
     (notices / 'inventory.json').write_text(json.dumps(inventory, indent=2)+'\n', encoding='utf-8')
 
 
+def source_snapshot():
+    """Record exact source inventory at both boundaries; this detects changes, not an atomic snapshot."""
+    git = lambda *args: subprocess.check_output(['git', *args], cwd=ROOT)
+    inputs = git('ls-files', '-z', '--cached', '--others', '--exclude-standard').split(b'\0')
+    lines = []
+    for name in sorted(set(x.decode('utf-8') for x in inputs if x)):
+        source = ROOT / name
+        if source.is_file():
+            lines.append(hashlib.sha256(source.read_bytes()).hexdigest()+'  '+name)
+    return dict(commit=git('rev-parse','HEAD').decode().strip(),
+                status=git('status','--porcelain').decode(), files=lines)
+
+
 def build(output):
     """Run only native host build/self-check, record reproducibility inputs, and create no installer side effects."""
-    output = output.absolute()
+    output = output.resolve()
+    if output.is_relative_to(ROOT.resolve()):
+        raise ValueError('Bundle output must be outside the source checkout')
+    before = source_snapshot()
     output.mkdir(parents=True, exist_ok=False)
     subprocess.run([sys.executable, '-m', 'PyInstaller', '--noconfirm',
         '--distpath', str(output / 'dist'), '--workpath', str(output / 'work'),
@@ -56,17 +78,15 @@ def build(output):
     report = json.loads(result.stdout)
     assert report['status'] == 'passed' and report['frozen'] and not report['camera_opened']
     (output / 'self-check.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
-    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
-    dirty = subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True)
-    inputs = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT).split(b'\0')
-    source_lines = []
-    for name in sorted(set(x.decode('utf-8') for x in inputs if x)):
-        source = ROOT / name
-        if source.is_file():
-            source_lines.append(hashlib.sha256(source.read_bytes()).hexdigest()+'  '+name)
-    (output / 'source-files-sha256.txt').write_text('\n'.join(source_lines)+'\n', encoding='utf-8')
+    after = source_snapshot()
+    if before != after:
+        (output/'source-change.json').write_text(json.dumps(dict(before=before,after=after),indent=2)+'\n',encoding='utf-8')
+        raise RuntimeError('Source changed during build; retain the failed output and rebuild explicitly')
+    (output/'source-files-sha256.txt').write_text('\n'.join(after['files'])+'\n',encoding='utf-8')
+    commit, dirty = after['commit'], after['status']
     receipt = dict(source_commit=commit, uncommitted_changes=bool(dirty), platform=platform.platform(),
                    python=platform.python_version(), self_check=report,
+                   source_inventory_stable=True, source_snapshot_atomic=False,
                    qualification='Private native-host prototype; not a public release or portability certification')
     (output / 'build-receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8')
     lines = []

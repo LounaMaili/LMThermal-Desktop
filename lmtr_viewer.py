@@ -159,6 +159,9 @@ class LmtrWindow(QMainWindow):
         row = QHBoxLayout(); layout.addLayout(row)
         self.open_button = QPushButton('Open .lmtr'); row.addWidget(self.open_button)
         self.recover = QCheckBox('Explicit verified-prefix recovery'); self.recover.setChecked(recover); row.addWidget(self.recover)
+        # Keep native controls reachable on laptop-size windows. Splitting rows
+        # changes presentation only, never geometry, source bytes or worker admission.
+        row = QHBoxLayout(); layout.addLayout(row)
         self.metadata_button = QPushButton('Original metadata'); row.addWidget(self.metadata_button)
         self.verify_button = QPushButton('Verify entire file / prefix'); row.addWidget(self.verify_button)
         self.save_button = QPushButton('Save separate PNG'); row.addWidget(self.save_button)
@@ -175,6 +178,7 @@ class LmtrWindow(QMainWindow):
         self.speed.setCurrentIndex(1); controls.addWidget(self.speed)
         self.seconds = QDoubleSpinBox(); self.seconds.setDecimals(6); self.seconds.setSuffix(' s intake'); controls.addWidget(self.seconds)
         self.seek_button = QPushButton('Seek time'); controls.addWidget(self.seek_button)
+        controls = QHBoxLayout(); layout.addLayout(controls)
         self.palette = QComboBox(); self.palette.addItems(PALETTES); self.palette.setCurrentText('Inferno'); controls.addWidget(self.palette)
         self.auto = QCheckBox('Auto'); self.auto.setChecked(True); controls.addWidget(self.auto)
         self.minimum = QDoubleSpinBox(); self.maximum = QDoubleSpinBox()

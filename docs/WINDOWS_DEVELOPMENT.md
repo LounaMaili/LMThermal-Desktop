@@ -55,3 +55,18 @@ Hosted CI needs a separate budget authorization. Do not push a branch with match
 workflow triggers, start Actions, merge or publish a release merely to follow this recipe.
 See [packaging gates](PACKAGING.md). Keep private examples/logs outside Git; review paths
 and exception details before sharing. Stop at the tested artifact until release approval.
+
+## Phase 5 qualification candidate
+
+The follow-up source is `codex/phase5-desktop-qualification`, descending from the pinned
+phase 4 packaging branch; it fixes refused-Close recovery and narrow LMTR control layout.
+The official Windows/Codex documentation was rechecked on 2026-11-13; native PowerShell
+and a retained sandbox remain the recommended setup for this project. No Windows run
+has occurred. Don't infer runtime/installer acceptance from these script reviews.
+
+After a separately authorized native build, reuse `tools/audit_desktop_bundle.py` for
+byte/link checks and `tools/run_window_campaign.py --binary <exe>` for normal-window checks.
+Include spaced/Unicode paths, finalization refusal/retry and a 1,000-pixel-wide LMTR window.
+The campaign requires explicit offline fixtures/legacy inputs and new private outputs.
+Keep the exposure/operator distinction; offscreen mode does not qualify native display.
+Review licensing and sign/install/uninstall as a standard user only after owner decisions.

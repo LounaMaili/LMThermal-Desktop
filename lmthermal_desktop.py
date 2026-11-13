@@ -18,6 +18,7 @@ MAX_DOCUMENTS = 4  # Each reader keeps its existing local limits; this is not a 
 class WorkspaceLegacyWindow(MainWindow):
     """Reuse legacy/live engines; keep the tab owner alive through cooperative worker shutdown."""
     closed = pyqtSignal()
+    close_refused = pyqtSignal()
     def __init__(self):
         super().__init__(auto_connect=False)
         self.setWindowTitle('LMThermal — capture / legacy recording / live camera')
@@ -47,7 +48,15 @@ class WorkspaceLegacyWindow(MainWindow):
         if pending:
             self.setEnabled(False);event.ignore();return
         super().closeEvent(event)
-        if event.isAccepted(): self.closed.emit()
+        self._workspace_waiting.clear()
+        if event.isAccepted():
+            self.closed.emit()
+        else:
+            # A legacy recorder/logger may refuse finalization. Keep its owner and
+            # explicit retry controls usable instead of trapping a disabled tab.
+            self._workspace_closing = False
+            self.setEnabled(True)
+            self.close_refused.emit()
 
 
 class WorkspaceLmtrWindow(LmtrWindow):
@@ -118,6 +127,8 @@ class DesktopWorkspace(QMainWindow):
         viewer.setWindowFlags(Qt.WindowType.Widget)
         self._documents[viewer]=title
         viewer.closed.connect(lambda:self._document_closed(viewer))
+        if hasattr(viewer, 'close_refused'):
+            viewer.close_refused.connect(self._abort_close)
         index=self.tabs.addTab(viewer,title);self.tabs.setCurrentIndex(index)
         return viewer
     def open_live(self):
@@ -160,6 +171,9 @@ class DesktopWorkspace(QMainWindow):
         if self._live is viewer:self._live=None
         viewer.deleteLater()
         if self._closing and not self._documents:self.close()
+    def _abort_close(self):
+        """Refusal preserves document ownership and lets the user inspect/retry; never discard it."""
+        self._closing = False
     def closeEvent(self,event):
         self._closing=True
         for viewer in list(self._documents):viewer.close()
@@ -188,7 +202,22 @@ def main():
     parser.add_argument('--open',type=Path);parser.add_argument('--legacy-recording',action='store_true')
     parser.add_argument('--recover-lmtr',action='store_true');parser.add_argument('--self-check',action='store_true')
     parser.add_argument('--verify-lmtr',type=Path)
+    parser.add_argument('--window-check-output',type=Path,
+        help='Opt-in camera-free developer check on --open; creates a new private report directory')
+    parser.add_argument('--expect-window-error',action='store_true')
     args=parser.parse_args()
+    if args.expect_window_error and not args.window_check_output:
+        parser.error('--expect-window-error requires --window-check-output')
+    if args.window_check_output and (args.open is None or args.self_check or args.verify_lmtr):
+        parser.error('--window-check-output requires only an explicit offline --open source')
+    if args.window_check_output:
+        if not args.open.is_file() and not (args.legacy_recording and args.open.is_dir()):
+            parser.error('Window check requires an existing offline file or legacy recording directory')
+        if args.window_check_output.exists():
+            parser.error('Window check report directory must be new')
+        if args.open.is_dir() and args.window_check_output.resolve().is_relative_to(args.open.resolve()):
+            parser.error('Window check output must be outside the immutable source')
+
     from desktop_runtime import configure_logging
     configure_logging()
     if args.self_check:print(json.dumps(self_check()));return
@@ -201,7 +230,23 @@ def main():
     app=QApplication(sys.argv);app.setApplicationName('LMThermal Desktop');app.setOrganizationName('LounaMaili')
     app.setStyle('Fusion');window=DesktopWorkspace()
     if args.open:window.open_path(args.open,recover=args.recover_lmtr,legacy_recording=args.legacy_recording)
-    window.show();sys.exit(app.exec())
+    window.show()
+    if args.window_check_output:
+        from desktop_window_check import run
+        # Native window mapping/exposure requires a running top-level event loop.
+        # This bounded developer path never changes normal startup or opens a camera.
+        app.setQuitOnLastWindowClosed(False)
+        def check_window():
+            exit_code=1
+            try:
+                report=run(app,window,args.open,args.window_check_output,expect_error=args.expect_window_error)
+                print(json.dumps({'status':report['status'],'platform':report['platform']}))
+                exit_code=0 if report['status']=='passed' else 1
+            finally:
+                app.exit(exit_code)
+        QTimer.singleShot(200,check_window)
+        sys.exit(app.exec())
+    sys.exit(app.exec())
 
 
 if __name__=='__main__':main()

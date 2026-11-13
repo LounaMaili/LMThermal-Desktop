@@ -101,3 +101,17 @@ class DesktopWorkspaceTests(unittest.TestCase):
             worker.take_latest.assert_not_called()
             self.assertIsNone(viewer.observation)
         finally:viewer.worker=None
+
+    def test_finalization_refusal_keeps_document_and_application_usable(self):
+        from lmthermal_viewer import MainWindow
+        viewer=self.window.open_live()
+        with patch.object(MainWindow,'closeEvent',lambda view,event:event.ignore()):
+            self.window.close()
+            self.assertIn(viewer,self.window._documents)
+            self.assertFalse(self.window._closing)
+            self.assertFalse(viewer._workspace_closing)
+            self.assertTrue(viewer.isEnabled())
+            self.window._legacy_factory=FakeView
+            self.assertIsNotNone(self.window.open_path('after-refusal.json'))
+        # Retrying Close after the original refusal is still allowed and releases owners.
+        self.window.close();self.wait(lambda:not self.window._documents)

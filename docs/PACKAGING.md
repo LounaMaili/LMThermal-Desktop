@@ -95,3 +95,31 @@ choice is made for the owner. Complete notices/source availability, dependency h
 SBOM review, native OS/installer validation and signing before public distribution.
 
 **Native-equivalent temperatures; absolute physical accuracy not yet independently validated.**
+
+## Phase 5 controls
+
+`tools/build_desktop_bundle.py` now refuses output inside the source checkout, compares
+source commit/status/file hashes at build boundaries and requires the exact Python runtime
+license from its installation. A detected change refuses the build and preserves its
+partial output. Start/end equality is not a claim of an atomic filesystem snapshot.
+
+Independently audit every retained bundle with:
+
+```sh
+.venv/bin/python tools/audit_desktop_bundle.py /private/build/dist/LMThermal-Desktop \
+  /private/build/bundle-sha256.txt --report /private/new-audit.json
+```
+
+This verifies all declared bytes and rejects escaping paths/links. On Linux, readelf
+reports observed glibc symbol requirements; don't advertise compatibility with older
+systems than that permits. Dynamic display/plugin behavior still needs native tests.
+The opt-in window checks and their distinction between offscreen and exposed native
+windows are documented in [phase 5 qualification](phase5/QUALIFICATION.md).
+
+AppImage remains a candidate after an older build baseline/clean-host campaign; wrapping
+a Fedora binary cannot lower its glibc requirements. Flatpak needs a pinned compatible
+runtime, explicit file/directory portals and separately reviewed live-device access.
+LMTX/LMTR are single-file sources; legacy JSON/NPZ sidecars need explicit scoped parent
+access, and legacy recordings need a selected directory. Do not grant host/home/all-device
+access as a shortcut. No Flatpak/AppImage installation or sandbox-policy weakening is
+performed here. Existing one-directory delivery remains a private host prototype.
