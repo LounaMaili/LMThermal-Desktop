@@ -154,3 +154,8 @@ illustrations now publish their observation without a forced seek. One real HT-3
 Full observation in an interrupted Android field file has exact independent
 Float32/native/transport parity and native Desktop analysis checks; a complete
 physical sequence and sustained recording acceptance remain pending.
+
+The [second physical follow-up](LMTR_INITIAL_OPEN.md#second-physical-sequence-follow-up)
+adds unchanged-runtime full readback of 45 real observations and 60 explicit losses,
+all 107 event/time positions and native inspection checks. Its 4.309s RSS safety
+interruption remains a failed duration/loss-free recording gate, not a reader failure.

@@ -83,4 +83,31 @@ recording. The Android field-only decimal fix is host-tested and awaits separate
 authorized physical retry before a longer test can be considered. The existing
 R4/R5 gates stay open; there is no common Desktop recorder or production R6 change.
 
+## Second physical sequence follow-up
+
+The unchanged Desktop reference `969420ec49e5570599648a186db4617658f0911e`
+(runtime `85dd25fa4747a2f79b9486702318ab2b9a76b4cc`) subsequently read the
+[second short R4 attempt](https://github.com/LounaMaili/LMThermal/blob/bacfd3a66cb7a63aa8f17d883c01c7ed047fdf6e/docs/lmtr-r4/SECOND_PHYSICAL_ATTEMPT.md).
+The fixed Android diagnostic worked, but the unchanged RSS guard stopped the
+requested ten-second Full/DEFLATE run at 4.308975303 seconds. Its finalized
+interrupted file contains 45 observations and 60 explicit losses (2 preparation,
+58 writer), not a loss-free 25 Hz sequence.
+
+Private `capture.lmtr`: 10051773 bytes, SHA-256
+`0ca64fc9a9a9507a241f20c1b358d176c476972603f088bd64cafcea9cb76a3f`.
+Independent Python and source/installed Linux Desktop verify full integrity and
+original-owner Float32/native/transport parity for all 45 available planes. The
+native plane is an exact same-observation transport view; no mask is invented.
+All107 events, all 60 gaps and exact time seek are checked; blank events clear
+readings. Representative first/middle/last frame and gap navigation, play/pause/step,
+native point/ROI, all palettes, range, resize, PNG and cooperative worker Close pass.
+All45 raw payloads have distinct hashes, without proving controlled target motion.
+Stored raw range 5177–5876; temperature range 20.920644760–36.332649231 °C.
+
+This is new Linux multi-frame readback evidence with unchanged source hashes and
+unchanged Desktop runtime, not manual operator, native Windows, ten-second recording,
+steady-memory or throughput acceptance. The original one-observation file remains
+preserved separately. Real files/oracles/images remain private; only these numerical
+conclusions and hashes are published. A longer recording is not ready and was not run.
+
 **Native-equivalent temperatures; absolute physical accuracy not yet independently validated.**
