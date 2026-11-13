@@ -16,7 +16,10 @@ historical automatic Connect behavior. Use the new workspace for an explicit con
 | Timeline, point/ROI, palettes, metadata, PNG | Existing document widgets | Source immutable; exports separate files |
 
 Home and File menu expose these routes. Each document keeps its engine's established
-controls to avoid changing qualification semantics. A shared toolbar/translation,
+semantics. The [offline qualification follow-up](OFFLINE_QUALIFICATION.md) omits
+live-only actions in saved tabs, compacts saved-source captions and exposes LMTR
+technical diagnostics on demand while preserving exact integrity scopes and data.
+A shared toolbar/translation,
 thumbnail library, edited analysis persistence and a native Windows camera backend
 are future product work. LMTR production recording remains disabled. This shell is
 a first coherent integration, not a completed redesign of every legacy panel.

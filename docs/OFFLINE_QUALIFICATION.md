@@ -105,8 +105,48 @@ Open/Save, Unicode paths, 1,000-pixel layout, interrupted/recovery views, instal
 and source/sentinel preservation; Fedora/WSL cannot validate these gates.
 
 The [exact Windows handoff](WINDOWS_OFFLINE_HANDOFF.md) now pins runtime source
-`cb5f310f2d367b459066de9af7d72451de4fac09`, PowerShell commands, native-window
+`dfaf6ed9ac6433cdeabc4c52bf2f890c9e2f1e42`, PowerShell commands, native-window
 acceptance and separate installer-generated inventory. It is ready for a future
 authorized Windows session, not a Windows result.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## Final private Linux receipt
+
+Runtime/build source: **`dfaf6ed9ac6433cdeabc4c52bf2f890c9e2f1e42`**.
+The later receipt/handoff commit changes documentation only. See the
+[sanitized validation record](offline-qualification-validation.json).
+
+| Gate | Observed result |
+|---|---|
+| Fedora source / Ubuntu 22.04 build source | 264 tests each, zero failures/skips |
+| Frozen corpus | 51 original files, 102 strict/recovery comparisons, unchanged hashes |
+| Source and frozen Fedora windows | 11/11 cases each, actual requested width 1,000 pixels |
+| Frozen build-root offscreen windows | 11/11; not native-provider or operator acceptance |
+| Separate no-build-Python Ubuntu runtime | 102 corpus outcomes +11 GTK/xcb virtual-window cases, all pass |
+| Actual source and frozen GTK3 selectors | Real Open/Save buttons, accent-bearing destination, exact PNG/source hashes and Close pass |
+| Normal installed launcher under Wayland | Actual default Qt fallback Open/Save pass; not a portal-provider certification |
+| Real physical file readback | All 107 events, 45 original-owner observations, 60 gaps; source hashes/point/ROI/colors/playback/time seek/tabs/Close pass |
+| Final frozen real-file integrity | Full valid END interrupted, 45 observations/60 gaps; no thermometry reconstruction |
+| Package/installation | 535 verified members, 203 ELF files, max required GLIBC 2.35; all 44 Qt plugins byte-identical to prior candidate |
+
+Original final tar: 146,054,069 bytes, SHA-256
+`c9276a4195c6c84590bf550f1072fc7e5f6341fffcf7e3e89b2c789153242ca5`.
+It is installed in a NEW private user directory with a ready-to-run `launch.sh`;
+the exact local path is in the private installation receipt and owner handoff.
+No external Python is needed. Controlled idle-copy removal preserves added/external
+sentinels; this is not a general uninstaller or a Windows install qualification.
+Earlier archives/installations and the nonconclusive GTK wait remain intact.
+
+The corrected diagnostic also passes a separate negative test: withholding its
+activation predicate causes an honest 12.135 s timeout with the original source
+unchanged. That simulated diagnostic predicate is **not** native-provider acceptance;
+the positive source/frozen checks use the actual unchanged provider controls.
+Older bundled GTK/fontconfig warnings against newer Fedora configuration remain in
+raw logs. No Fedora font/theme/security configuration or plugin was changed to hide
+them; they are not established as the original GTK wait's sole cause.
+
+These finite automated own-window checks do not replace manual ergonomic acceptance,
+native Windows 11, a full Ubuntu desktop/driver stack, other Linux distributions,
+sustained camera operation or physical-temperature calibration. The minimum support
+floor remains GLIBC 2.35; no public release or hardware/Actions run occurred.
