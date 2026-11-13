@@ -5,14 +5,26 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
-from PyQt6.QtWidgets import QApplication
-from desktop_window_check import run
+from PyQt6.QtWidgets import QApplication,QWidget
+from PyQt6.QtCore import QTimer
+from desktop_window_check import run,pointer_probe
 from lmthermal_desktop import DesktopWorkspace
 
 
 class WindowCheckTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.app=QApplication.instance() or QApplication([])
+    def test_native_input_after_probe_cannot_relabel_its_synchronous_result(self):
+        class Image(QWidget):
+            """A later legitimate cursor input must remain observable, without corrupting the probe receipt."""
+            pointer=None
+            def mouseMoveEvent(self,event):self.pointer=(int(event.position().x()),int(event.position().y()))
+        image=Image();image.setMouseTracking(True)
+        QTimer.singleShot(0,lambda:setattr(image,'pointer',(9,9)))
+        self.assertEqual((0,0),pointer_probe(self.app,image,(0.5,0.5),(0,0)))
+        self.app.processEvents()
+        self.assertEqual((9,9),image.pointer)
+        image.close()
     def test_verified_masked_source_drives_readings_png_metadata_gap_and_normal_close(self):
         source=Path(__file__).parent/'fixtures/lmtr/files/illustration-01-stored.lmtr'
         with TemporaryDirectory() as name,patch('lmthermal_viewer.CameraWorker',side_effect=AssertionError('camera')):

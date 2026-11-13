@@ -22,6 +22,19 @@ def hashes(path):
     return {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if p.is_file()}
 
 
+def pointer_probe(app, image, position, expected):
+    """Check our synchronous event before pumping unrelated native cursor/enter events.
+
+    A real desktop may legitimately move the cursor during the later event-loop wait.
+    That subsequent input is not evidence that this probe's inverse mapping was wrong.
+    """
+    app.sendEvent(image,QMouseEvent(QEvent.Type.MouseMove,QPointF(*position),
+        Qt.MouseButton.NoButton,Qt.MouseButton.NoButton,Qt.KeyboardModifier.NoModifier))
+    actual=image.pointer
+    assert actual==expected,('pointer mapping',position,actual)
+    return actual
+
+
 def run(app, window, path, output, *, expect_error=False):
     """Run a bounded developer check through actual viewers; normal launches never enter here."""
     from mvp_presentation import native_to_widget
@@ -79,13 +92,11 @@ def run(app, window, path, output, *, expect_error=False):
                 mapping = image._mapping();geometry = mapping['geometry'];transform = mapping['transform']
                 x, y = 0, 0
                 position = native_to_widget(x,y,image.width(),image.height(),geometry=geometry,transform=transform)
-                # Deliver an explicit Qt move event: OS cursor coalescing is not an operator test.
-                app.sendEvent(image,QMouseEvent(QEvent.Type.MouseMove,QPointF(*position),
-                    Qt.MouseButton.NoButton,Qt.MouseButton.NoButton,Qt.KeyboardModifier.NoModifier));settle()
-                assert image.pointer == (x,y), ('pointer mapping',position,image.pointer)
-
+                result['pointer_at_synchronous_probe']=pointer_probe(app,image,position,(x,y))
                 point = viewer.point.text() if lmtr else viewer.cursor_label.text()
                 result['point_text'] = point
+                settle()
+                result['pointer_after_event_loop_wait']=image.pointer
                 roi = NativeROI(0,0,min(2,geometry.width),1)
                 image.set_roi(roi);settle()
                 roi_label = viewer.roi_label if lmtr else viewer.roi_values_label
