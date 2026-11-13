@@ -76,6 +76,11 @@ Build only a clean reviewed commit with the existing pinned Ubuntu 22.04 / CPyth
 plugin/member audits. Install into a NEW private folder; do not replace old candidates.
 The required GLIBC ceiling stays 2.35 and the complete GTK/portal/Qt plugin set remains.
 The provider tool is opt-in; normal application startup is unchanged.
+The rootless runner now uses the exact `$source_dir/tests/fixtures`: inspection found
+the former `/source` pathname referred to an older checkout retained in the dependency
+root. Canonical bytes match, but that stale reference was not a sound source-binding
+rule. The historical source/checks remain untouched and the new build uses a separate
+private copy of the dependency root.
 
 No authorized native Windows 11 environment is available to this Linux session.
 Thirteen retained Windows wheels still match `requirements-windows-cp315.lock` exactly;

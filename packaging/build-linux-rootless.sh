@@ -34,5 +34,5 @@ exec unshare --user --map-auto --map-root-user bwrap \
    python tools/audit_desktop_bundle.py /reports/bundle/dist/LMThermal-Desktop /reports/bundle/bundle-sha256.txt --report /reports/audit.json
    python tools/check_frozen_bundle.py /reports/bundle/dist/LMThermal-Desktop/LMThermal-Desktop --report /reports/canonical-parity.json > /reports/canonical.log 2>&1
    python tools/prepare_offline_qualification.py --output "/reports/inputs é" > /reports/inputs.log
-   python tools/run_window_campaign.py --fixtures /source/tests/fixtures --legacy "/reports/inputs é" --output /reports/frozen-offscreen --binary /reports/bundle/dist/LMThermal-Desktop/LMThermal-Desktop > /reports/frozen-offscreen.log 2>&1
+   python tools/run_window_campaign.py --fixtures "$source_dir/tests/fixtures" --legacy "/reports/inputs é" --output /reports/frozen-offscreen --binary /reports/bundle/dist/LMThermal-Desktop/LMThermal-Desktop > /reports/frozen-offscreen.log 2>&1
  '
