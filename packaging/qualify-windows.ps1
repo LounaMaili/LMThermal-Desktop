@@ -11,7 +11,8 @@ $Python = Join-Path $ProjectRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $Python)) { throw 'Prepare the documented native Python venv first.' }
 Push-Location $ProjectRoot
 try {
-    & $Python -c 'import sys,struct; assert sys.version_info[:3] == (3,15,2) and struct.calcsize("P")==8, "Use CPython 3.15.2 x64"'
+    # Avoid embedded quotes in native -c arguments, including Windows PowerShell 5.1.
+    & $Python -c 'import sys; assert sys.version_info[:3] == (3,15,2) and sys.maxsize > 2**32'
     if ($LASTEXITCODE -ne 0) { throw 'Wrong Python version/architecture' }
     $Arguments = @('tools\qualify_native_desktop.py','--native-windows','--expected-commit',$ExpectedCommit,'--output',$ReportDirectory)
     if ($Build) { $Arguments += '--build' }

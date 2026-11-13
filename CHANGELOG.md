@@ -11,6 +11,8 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Correct the new provenance test double to preserve Path hashability; retain the failed 257-test checkpoint rather than mislabeling it as a product/runtime failure.
 - Check the diagnostic cursor probe synchronously before unrelated native input can arrive; retain both the immediate and later pointers. Preserve the first frozen native 10/11 result and add a deterministic queued-input regression; no measurement coordinate or application interaction mapping changes.
 - Add exact-source native Windows qualification and fixture-derived legacy-input tools, thirteen hashed Windows wheel inputs, and a reproducible user-installer/manual acceptance recipe. Preparation/downloads are not native Windows validation, legal acceptance or a public release.
+- Keep the Debian alias regression's path expectation platform-neutral and avoid embedded native-command quotes in the Windows PowerShell version guard. These handoff-only changes do not alter the Linux artifact's runtime or claim Windows execution.
+- Record the final GLIBC2.35/535-member private candidate with all44 Qt plugins retained, zero unknown native origins, 258 host/build-root tests, 102 canonical outcomes per environment, clean no-Python Ubuntu runtime and exposed XWayland/Wayland window campaigns. Preserve prior failures and leave normal-picker/operator, broader-distro, Windows, licensing/signing and public-release gates open.
 
 ### Fixed (Phase 5 Desktop qualification — 2026-11-13)
 - Keep a refused legacy finalization retryable and abort application Close without discarding its owner or weakening recorder safety. Split LMTR controls into laptop-width rows while retaining source/native-coordinate/reader behavior.

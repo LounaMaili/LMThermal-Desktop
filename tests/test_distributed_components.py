@@ -11,10 +11,11 @@ from tools.distributed_components import collected_members, write_native_invento
 class DistributedComponentTests(unittest.TestCase):
     def test_package_lookup_resolves_usr_merge_alias_without_guessing_by_basename(self):
         source=Path('/lib/example.so.1')
-        with patch('tools.distributed_components.Path.resolve',return_value=Path('/usr/lib/example.so.1.2')), patch('tools.distributed_components.subprocess.run',side_effect=[
+        resolved=Path('/usr/lib/example.so.1.2')
+        with patch('tools.distributed_components.Path.resolve',return_value=resolved), patch('tools.distributed_components.subprocess.run',side_effect=[
             SimpleNamespace(returncode=1),SimpleNamespace(returncode=0,stdout='libexample:amd64: /usr/lib/example.so.1.2\n')]) as run:
             self.assertEqual('libexample:amd64',debian_owner(source,'dpkg-query'))
-            self.assertEqual('/usr/lib/example.so.1.2',run.call_args_list[1].args[0][-1])
+            self.assertEqual(str(resolved),run.call_args_list[1].args[0][-1])
 
     def test_actual_native_members_retain_both_hashes_and_unknown_origin(self):
         with TemporaryDirectory() as name:

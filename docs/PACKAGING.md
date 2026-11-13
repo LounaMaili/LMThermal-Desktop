@@ -5,6 +5,8 @@ The workspace and R5 review are prerequisites, not assumed merged into main.
 See the [phase6 old-Linux/rootless recipe](LINUX_BASELINE.md) for the replacement build
 baseline and actual native-library provenance. Preserve all earlier Fedora prototypes
 and their negative GLIBC2.44 finding as historical evidence.
+The [final phase6 receipt](phase6/QUALIFICATION.md) identifies the exact source/tar hash,
+535 delivered file hashes, all203 ELF requirements and actual clean-userland/native gates.
 
 ## Native one-directory prototype
 

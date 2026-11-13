@@ -29,6 +29,9 @@ is available; native Windows qualification and licensing decisions remain pendin
 The [phase6 rootless old-Linux recipe](docs/LINUX_BASELINE.md) retains Qt plugins and
 pins the interpreter, base image and wheel bytes; runtime/ABI results are recorded
 separately from public-distribution acceptance.
+The [phase6 result and private-candidate handoff](docs/phase6/QUALIFICATION.md) records
+GLIBC2.35, retained Qt plugins, actual Ubuntu/Fedora runs and the remaining manual,
+Windows, licensing and distribution gates.
 
 ## Phase 5 qualification
 
