@@ -135,6 +135,7 @@ def run(app, window, path, output, *, expect_error=False):
                         dialogs.append(bool(text and text.toPlainText()))
                         dialog.accept()
             QTimer.singleShot(60,inspect_dialog)
+            if lmtr: viewer.details_button.setChecked(True)
             (viewer.metadata_button).click()
             assert dialogs == [True]
             result['checks'].append('original_metadata_dialog')
@@ -143,7 +144,7 @@ def run(app, window, path, output, *, expect_error=False):
                 assert viewer.frame is None and image.image is None and not viewer.save_button.isEnabled()
                 viewer.slider.setValue(1);wait(lambda:viewer.frame is not None,'observation recovery')
                 viewer.verify_button.click();wait(lambda:not viewer._in_flight,'full verification')
-                result['integrity_status'] = viewer.status.text()
+                result['integrity_status'] = viewer.validation_status.text()
                 result['checks'].append('timeline_blank_event_recovery_full_verification')
             elif viewer.playback is not None:
                 viewer.timeline_slider.setValue(2)

@@ -8,7 +8,7 @@ import threading
 from PyQt6.QtCore import QThread, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QHBoxLayout, QLabel, QPushButton, QSlider, QComboBox, QDoubleSpinBox,
-    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog)
+    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton, QSizePolicy)
 from PyQt6.QtCore import Qt, QSignalBlocker
 
 from lmthermal_viewer import ThermalImageWidget, CelsiusLegend
@@ -163,13 +163,21 @@ class LmtrWindow(QMainWindow):
         root = QWidget(); self.setCentralWidget(root); layout = QVBoxLayout(root)
         row = QHBoxLayout(); layout.addLayout(row)
         self.open_button = QPushButton('Open .lmtr'); row.addWidget(self.open_button)
-        self.recover = QCheckBox('Explicit verified-prefix recovery'); self.recover.setChecked(recover); row.addWidget(self.recover)
+        self.recover = QCheckBox('Recover incomplete file'); self.recover.setChecked(recover); row.addWidget(self.recover)
+        self.recover.setToolTip('Explicit verified-prefix recovery only. Unknown tail stays unknown; the source is never repaired.')
+        self.save_button = QPushButton('Save PNG…'); row.addWidget(self.save_button)
+        self.details_button = QToolButton(); self.details_button.setText('Diagnostics')
+        self.details_button.setCheckable(True); row.addWidget(self.details_button)
+        self.details_button.setToolTip('Original metadata and explicit full-file integrity verification')
         # Keep native controls reachable on laptop-size windows. Splitting rows
         # changes presentation only, never geometry, source bytes or worker admission.
-        row = QHBoxLayout(); layout.addLayout(row)
+        self.details_panel = QWidget(); row = QHBoxLayout(self.details_panel)
+        row.setContentsMargins(0, 0, 0, 0); layout.addWidget(self.details_panel)
         self.metadata_button = QPushButton('Original metadata'); row.addWidget(self.metadata_button)
         self.verify_button = QPushButton('Verify entire file / prefix'); row.addWidget(self.verify_button)
-        self.save_button = QPushButton('Save separate PNG'); row.addWidget(self.save_button)
+        self.validation_status = QLabel('No source'); self.validation_status.setWordWrap(True)
+        row.addWidget(self.validation_status, 1)
+        self.details_panel.hide(); self.details_button.toggled.connect(self.details_panel.setVisible)
         self.status = QLabel('Offline — no camera'); self.status.setWordWrap(True); layout.addWidget(self.status)
         images = QHBoxLayout(); layout.addLayout(images, 1)
         self.image = ThermalImageWidget(); images.addWidget(self.image, 1)
@@ -185,7 +193,8 @@ class LmtrWindow(QMainWindow):
         self.seek_button = QPushButton('Seek time'); controls.addWidget(self.seek_button)
         controls = QHBoxLayout(); layout.addLayout(controls)
         self.palette = QComboBox(); self.palette.addItems(PALETTES); self.palette.setCurrentText('Inferno'); controls.addWidget(self.palette)
-        self.auto = QCheckBox('Auto'); self.auto.setChecked(True); controls.addWidget(self.auto)
+        self.auto = QCheckBox('Auto range'); self.auto.setChecked(True); controls.addWidget(self.auto)
+        self.auto.setToolTip('Display-only percentile bounds; uncheck to edit the locked Celsius bounds')
         self.minimum = QDoubleSpinBox(); self.maximum = QDoubleSpinBox()
         for spin, value in ((self.minimum,20),(self.maximum,40)):
             spin.setRange(-1e30,1e30); spin.setValue(value); spin.setSuffix(' °C'); controls.addWidget(spin)
@@ -194,6 +203,12 @@ class LmtrWindow(QMainWindow):
         self.readings = QLabel('Readings unavailable'); layout.addWidget(self.readings)
         self.point = QLabel('Point unavailable'); layout.addWidget(self.point)
         self.roi_label = QLabel('Inspection ROI: none'); layout.addWidget(self.roi_label)
+        # Source values/ROI updates must not establish a wider minimum window or
+        # move the image during a drag. Reserve two lines, including the empty state.
+        for label in (self.status, self.readings, self.point, self.roi_label):
+            label.setWordWrap(True)
+            label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self.roi_label.setFixedHeight(self.roi_label.fontMetrics().lineSpacing()*2+4)
         warning = QLabel(WARNING); warning.setWordWrap(True); layout.addWidget(warning)
         self.worker = LmtrWorker(self); self.worker.available.connect(self._receive); self.worker.finished.connect(self._worker_finished); self.worker.start()
         self.timer = QTimer(self); self.timer.setInterval(40); self.timer.timeout.connect(self._tick)
@@ -211,6 +226,7 @@ class LmtrWindow(QMainWindow):
         self.verify_button.clicked.connect(lambda:self._request('verify'))
         self.save_button.setEnabled(False); self.metadata_button.setEnabled(False)
         self._sync_controls()
+        self._presentation()
         if path: self.open_path(path)
     def _choose(self):
         path, _ = QFileDialog.getOpenFileName(self,'Open read-only LMTR', '', 'LMTR recording (*.lmtr)')
@@ -256,6 +272,7 @@ class LmtrWindow(QMainWindow):
         self.token = token
         if clear: self._clear_current()
         self._in_flight = True
+        if action == 'open': self.validation_status.setText('Opening — full-file integrity not yet checked')
         self._sync_controls()
         return True
 
@@ -273,6 +290,7 @@ class LmtrWindow(QMainWindow):
             self.state = None
             self._clear_current('Readings unavailable')
             self.status.setText('Read failed: '+error)
+            self.validation_status.setText('No current verified source')
             self._sync_controls()
             return
         self.state = state
@@ -280,8 +298,15 @@ class LmtrWindow(QMainWindow):
         block = QSignalBlocker(self.slider); self.slider.setRange(0,max(0,state['count']-1)); self.slider.setValue(state['index']); del block
         self.seconds.setRange(0,state['duration_s'])
         completeness = 'RECOVERED PREFIX — unknown tail' if report['status']=='recovered' else 'END '+str(report['declared_end_status'])
-        self.status.setText(f"{completeness} | {report['integrity_scope']} (file); {'selected CHUNK verified' if entry else 'no CHUNK selected'} | event {state['index']+1 if entry else 0}/{state['count']} | "+(f'{entry.elapsed_s:.6f} s | {entry.state}: {entry.reason}' if entry else 'empty recording'))
-        self.image.empty_text = entry.reason if entry else 'Empty recording'
+        summary = report['summary']
+        position = f"event {state['index']+1 if entry else 0}/{state['count']}"
+        # Indexed totals are explicitly qualified, not promoted to full-file verification.
+        self.status.setText(f"{completeness} · {position}" + (f' · {entry.elapsed_s:.3f} s' if entry else '')
+            + f"\nIndexed: {summary['observations']} observations · {summary['gap_events']} gap events · {summary['known_missing_observations']} known missing observations")
+        self.validation_status.setText(f"{report['integrity_scope']} (file) · "
+            + ('selected CHUNK verified' if entry else 'no CHUNK selected'))
+        self.image.empty_text = ('Gap — '+entry.reason if entry and entry.state == 'gap'
+                                 else entry.reason if entry else 'Empty recording')
         if self.frame is not None:
             key = native_space_key(self.frame)
             if self._space_key is not None and key != self._space_key:
@@ -298,16 +323,19 @@ class LmtrWindow(QMainWindow):
         self.image.setEnabled(self.image.image is not None)
         self._sync_controls()
         if self.frame and self.frame.has_readings:
-            self.readings.setText(f'Native grid {self.frame.geometry.width}×{self.frame.geometry.height} | min {self.frame.low_c:.6g} at {self.frame.low_xy} | max {self.frame.high_c:.6g} at {self.frame.high_xy}')
+            self.readings.setText(f'Native grid {self.frame.geometry.width}×{self.frame.geometry.height} | min {self.frame.low_c:.6g} °C at {self.frame.low_xy} | max {self.frame.high_c:.6g} °C at {self.frame.high_xy}')
         else: self.readings.setText('Readings unavailable — no valid stored temperature plane')
         self._roi(self.image.roi); self._point(self.image.pointer)
     def _presentation(self, *unused):
+        self.minimum.setEnabled(not self.auto.isChecked()); self.maximum.setEnabled(not self.auto.isChecked())
         lower, upper = self.minimum.value(), self.maximum.value()
         if upper <= lower and not self.auto.isChecked():
             self.range_status.setText('Invalid locked range: Max must exceed Min. Last valid presentation retained.')
+            self.range_status.show()
             self.legend.set_presentation(self.image.effective_bounds, self.image.palette)
             return
         self.range_status.setText('')
+        self.range_status.hide()
         # Automatic bounds must not be disabled by unfinished manual edits. The
         # shared widget still validates its unused locked fallback, so keep it valid.
         if upper <= lower: lower, upper = 20.0, 40.0
@@ -319,7 +347,8 @@ class LmtrWindow(QMainWindow):
     def _roi(self, roi):
         if roi is None: self.roi_label.setText('Inspection ROI: none'); return
         result = self.frame.roi_statistics(Rectangle(roi.x1,roi.y1,roi.x2,roi.y2)) if self.frame else None
-        self.roi_label.setText('ROI unavailable' if result is None or not result.valid_pixel_count else f'Native ROI {roi}: min {result.min_c:.8g}, max {result.max_c:.8g}, mean {result.mean_c:.8g} °C ({result.valid_pixel_count}/{result.pixel_count})')
+        self.roi_label.setText('ROI unavailable' if result is None or not result.valid_pixel_count else
+            f'Native ROI [{roi.x1},{roi.x2}) × [{roi.y1},{roi.y2}): min {result.min_c:.8g}, max {result.max_c:.8g}, mean {result.mean_c:.8g} °C · {result.valid_pixel_count}/{result.pixel_count} valid pixels')
     def _save(self):
         # A native destination chooser runs a nested event loop. Freeze all immutable
         # export inputs BEFORE opening it: playback/file switches may continue meanwhile.

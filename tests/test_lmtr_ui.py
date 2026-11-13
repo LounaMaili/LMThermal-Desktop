@@ -67,7 +67,7 @@ class LmtrUiTests(unittest.TestCase):
     def test_recovery_is_opt_in_and_visibly_unknown(self):
         w=self.window;w.recover.setChecked(True)
         w.open_path(ROOT/'missing-end.lmtr');self.wait(lambda:w.state is not None)
-        self.assertIn('unknown tail',w.status.text());self.assertIn('full_verified_prefix',w.status.text())
+        self.assertIn('unknown tail',w.status.text());self.assertIn('full_verified_prefix',w.validation_status.text())
     def test_failed_open_clears_previous_frame_without_camera_import(self):
         self.opened();w=self.window
         w.open_path(ROOT/'unknown-required-feature.lmtr')
@@ -82,10 +82,29 @@ class LmtrUiTests(unittest.TestCase):
             request.assert_not_called()
 
     def test_laptop_width_keeps_navigation_and_palette_controls_inside_window(self):
-        self.opened();self.window.resize(1000,740);self.app.processEvents()
+        self.opened();self.window.details_button.setChecked(True)
+        self.window.resize(1000,740);self.app.processEvents()
         self.assertLessEqual(self.window.width(),1000)
         for control in [self.window.open_button,self.window.metadata_button,self.window.verify_button,
                         self.window.save_button,self.window.seek_button,self.window.palette,self.window.clear]:
             rect=control.geometry();point=control.mapTo(self.window,control.rect().topLeft())
             self.assertGreaterEqual(point.x(),0)
             self.assertLessEqual(point.x()+rect.width(),self.window.width())
+
+    def test_auto_bounds_are_visibly_read_only_and_diagnostics_are_explicit(self):
+        self.opened();w=self.window
+        self.assertFalse(w.minimum.isEnabled());self.assertFalse(w.maximum.isEnabled())
+        self.assertFalse(w.details_panel.isVisible());w.details_button.click()
+        self.assertTrue(w.details_panel.isVisible());self.assertTrue(w.verify_button.isVisible())
+        self.assertIn('opened_records',w.validation_status.text())
+        self.assertIn('Indexed:',w.status.text());self.assertIn('gap events',w.status.text())
+        w.auto.setChecked(False);self.assertTrue(w.minimum.isEnabled());self.assertTrue(w.maximum.isEnabled())
+
+    def test_roi_changes_keep_viewport_and_readings_inside_a_thousand_pixel_window(self):
+        self.opened();w=self.window;w.resize(1000,740);self.app.processEvents()
+        before=(w.width(),w.image.geometry())
+        w.image.set_roi(NativeROI(0,0,3,2));self.app.processEvents()
+        self.assertEqual(before,(w.width(),w.image.geometry()))
+        self.assertIn('[0,3)',w.roi_label.text());self.assertIn('5/6 valid pixels',w.roi_label.text())
+        w.image.clear_roi();self.app.processEvents()
+        self.assertEqual(before,(w.width(),w.image.geometry()))

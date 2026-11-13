@@ -28,6 +28,17 @@ class WorkspaceLegacyWindow(MainWindow):
         """A queued callback during cooperative Close must not republish a live reading."""
         if not self._workspace_closing:
             super()._on_frame_available()
+    def use_offline_controls(self):
+        """Saved-document tabs omit live-only actions; Home still owns explicit Live.
+
+        This is presentation only: it never opens/stops a camera or changes any
+        loader, recorder, measurement or finalization decision.
+        """
+        for control in (self.connect_button, self.initialize_button, self.capture_button,
+                        self.start_log_button.parentWidget(), self.start_record_button.parentWidget()):
+            control.hide()
+        session = self.device_label.parentWidget(); session.setTitle('Saved source')
+        session.layout().labelForField(self.fps_label).hide(); self.fps_label.hide()
     def closeEvent(self, event):
         # MainWindow's standalone close waits synchronously. The workspace requests
         # worker cancellation first and lets finished signals retry Close without a GUI wait.
@@ -146,7 +157,9 @@ class DesktopWorkspace(QMainWindow):
             viewer=self._lmtr_factory();viewer.recover.setChecked(recover)
             self._add(viewer,path.name+' · LMTR');viewer.open_path(path)
         else:
-            viewer=self._legacy_factory();self._add(viewer,path.name)
+            viewer=self._legacy_factory()
+            if isinstance(viewer, WorkspaceLegacyWindow): viewer.use_offline_controls()
+            self._add(viewer,path.name)
             if legacy_recording:viewer.open_recording(path)
             elif path.suffix.lower()=='.lmtx':viewer.open_lmtx(path)
             else:viewer.open_capture(path)
@@ -205,7 +218,14 @@ def main():
     parser.add_argument('--window-check-output',type=Path,
         help='Opt-in camera-free developer check on --open; creates a new private report directory')
     parser.add_argument('--expect-window-error',action='store_true')
+    parser.add_argument('--native-dialog-check-output',type=Path,
+        help='Opt-in Linux own-process actual Open/PNG provider check; needs --open and NEW private output')
     args=parser.parse_args()
+    if args.native_dialog_check_output:
+        if not sys.platform.startswith('linux') or args.open is None or not args.open.is_file() or args.legacy_recording or args.recover_lmtr or args.window_check_output or args.self_check or args.verify_lmtr:
+            parser.error('--native-dialog-check-output requires Linux and only an explicit offline --open file')
+        if args.native_dialog_check_output.exists() or args.native_dialog_check_output.resolve().is_relative_to(Path(__file__).resolve().parent):
+            parser.error('Native dialog report directory must be NEW and outside the application checkout')
     if args.expect_window_error and not args.window_check_output:
         parser.error('--expect-window-error requires --window-check-output')
     if args.window_check_output and (args.open is None or args.self_check or args.verify_lmtr):
@@ -229,8 +249,21 @@ def main():
         return
     app=QApplication(sys.argv);app.setApplicationName('LMThermal Desktop');app.setOrganizationName('LounaMaili')
     app.setStyle('Fusion');window=DesktopWorkspace()
-    if args.open:window.open_path(args.open,recover=args.recover_lmtr,legacy_recording=args.legacy_recording)
+    if args.open and not args.native_dialog_check_output:window.open_path(args.open,recover=args.recover_lmtr,legacy_recording=args.legacy_recording)
     window.show()
+    if args.native_dialog_check_output:
+        from desktop_native_dialog_check import run as check_native_dialogs
+        app.setQuitOnLastWindowClosed(False)
+        def native_dialog_check():
+            exit_code=1
+            try:
+                result=check_native_dialogs(app,window,args.open,args.native_dialog_check_output)
+                print(json.dumps({'status':result['status'],'actions':result['actions']}));exit_code=0
+            except Exception as error:
+                print(json.dumps({'status':'failed','error':repr(error)}))
+            finally:app.exit(exit_code)
+        QTimer.singleShot(200,native_dialog_check)
+        sys.exit(app.exec())
     if args.window_check_output:
         from desktop_window_check import run
         # Native window mapping/exposure requires a running top-level event loop.

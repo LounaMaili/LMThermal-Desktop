@@ -49,6 +49,16 @@ class DesktopWorkspaceTests(unittest.TestCase):
         self.window.close_document(self.window.tabs.indexOf(viewer))
         self.wait(lambda:not self.window._documents)
         self.assertEqual(before,hashlib.sha256(path.read_bytes()).hexdigest())
+    def test_saved_tabs_omit_live_only_controls_without_affecting_live_tab(self):
+        with patch('lmthermal_viewer.CameraWorker',side_effect=AssertionError('implicit camera')):
+            saved=self.window.open_path(Path(__file__).parent/'fixtures/lmtx/temperature-only.lmtx')
+            self.wait(lambda:saved.offline_capture is not None)
+            self.assertTrue(saved.connect_button.isHidden());self.assertTrue(saved.initialize_button.isHidden())
+            self.assertTrue(saved.start_log_button.parentWidget().isHidden())
+            self.assertTrue(saved.start_record_button.parentWidget().isHidden())
+            self.assertTrue(saved.render_button.isVisible());self.assertTrue(saved.roi_values_label.isVisible())
+            live=self.window.open_live();self.assertFalse(live.connect_button.isHidden())
+            self.assertIsNone(live.worker)
     def test_format_routes_reuse_distinct_existing_apis(self):
         self.window._legacy_factory=FakeView
         for name,expected,recording in [('still.lmtx','lmtx',False),('legacy.json','capture',False),

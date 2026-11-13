@@ -1,5 +1,9 @@
 # LMThermal-Desktop
 
+The [offline usability/qualification follow-up](docs/OFFLINE_QUALIFICATION.md) keeps
+measurements prominent, exposes technical diagnostics on demand and separates actual
+native-provider checks from offscreen/widget tests. Windows qualification remains native-only.
+
 Desktop companion application for Linux and Windows, with a Linux acquisition backend for the Infiray HT-301 / T3-317-13. The first
 radiometric PyQt MVP now uses the evidence-gated native-equivalent measurement
 session. Absolute physical accuracy has not been independently validated.

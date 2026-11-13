@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Changed (Offline usability and native-provider qualification — 2026-11-13)
+- Keep LMTR Open/recovery/PNG together, expose diagnostics on demand, label indexed observations/gaps/losses and retain exact integrity scope. Disable manual bounds in Auto and stabilize compact native ROI readouts without changing stored values, coordinates, source bytes or reader behavior.
+- Hide live-only actions in saved workspace tabs while preserving the explicit Live tab and existing ownership/finalization rules. Add layout/action regressions and an opt-in actual GTK3/Qt-selector Open/PNG check for source/frozen Linux; distinguish provider interaction from the older chooser-substituting campaign and from manual acceptance. No camera, CI, release or format change.
+
 ### Validated (Second physical R4 readback — 2026-11-13)
 - Verify the unchanged Linux runtime against all 45 saved Full observations and 60 represented losses from the corrected Android short smoke: exact original-owner Float32/native/transport parity, all 107 events and exact seeks, points/ROI/palettes/ranges/PNG and source immutability. Preserve the 4.309s RSS safety interruption as failed duration/loss-free recording acceptance; no reader/code, wire, corpus or hardware behavior changes.
 
