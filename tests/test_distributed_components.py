@@ -3,10 +3,19 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
 import unittest
-from tools.distributed_components import collected_members, write_native_inventory
+from unittest.mock import patch
+from types import SimpleNamespace
+from tools.distributed_components import collected_members, write_native_inventory, debian_owner
 
 
 class DistributedComponentTests(unittest.TestCase):
+    def test_package_lookup_resolves_usr_merge_alias_without_guessing_by_basename(self):
+        source=SimpleNamespace(resolve=lambda:Path('/usr/lib/example.so.1.2'))
+        with patch('tools.distributed_components.subprocess.run',side_effect=[
+            SimpleNamespace(returncode=1),SimpleNamespace(returncode=0,stdout='libexample:amd64: /usr/lib/example.so.1.2\n')]) as run:
+            self.assertEqual('libexample:amd64',debian_owner(source,'dpkg-query'))
+            self.assertEqual('/usr/lib/example.so.1.2',run.call_args_list[1].args[0][-1])
+
     def test_actual_native_members_retain_both_hashes_and_unknown_origin(self):
         with TemporaryDirectory() as name:
             root=Path(name);folder=root/'app';(folder/'_internal').mkdir(parents=True);(folder/'THIRD_PARTY').mkdir()

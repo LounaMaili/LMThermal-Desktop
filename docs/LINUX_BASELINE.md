@@ -41,7 +41,7 @@ No source recording or phone permission is needed. Do not substitute host native
 ## Exact-source build
 
 Create a NEW Git bundle from the reviewed clean branch; preserve all prerequisite history.
-The runner clones it into a new `/source`, with no source-directory bind and networking
+The runner clones it into a new `/source-<SHA>`, with no source-directory bind and networking
 disabled. Set a private report path outside the checkout:
 
 ```sh
@@ -53,8 +53,9 @@ The runner requires already available `unshare`/bubblewrap and a prepared root; 
 not install system tools. It runs the complete suite, build/self-check, every delivered
 file/link/ELF audit, strict+recovery parity on all 51 unchanged canonical files and eleven
 frozen offline cases. Failure stops the stage and preserves partial files/logs. It does
-not retry, enlarge limits, change formats or repair sources. Each root/report path is
-single-use; never reset a historical root to rerun conveniently.
+not retry, enlarge limits, change formats or repair sources. Each checkout/report path is
+single-use. A prepared dependency root may be reused only with unchanged package/wheel
+inventory and a different new checkout; never reset old sources/reports to retry.
 
 The audit distinguishes required symbol versions from versions a library merely provides,
 includes GLIBCXX/CXXABI, needed libraries/search paths and refuses an absent readelf or

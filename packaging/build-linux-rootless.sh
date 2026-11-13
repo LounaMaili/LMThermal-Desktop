@@ -21,9 +21,12 @@ exec unshare --user --map-auto --map-root-user bwrap \
  --bind "$rootfs" / --dev /dev --proc /proc --tmpfs /tmp \
  --ro-bind "$bundle" /source.bundle --bind "$reports" /reports \
  -- /bin/sh -eu -c '
-   test ! -e /source
-   git clone /source.bundle /source
-   cd /source
+   source_sha=$(git bundle list-heads /source.bundle HEAD | cut -d " " -f 1)
+   test -n "$source_sha"
+   source_dir=/source-$source_sha
+   test ! -e "$source_dir"
+   git clone /source.bundle "$source_dir"
+   cd "$source_dir"
    git status --porcelain > /reports/source-status.txt
    git rev-parse HEAD > /reports/source-sha.txt
    python -m unittest discover -s tests -v > /reports/tests.log 2>&1

@@ -23,6 +23,14 @@ def collected_members(toc):
         yield name, Path(source), kind
 
 
+def debian_owner(source, dpkg):
+    """usr-merge/symlinks may not be listed under the loader spelling; query the exact resolved file too."""
+    for path in dict.fromkeys([source,source.resolve()]):
+        found=subprocess.run([dpkg,'-S',str(path)],text=True,capture_output=True)
+        if found.returncode==0:return found.stdout.splitlines()[0].rsplit(': ',1)[0]
+    return None
+
+
 def write_native_inventory(folder, toc, *, distributions=None, use_dpkg=True):
     """Only actual BINARY/EXTENSION entries are mapped; installed build tools are not called runtime dependencies."""
     wheels = {}
@@ -42,9 +50,8 @@ def write_native_inventory(folder, toc, *, distributions=None, use_dpkg=True):
             source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
             origin=wheels.get(source.resolve(),dict(provider='unmapped',source_basename=source.name)))
         if item['origin']['provider']=='unmapped' and dpkg:
-            found = subprocess.run([dpkg,'-S',str(source)],text=True,capture_output=True)
-            if found.returncode == 0:
-                package = found.stdout.splitlines()[0].rsplit(': ',1)[0]
+            package = debian_owner(source,dpkg)
+            if package:
                 version = subprocess.check_output([dpkg,'-W','-f=${Version}',package],text=True)
                 item['origin'] = dict(provider='deb',package=package,version=version)
                 copyright = Path('/usr/share/doc') / package.split(':')[0] / 'copyright'
