@@ -5,6 +5,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 ## [Unreleased]
 
 ### Changed (Offline usability and native-provider qualification — 2026-11-13)
+- Bound the actual-dialog diagnostic even while GTK remains visible: wait for the selected path and enabled native button, keep event pumping after one activation and preserve progress/failure receipts. Retain the final-candidate GTK wait as nonconclusive; ordinary loading/PNG logic and scientific data are unchanged.
 - Compact saved-document source captions so module/provenance dictionaries no longer push temperatures below the sidebar; retain original metadata, physical-accuracy and palette-fallback disclosure. Require exactly 1,000 pixels in the graphical campaign and add a still/legacy layout regression; preserve the earlier 1,020-pixel screenshots as historical evidence.
 - Bind rootless frozen-window fixture paths to the exact cloned source checkout, rather than a stale `/source` directory left in a reused dependency root. Retain historical results separately; no fixture bytes or validator changes.
 - Keep LMTR Open/recovery/PNG together, expose diagnostics on demand, label indexed observations/gaps/losses and retain exact integrity scope. Disable manual bounds in Auto and stabilize compact native ROI readouts without changing stored values, coordinates, source bytes or reader behavior.

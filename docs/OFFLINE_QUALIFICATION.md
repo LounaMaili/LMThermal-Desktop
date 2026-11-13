@@ -72,6 +72,15 @@ non-native mode or infer a GTK pass merely from `DontUseNativeDialog` being fals
 
 The older eleven-case window campaign still substitutes its PNG chooser: it validates
 widgets/worker/rendering, not native dialogs. Both evidence classes remain distinct.
+One later frozen GTK run remained in the real Open dialog and needed termination of
+that exact offline test process. Its empty output, log and owned-window title are
+preserved as **nonconclusive**, not a reader pass/failure. The diagnostic previously
+stopped its timer immediately after activation and checked timeout only when no chooser
+was visible. It now requires matching selection/button sensitivity, activates once,
+keeps pumping until return and enforces the deadline even on a visible GTK chooser.
+Progress and final source-identity receipts survive failure. This corrects the test
+driver; it does not alter normal Open/Save or infer that the old GTK wait's sole cause
+was timing. The prior passing default Wayland selector remains separate evidence.
 
 ## Packaging and Windows boundaries
 
@@ -96,7 +105,7 @@ Open/Save, Unicode paths, 1,000-pixel layout, interrupted/recovery views, instal
 and source/sentinel preservation; Fedora/WSL cannot validate these gates.
 
 The [exact Windows handoff](WINDOWS_OFFLINE_HANDOFF.md) now pins runtime source
-`07f8b3a4d7dc70a79c6db057c06c8a76d79e8a90`, PowerShell commands, native-window
+`cb5f310f2d367b459066de9af7d72451de4fac09`, PowerShell commands, native-window
 acceptance and separate installer-generated inventory. It is ready for a future
 authorized Windows session, not a Windows result.
 

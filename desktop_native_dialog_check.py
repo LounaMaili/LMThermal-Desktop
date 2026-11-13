@@ -33,12 +33,15 @@ def _gtk_controls():
         chooser_type=function(gtk, 'gtk_file_chooser_get_type', C.c_size_t, []),
         is_a=function(gobj, 'g_type_check_instance_is_a', C.c_int, [C.c_void_p, C.c_size_t]),
         filename=function(gtk, 'gtk_file_chooser_set_filename', C.c_int, [C.c_void_p, C.c_char_p]),
+        selected_filename=function(gtk, 'gtk_file_chooser_get_filename', C.c_void_p, [C.c_void_p]),
         folder=function(gtk, 'gtk_file_chooser_set_current_folder', C.c_int, [C.c_void_p, C.c_char_p]),
         name=function(gtk, 'gtk_file_chooser_set_current_name', None, [C.c_void_p, C.c_char_p]),
         # GTK_RESPONSE_OK is the response of Qt's real GTK3 Open/Save buttons.
         button=function(gtk, 'gtk_dialog_get_widget_for_response', C.c_void_p, [C.c_void_p, C.c_int]),
         label=function(gtk, 'gtk_button_get_label', C.c_char_p, [C.c_void_p]),
         activate=function(gtk, 'gtk_widget_activate', C.c_int, [C.c_void_p]),
+        sensitive=function(gtk, 'gtk_widget_get_sensitive', C.c_int, [C.c_void_p]),
+        free_string=function(glib, 'g_free', None, [C.c_void_p]),
         free=function(glib, 'g_list_free', None, [C.c_void_p]))
 
 
@@ -74,6 +77,10 @@ def run(app, workspace, source, output):
         def operate():
             nonlocal selected
             try:
+                # A visible but non-closing chooser must not bypass the deadline.
+                # GTK activation can finish asynchronously: keep pumping until the
+                # modal call actually returns, never stop its only diagnostic timer.
+                if time.monotonic()-started>12: raise TimeoutError('Real selector did not complete within the diagnostic deadline')
                 head = gtk['windows'](); at = head
                 try:
                     while at:
@@ -86,26 +93,34 @@ def run(app, workspace, source, output):
                                     gtk['name'](pointer, path.name.encode())
                                 else: assert gtk['filename'](pointer, str(path).encode())
                                 selected = time.monotonic()
-                            elif time.monotonic()-selected>.8:
+                            elif time.monotonic()-selected>.8 and not row.get('activated_button'):
                                 button = gtk['button'](pointer, -5); assert button
+                                name = gtk['selected_filename'](pointer)
+                                try: matches = bool(name and Path(C.string_at(name).decode()).resolve()==path.resolve())
+                                finally:
+                                    if name: gtk['free_string'](name)
+                                if not matches or not gtk['sensitive'](button): return
                                 row['activated_button'] = gtk['label'](button).decode()
-                                timer.stop(); assert gtk['activate'](button)
+                                row['selection_matched'] = True
+                                assert gtk['activate'](button)
+                                (output/'native-dialog-progress.json').write_text(json.dumps(report, indent=2)+'\n')
                             return
                         at = at.contents.next
                 finally:
                     if head: gtk['free'](head)
                 for dialog in app.topLevelWidgets():
                     if isinstance(dialog, QFileDialog) and dialog.isVisible():
+                        if row.get('Qt_submitted'): return
                         row['provider'] = 'Qt fallback file chooser (not GTK/portal)'
                         assert not dialog.testOption(QFileDialog.Option.DontUseNativeDialog)
                         edit = dialog.findChild(QLineEdit, 'fileNameEdit'); assert edit
                         edit.setText(str(path)); edit.setFocus()
-                        timer.stop(); QTest.keyClick(edit, Qt.Key.Key_Return)
+                        row['Qt_submitted'] = True; QTest.keyClick(edit, Qt.Key.Key_Return)
                         return
-                if time.monotonic()-started>12: raise TimeoutError('No supported in-process selector; portal/operator check still pending')
             except BaseException as error:
                 failures.append(repr(error)); timer.stop(); reject()
         timer.timeout.connect(operate); timer.start()
+        (output/'native-dialog-progress.json').write_text(json.dumps(report, indent=2)+'\n')
         try: action()
         finally: timer.stop()
         row['elapsed_s'] = time.monotonic()-started
@@ -141,4 +156,6 @@ def run(app, workspace, source, output):
         except Exception as cleanup: report['cleanup_error'] = repr(cleanup)
         raise
     finally:
+        report['source_sha256'] = original
+        report['source_unchanged'] = source.is_file() and hashlib.sha256(source.read_bytes()).hexdigest()==original
         (output/'native-dialog-check.json').write_text(json.dumps(report, indent=2)+'\n')

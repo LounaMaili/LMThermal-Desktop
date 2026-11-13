@@ -8,12 +8,12 @@ is part of this recipe. Read AGENTS.md and preserve existing local work first.
 ## Exact source and environment
 
 Working branch: `codex/desktop-offline-qualification`.
-Runtime/build source: **`07f8b3a4d7dc70a79c6db057c06c8a76d79e8a90`**.
+Runtime/build source: **`cb5f310f2d367b459066de9af7d72451de4fac09`**.
 Later evidence/handoff-only commits do not change the tested runtime. Fetch that exact
 commit into a new native-Windows worktree; never reset a user's existing checkout:
 
 ```powershell
-$ExpectedCommit = '07f8b3a4d7dc70a79c6db057c06c8a76d79e8a90'
+$ExpectedCommit = 'cb5f310f2d367b459066de9af7d72451de4fac09'
 git fetch origin codex/desktop-offline-qualification
 git worktree add --detach ..\LMThermal-Desktop-offline-check $ExpectedCommit
 Set-Location ..\LMThermal-Desktop-offline-check
