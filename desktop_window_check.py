@@ -112,7 +112,8 @@ def run(app, window, path, output, *, expect_error=False):
                 palette.setCurrentText('Turbo');automatic.setChecked(False)
                 minimum.setValue(10);maximum.setValue(45);settle()
                 assert roi_label.text() == roi_text
-                window.resize(1020,740);settle()
+                window.resize(1000,740);settle()
+                assert window.width()<=1000, 'Offline controls must fit the requested 1,000-pixel window'
                 result['resized_window_size'] = [window.width(),window.height()]
                 assert image.roi == roi and matrix.tobytes() == evidence
                 result['presentation_and_resize_with_test_waits_ms'] = (time.monotonic()-started)*1000

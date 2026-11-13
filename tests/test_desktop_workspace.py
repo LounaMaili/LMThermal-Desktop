@@ -57,8 +57,25 @@ class DesktopWorkspaceTests(unittest.TestCase):
             self.assertTrue(saved.start_log_button.parentWidget().isHidden())
             self.assertTrue(saved.start_record_button.parentWidget().isHidden())
             self.assertTrue(saved.render_button.isVisible());self.assertTrue(saved.roi_values_label.isVisible())
+            self.assertIn('Stored temperatures',saved.mode_label.text())
+            self.assertEqual('temperature-only.lmtx',saved.state_label.text())
+            self.assertTrue(saved.metadata_button.isEnabled())
             live=self.window.open_live();self.assertFalse(live.connect_button.isHidden())
             self.assertIsNone(live.worker)
+    def test_still_and_legacy_recording_fit_a_thousand_pixel_workspace(self):
+        from tempfile import TemporaryDirectory
+        from playback_support import observations,build_bundle
+        with TemporaryDirectory() as name:
+            path=Path(name)/'legacy.lmthermal';build_bundle(path,observations())
+            still=self.window.open_path(Path(__file__).parent/'fixtures/lmtx/temperature-only.lmtx')
+            self.wait(lambda:still.offline_capture is not None)
+            self.window.resize(1000,740);self.app.processEvents()
+            self.assertLessEqual(self.window.width(),1000)
+            recording=self.window.open_path(path,legacy_recording=True)
+            self.wait(lambda:recording.playback is not None)
+            self.window.resize(1000,740);self.app.processEvents()
+            self.assertLessEqual(self.window.width(),1000)
+            recording.close();self.wait(lambda:recording not in self.window._documents)
     def test_format_routes_reuse_distinct_existing_apis(self):
         self.window._legacy_factory=FakeView
         for name,expected,recording in [('still.lmtx','lmtx',False),('legacy.json','capture',False),

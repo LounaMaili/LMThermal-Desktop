@@ -1,6 +1,8 @@
 # Native Windows development and Codex
 
 This is a preparation recipe, not evidence that the new workspace/installer ran on Windows.
+The current [exact-SHA offline handoff](WINDOWS_OFFLINE_HANDOFF.md) pins the qualified
+Linux runtime source, Windows dependency checks and remaining native picker/installer gates.
 Use a native Windows 11 x64 environment for qualification. Keep its clone independent of
 Linux worktrees. Linux/WSL results do not establish native NTFS/Qt behavior.
 

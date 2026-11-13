@@ -24,6 +24,7 @@ class WorkspaceLegacyWindow(MainWindow):
         self.setWindowTitle('LMThermal — capture / legacy recording / live camera')
         self._workspace_closing = False
         self._workspace_waiting = set()
+        self._offline_workspace = False
     def _on_frame_available(self):
         """A queued callback during cooperative Close must not republish a live reading."""
         if not self._workspace_closing:
@@ -34,11 +35,29 @@ class WorkspaceLegacyWindow(MainWindow):
         This is presentation only: it never opens/stops a camera or changes any
         loader, recorder, measurement or finalization decision.
         """
+        self._offline_workspace = True
         for control in (self.connect_button, self.initialize_button, self.capture_button,
                         self.start_log_button.parentWidget(), self.start_record_button.parentWidget()):
             control.hide()
         session = self.device_label.parentWidget(); session.setTitle('Saved source')
         session.layout().labelForField(self.fps_label).hide(); self.fps_label.hide()
+        self.cursor_label.parentWidget().setTitle('Stored measurements')
+    def _publish_offline(self, capture):
+        """Keep source identity/provenance available in Metadata, not above every reading.
+
+        Only the workspace caption changes. The original capture, warning, unknown-
+        palette disclosure, measurement owners and native coordinates remain intact.
+        """
+        accepted = super()._publish_offline(capture)
+        if accepted and self._offline_workspace:
+            self.state_label.setText(capture.source_path.name)
+            availability = 'Stored temperatures' if capture.has_readings else 'No usable stored temperatures'
+            text = f'{capture.geometry.width} × {capture.geometry.height} native pixels · {availability}'
+            if capture.accuracy_warning: text += '\n'+capture.accuracy_warning
+            elif capture.provenance.get('kind'): text += '\nProvenance: '+str(capture.provenance['kind'])
+            if capture.palette_fallback: text += f'\nUnknown palette {capture.original_palette_id}; using White hot'
+            self.mode_label.setText(text)
+        return accepted
     def closeEvent(self, event):
         # MainWindow's standalone close waits synchronously. The workspace requests
         # worker cancellation first and lets finished signals retry Close without a GUI wait.

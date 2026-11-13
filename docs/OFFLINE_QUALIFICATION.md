@@ -20,6 +20,10 @@ screenshots remain private; the frozen LMTR validator and 51 corpus hashes stay 
 - Saved LMTX/legacy workspace tabs omit live-only camera, initialization, capture/log/
   recording commands. Home's explicit Live tab retains them; source loaders, worker
   ownership, finalization refusals and acquisition logic are unchanged.
+- Saved-source captions show filename, native size and measurement availability;
+  verbose module/provenance dictionaries remain in original Metadata. Accuracy and
+  unknown-palette warnings stay visible. The window campaign now actually requests
+  and asserts 1,000 pixels; its former 1,020-pixel screenshots do not establish that gate.
 
 The 1,000-pixel exposed baseline screenshot showed a technical integrity string in
 the primary status line and live controls even in a saved-document tab. These changes
@@ -90,5 +94,10 @@ The [Windows guide](WINDOWS_DEVELOPMENT.md) remains the installation/manual/retr
 procedure. A final handoff must pin the new runtime SHA and include normal Windows
 Open/Save, Unicode paths, 1,000-pixel layout, interrupted/recovery views, install/uninstall
 and source/sentinel preservation; Fedora/WSL cannot validate these gates.
+
+The [exact Windows handoff](WINDOWS_OFFLINE_HANDOFF.md) now pins runtime source
+`07f8b3a4d7dc70a79c6db057c06c8a76d79e8a90`, PowerShell commands, native-window
+acceptance and separate installer-generated inventory. It is ready for a future
+authorized Windows session, not a Windows result.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
