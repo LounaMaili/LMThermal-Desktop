@@ -70,3 +70,8 @@ Include spaced/Unicode paths, finalization refusal/retry and a 1,000-pixel-wide 
 The campaign requires explicit offline fixtures/legacy inputs and new private outputs.
 Keep the exposure/operator distinction; offscreen mode does not qualify native display.
 Review licensing and sign/install/uninstall as a standard user only after owner decisions.
+
+The Linux-only CPython 3.13.18 experiment does not validate Windows or improve the final
+Linux glibc floor. Keep native Windows Python/wheel provenance explicit rather than
+assuming identical version labels imply identical binary inputs. Either native Python
+candidate must run the full Windows suite, frozen UI and installer checks separately.

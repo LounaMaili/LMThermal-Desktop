@@ -7,6 +7,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 ### Fixed (Phase 5 Desktop qualification — 2026-11-13)
 - Keep a refused legacy finalization retryable and abort application Close without discarding its owner or weakening recorder safety. Split LMTR controls into laptop-width rows while retaining source/native-coordinate/reader behavior.
 - Add opt-in camera-free source/frozen window qualification with strict native exposure, metadata/ROI/palette/PNG/timeline/source-hash/Close checks; record the current locked-session boundary instead of claiming operator/native visual acceptance.
+- Verify both Python 3.15/3.13 candidates with 249 tests, eleven frozen offline UI cases and 102 unchanged-corpus comparisons each. Retain the negative portability result: GTK/tinysparql/SQLite keeps GLIBC 2.44 despite a standalone interpreter. Native visual tests remain blocked by the locked desktop, without an unlock attempt.
 - Require Python's actual runtime notice, refuse in-checkout build output and detected source changes, and add independent byte/link/ELF ABI audits. Keep physical, clean-distro, licensing, native Windows and release gates explicit.
 
 

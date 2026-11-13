@@ -123,3 +123,21 @@ LMTX/LMTR are single-file sources; legacy JSON/NPZ sidecars need explicit scoped
 access, and legacy recordings need a selected directory. Do not grant host/home/all-device
 access as a shortcut. No Flatpak/AppImage installation or sandbox-policy weakening is
 performed here. Existing one-directory delivery remains a private host prototype.
+
+### Interpreter experiment receipt
+
+An isolated CPython 3.13.18 / 20261110 candidate was obtained using project-local
+uv 0.13.8 and `python-build-standalone`, with no global bin/PATH changes. The original
+33.9 MiB archive is retained privately with SHA-256
+`f2d2199eb25880e07863b391cf7124e7ffa1338b0d65600dfcec117c4223a7fb`.
+It uses the same pinned package versions; ABI-specific wheel bytes differ. Both Python
+runtimes pass 249 source tests, eleven frozen UI cases and the same 102 corpus results.
+Neither lowers the complete bundle's GLIBC 2.44 floor because the GTK theme dependency
+still brings host SQLite. It is an experiment, not a new advertised minimum Python/distro.
+See [the final receipt and ABI finding](phase5/QUALIFICATION.md#final-software-checkpoint).
+
+For a future explicit reproduction use the exact Python patch/build rather than a floating
+`3.13` request. [uv's Python installation guide](https://docs.astral.sh/uv/guides/install-python/)
+explains its Astral distribution provider; use project-local install/cache/bin directories,
+`--no-bin`, and retain source/archive hashes. Do not run a global installer or modify shell
+profiles merely to reproduce this experiment.

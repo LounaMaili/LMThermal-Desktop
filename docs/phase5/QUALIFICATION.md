@@ -90,3 +90,45 @@ install/uninstall, decide licensing/branding/signing/privacy and obtain explicit
 availability for Android. No CI budget or public release is consumed by this phase.
 
 **Native-equivalent temperatures; absolute physical accuracy not yet independently validated.**
+
+## Final software checkpoint
+
+The reviewed source passes **249 hardware-independent tests** under both CPython 3.15.2
+and a project-local Astral CPython 3.13.18 (build 20261110). Both frozen candidates pass
+all eleven offline window cases and 102 strict/recovery comparisons over the unchanged
+51 canonical files. The complete canonical comparison reports are identical across
+Python versions. These are software/offscreen results; native visual/operator cases
+remain deferred because the session is locked. There is no physical acquisition FPS,
+Pixel heap/GC or visible-motion-latency result from this phase.
+
+Both artifacts were built from clean commit
+`c9a0854743df488b38042e4de77ac0920aa962c5`, with stable before/after source inventory.
+Later documentation commits do not change that tested artifact provenance.
+
+| Candidate | File hashes verified | Private tar bytes | Original tar SHA-256 |
+| --- | ---: | ---: | --- |
+| Fedora CPython 3.15.2 | 510 | 153225660 | `6f6954fd4319134e40a5d6a544788ace7f40dacc140d3ec5ef96968df2f4d03c` |
+| Astral CPython 3.13.18 | 452 | 153593451 | `f291887faa39059fd2a1d4d7ef49bdedb007a6b6121d5846c69cf91bf6771676` |
+
+Private installation/retraction rehearsals extract each tar under spaced/Unicode paths,
+verify every declared file, self-check with an empty executable PATH and no external
+Python settings, remove only owned files and retain an added user-file sentinel plus
+external local logs. The original archive hashes are measured before/after and match.
+This is a controlled prototype rehearsal, not a general production uninstaller or a
+native Windows installation result. Artifacts, raw logs, screenshots and manifests stay
+private and have not been published as releases.
+
+### ABI finding and next packaging decision
+
+**Both candidates still contain a GLIBC 2.44 requirement.** The portable interpreter
+removes the system-math requirement but not the copied host SQLite dependency. The
+observed chain is Qt's GTK platform-theme plugin → GTK3 → tinysparql → libsqlite3.
+Changing Python alone is therefore not a portability solution. No plugin is blindly
+removed and no favorable partial ABI scan is substituted for the complete inventory.
+
+Recommend a separately reviewed older build baseline matching all dependency floors,
+plus clean-distro tests, or an intentional platform-theme/plugin policy with native
+picker/input/accessibility qualification. Do not advertise older-distro compatibility
+for these artifacts. AppImage wrapping cannot remove the requirement; Flatpak needs
+its own pinned runtime/portal/device design. No system package or security policy was
+changed, and neither candidate is selected as a public release.
