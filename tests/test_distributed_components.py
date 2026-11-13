@@ -10,8 +10,8 @@ from tools.distributed_components import collected_members, write_native_invento
 
 class DistributedComponentTests(unittest.TestCase):
     def test_package_lookup_resolves_usr_merge_alias_without_guessing_by_basename(self):
-        source=SimpleNamespace(resolve=lambda:Path('/usr/lib/example.so.1.2'))
-        with patch('tools.distributed_components.subprocess.run',side_effect=[
+        source=Path('/lib/example.so.1')
+        with patch('tools.distributed_components.Path.resolve',return_value=Path('/usr/lib/example.so.1.2')), patch('tools.distributed_components.subprocess.run',side_effect=[
             SimpleNamespace(returncode=1),SimpleNamespace(returncode=0,stdout='libexample:amd64: /usr/lib/example.so.1.2\n')]) as run:
             self.assertEqual('libexample:amd64',debian_owner(source,'dpkg-query'))
             self.assertEqual('/usr/lib/example.so.1.2',run.call_args_list[1].args[0][-1])
