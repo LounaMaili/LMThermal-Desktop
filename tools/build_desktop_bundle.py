@@ -12,6 +12,8 @@ import sys
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from tools.distributed_components import write_native_inventory
 
 
 def write_inventory(folder):
@@ -70,6 +72,7 @@ def build(output):
         str(ROOT / 'packaging/desktop.spec')], cwd=ROOT, check=True)
     folder = output / 'dist/LMThermal-Desktop'
     write_inventory(folder)
+    native_inventory = write_native_inventory(folder, output/'work/desktop/COLLECT-00.toc')
     for name in ['PACKAGING.md', 'WINDOWS_DEVELOPMENT.md', 'PRODUCT_WORKSPACE.md']:
         shutil.copyfile(ROOT / 'docs' / name, folder / name)
     shutil.copyfile(ROOT / 'packaging/README-RUNTIME.txt', folder / 'START_HERE.txt')
@@ -87,6 +90,8 @@ def build(output):
     receipt = dict(source_commit=commit, uncommitted_changes=bool(dirty), platform=platform.platform(),
                    python=platform.python_version(), self_check=report,
                    source_inventory_stable=True, source_snapshot_atomic=False,
+                   native_inventory_members=native_inventory['native_members'],
+                   unmapped_native_members=native_inventory['unmapped'],
                    qualification='Private native-host prototype; not a public release or portability certification')
     (output / 'build-receipt.json').write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8')
     lines = []

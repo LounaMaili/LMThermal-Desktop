@@ -25,15 +25,77 @@ for this Python/Qt application. No OpenAI API integration/key is required by LMT
 ```powershell
 git clone https://github.com/LounaMaili/LMThermal-Desktop.git
 Set-Location LMThermal-Desktop
-git switch codex/desktop-packaging-preview
+git fetch origin
+# Copy the complete reviewed phase6 source SHA from the handoff, not a moving branch tip.
+$ExpectedCommit = '<40-character-reviewed-SHA>'
+git switch --detach $ExpectedCommit
+py -3.15 -c 'import sys; assert sys.version_info[:3] == (3,15,2)'
 py -3.15 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r packaging\requirements-build.txt
+.\.venv\Scripts\python.exe -m pip install --require-hashes -r packaging\requirements-windows-cp315.lock
 $env:QT_QPA_PLATFORM = 'offscreen'
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 git diff --check
 Remove-Item Env:QT_QPA_PLATFORM
 .\.venv\Scripts\python.exe lmthermal_desktop.py
 ```
+
+Use the official [Python 3.15.2 release/install manager](https://www.python.org/downloads/release/python-3152/)
+and record its normal signed x64 installation. Do not accidentally select ARM64, 32-bit
+or free-threaded Python. The version guard refuses another patch rather than silently
+changing the qualification environment. Thirteen Windows wheels, including explicit
+pefile/pywin32-ctypes builder dependencies, were downloaded/hashed on Linux; this verifies
+availability/provenance only, not import, PE linkage or Windows execution.
+
+## Exact-source executable campaign
+
+After tools and normal Codex sign-in are available, read this repository's AGENTS.md.
+Use the exact reviewed commit and a NEW private report directory outside Git:
+
+```powershell
+$Reports = Join-Path $env:LOCALAPPDATA ('LMThermal-validation\phase6-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+.\packaging\qualify-windows.ps1 -ExpectedCommit $ExpectedCommit -ReportDirectory $Reports -Build
+```
+
+The script refuses Linux/WSL, wrong SHA, dirty source and reused output. It runs the
+complete native suite with offscreen Qt only for that child, prepares explicitly
+fixture-derived legacy inputs, builds/self-checks the executable, audits every byte,
+compares all 51 canonical files in strict/recovery modes and executes eleven real-window
+cases with the frozen application. Native cases require exposure; locked sessions fail
+honestly. Every stage has a private log and raw exit status, with no automatic rerun.
+No camera, Android tooling, administrative privileges or hosted Actions is required.
+
+Open the frozen application normally after the campaign:
+
+```powershell
+& (Join-Path $Reports 'bundle\dist\LMThermal-Desktop\LMThermal-Desktop.exe')
+```
+
+Manually check Home/tabs, normal open/save dialogs, LMTX/LMTR/legacy still and directory
+recording, timeline/gaps/recovery, point/ROI, palette/Locked, 1,000-pixel window, errors,
+changing files without stale readings, Close during pending work and ordinary final Close.
+Keep original hashes and separate PNGs. Automated Qt events are not operator acceptance.
+
+## User installer and retraction
+
+After the executable campaign succeeds, install Inno Setup 6 normally for the current
+user and record its exact compiler version. Compile the existing template with:
+
+```powershell
+$BundleRoot = Join-Path $Reports 'bundle\dist\LMThermal-Desktop'
+$InstallerOutput = Join-Path $Reports 'installer'
+ISCC.exe "/DBundleRoot=$BundleRoot" "/DInstallerOutput=$InstallerOutput" packaging\windows-user-installer.iss
+if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
+Get-FileHash -Algorithm SHA256 (Join-Path $InstallerOutput 'LMThermal-Desktop-preview-setup.exe')
+```
+
+Close all LMThermal windows first. Use a new private user destination, without replacing
+an existing installation. Verify the installed file inventory against the build manifest,
+launch from Start Menu and executable, repeat normal dialogs/analysis/Close, add a harmless
+user sentinel and keep captures/logs outside the application. Use the normal generated
+uninstaller, then verify the sentinel/external files and their hashes remain. Record any
+unsigned/SmartScreen prompt; do not disable Defender or bypass organizational policy.
+The template requests no elevation, association, driver, service or firewall rule.
+No Inno compilation, install/uninstall or signature is claimed from Linux preparation.
 
 Calling the venv executable directly avoids requiring activation-policy changes. If a
 reviewed build script is blocked by local execution policy, follow organizational policy

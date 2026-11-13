@@ -3,7 +3,8 @@ LMThermal Desktop — private development preview
 Linux: extract the complete directory and run ./LMThermal-Desktop.
 Windows: open LMThermal-Desktop.exe after a separately qualified native build.
 Keep _internal beside the executable. No Python environment or administrator access
-is needed at runtime. This build is qualified on its Fedora host only.
+is needed at runtime. Consult the build receipt and qualification report for the
+actual tested userlands/desktops; a static ABI floor alone is not distro certification.
 
 Home opens thermal stills (LMTX/legacy), read-only LMTR recordings or historical
 recording directories. Stored measurements remain authoritative. Palette and ROI

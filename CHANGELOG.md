@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Phase 6 distribution qualification — 2026-11-13)
+- Prepare an exact-source rootless Ubuntu 22.04/GLIBC2.35 build, pinned CPython/wheel/Debian receipts, and independent old-userland/runtime and native Fedora gates without replacing libc or removing Qt plugins.
+- Audit every delivered file and required ELF GLIBC/GLIBCXX/CXXABI version, needed library and search path; refuse omitted files/missing readelf, distinguish provided from needed versions, and map actual native COLLECT members to wheel/Debian/CPython origins with matching Debian notices and explicit unknowns.
+- Add exact-source native Windows qualification and fixture-derived legacy-input tools, thirteen hashed Windows wheel inputs, and a reproducible user-installer/manual acceptance recipe. Preparation/downloads are not native Windows validation, legal acceptance or a public release.
+
 ### Fixed (Phase 5 Desktop qualification — 2026-11-13)
 - Keep a refused legacy finalization retryable and abort application Close without discarding its owner or weakening recorder safety. Split LMTR controls into laptop-width rows while retaining source/native-coordinate/reader behavior.
 - Add opt-in camera-free source/frozen window qualification with strict native exposure, metadata/ROI/palette/PNG/timeline/source-hash/Close checks; record the current locked-session boundary instead of claiming operator/native visual acceptance.

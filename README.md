@@ -26,6 +26,9 @@ See [workspace behavior and qualification](docs/PRODUCT_WORKSPACE.md).
 See [private Linux prototype and Windows installer preparation](docs/PACKAGING.md)
 and [Windows development with Codex](docs/WINDOWS_DEVELOPMENT.md). No public release
 is available; native Windows qualification and licensing decisions remain pending.
+The [phase6 rootless old-Linux recipe](docs/LINUX_BASELINE.md) retains Qt plugins and
+pins the interpreter, base image and wheel bytes; runtime/ABI results are recorded
+separately from public-distribution acceptance.
 
 ## Phase 5 qualification
 

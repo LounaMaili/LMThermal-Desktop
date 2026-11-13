@@ -1,0 +1,5 @@
+# Native Windows build profile. Explicit Windows-only PyInstaller dependencies
+# prevent cross-platform download tools from silently dropping environment markers.
+-r requirements-build.txt
+pefile==2024.8.26
+pywin32-ctypes==0.2.3
