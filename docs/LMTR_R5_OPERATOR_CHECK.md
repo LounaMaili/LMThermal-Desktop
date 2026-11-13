@@ -40,5 +40,7 @@ Windows must rerun the full suite on this new code; older Windows runs do not qu
 The tiny canonical example is not a photographic aiming scene. Optional synthetic
 large-grid and >4GiB probes are documented in the qualification report. Real Android
 LMTR source/operator interoperability remains a separately authorized future gate.
+[One real interrupted Full observation](LMTR_INITIAL_OPEN.md) now passes automated
+native Linux readback; this does not replace multi-frame/operator acceptance.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.

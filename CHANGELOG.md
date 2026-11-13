@@ -5,6 +5,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 ## [Unreleased]
 
 ### Fixed (LMTR initial observation — 2026-11-13)
+- Qualify the exact corrective runtime with 260 source/build-root tests, 102 unchanged-corpus comparisons, eleven frozen offline cases and three normal installed native opens. Verify one real interrupted Android Full observation through independent original-owner hashes, native points/ROI/palettes/PNG/navigation and unchanged source; preserve the failed ten-second field attempt and do not claim multi-frame or sustained recording acceptance.
 - Reproduce the empty initial screen in the installed Linux candidate: canonical examples start with a segment declaration, not pixels. Open the first observation in that same validated initial CHUNK without forcing Next, scanning the whole recording or discarding earlier events. Reader default timeline order, gap/unavailable semantics and one-CHUNK limits remain unchanged.
 - Remove the diagnostic campaign's forced seek that concealed the normal-open issue; regress automatic publication for both the masked 3×2 and uniform 384×288 examples, plus control-only/unavailable observation selection and explicit Previous-to-segment clearing. Canonical files and the pinned reference validator remain unchanged.
 

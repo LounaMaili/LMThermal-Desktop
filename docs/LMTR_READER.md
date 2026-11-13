@@ -145,3 +145,12 @@ new engineering sources are noncanonical and never replace those fixtures.
 [Independent review and integration proposal](LMTR_R5_INTEGRATION_REVIEW.md) records
 additional malformed-visual and obsolete-scan corrections,232 passing Linux tests,
 and exact pending Windows/operator gates. Historical phase2 evidence remains pinned.
+
+## Initial-open correction and first physical observation
+
+[The 2026-11-13 corrective receipt](LMTR_INITIAL_OPEN.md) separates the normal-open
+regression and rebuilt private runtime from earlier qualification. Both unchanged
+illustrations now publish their observation without a forced seek. One real HT-301
+Full observation in an interrupted Android field file has exact independent
+Float32/native/transport parity and native Desktop analysis checks; a complete
+physical sequence and sustained recording acceptance remain pending.
