@@ -87,6 +87,40 @@ class LmtrEntry:
     roi: object = None
 
 
+def _seconds_ns(value):
+    """Present original integer nanoseconds without rounding them through binary64."""
+    value=int(value);sign='-' if value<0 else '';whole,fraction=divmod(abs(value),1_000_000_000)
+    return f'{sign}{whole}.{fraction:09d} s'
+
+
+def format_timing_evidence(value):
+    """Compact display of declared policy and actual event time; no inferred sensor FPS/clock mapping."""
+    if value is None:return 'Timing unavailable'
+    sampling=value.get('sampling')
+    label='Sampling: multiple streams / see original metadata'
+    if sampling is not None:
+        if sampling['mode']=='periodic':
+            period=int(sampling['period_ns'])
+            rate=str(1_000_000_000//period) if 1_000_000_000%period==0 else f'1000000000/{period}'
+            label=f'Requested: {rate} Hz periodic ({period} ns)'
+        else:label='Acquisition-following; no requested periodic slots'
+    schedule=value.get('scheduled')
+    if schedule is not None:
+        first,last=schedule['first_slot'],schedule['last_slot']
+        label+=f' · slot {first}' if first==last else f' · slots {first}–{last}'
+    actual='Recorder intake +'+_seconds_ns(value['timeline_ns'])
+    if value.get('receipt_shared_timeline_ns') is not None:
+        actual+=' · receipt '+_seconds_ns(value['receipt_shared_timeline_ns'])
+    elif value.get('receipt') is not None:
+        stamp=value['receipt'].get('stamp')
+        actual+=' · receipt '+(str(stamp['ticks'])+' ticks, unaligned clock' if stamp else value['receipt']['status'])
+    if value['kind']=='gap':detail=f"{value['category']} · count {value['count'] or 'unknown'} · {value['reason']}"
+    elif value.get('measurement') is not None:
+        measurement=value['measurement'];detail=measurement['status']+' · '+measurement.get('reason',measurement.get('validity',''))
+    else:detail=value['kind']+' · '+value.get('reason','')
+    return '\n'.join((label,actual,detail))
+
+
 class _Entries:
     """Sequence facade for existing slider controls without a duration-sized list."""
     def __init__(self, owner): self.owner = weakref.proxy(owner)
@@ -270,13 +304,36 @@ class LmtrPlaybackModel:
         if kind == 'observation':
             kind = 'valid' if entry['measurement']['status'] == 'available' else 'unavailable'
         elif kind != 'gap': kind = 'segment'
-        reason = entry.get('reason', entry['kind'])
+        reason = entry.get('reason', entry.get('measurement',{}).get('reason',entry['kind']))
         if kind == 'gap':
-            reason += ' (missing '+(entry['count'] if entry['count'] is not None else 'unknown')+')'
+            reason = entry['category']+': '+reason+' (missing '+(entry['count'] if entry['count'] is not None else 'unknown')+')'
         utc = entry.get('acquisition', {}).get('utc', {})
         return LmtrEntry(index, int(entry['entry_id']), utc.get('utc', 'UTC unavailable'),
                          (int(entry['timeline_ns'])-self.first_time_ns)/1e9,
                          entry['kind'], reason, kind)
+
+    def timing_evidence(self,index):
+        """Project selected validated metadata only; no scan, payload history or invented time alignment.
+
+        Receipt is aligned to HEADER-relative time only for the identical reliable ns clock.
+        A different UUID is not assumed to share an epoch merely because it uses ns units.
+        Segment events with multiple streams do not get a fabricated common sampling policy.
+        """
+        _,metadata,_=self._chunk(index);entry=self._entry_view(index)
+        segment=next(s for s in metadata['segments'] if s['id']==entry['segment_id'])
+        streams=segment['streams'];stream=next((s for s in streams if s['stream_id']==entry.get('stream_id')),None)
+        if stream is None and len(streams)==1:stream=streams[0]
+        receipt=entry.get('receipt');shared=None
+        if stream is not None and receipt is not None and receipt.get('stamp') is not None:
+            stamp=receipt['stamp'];clock=next((c for c in stream['clocks'] if c['id']==stamp['clock_domain_id']),None)
+            if (receipt['status']=='known' and stamp['clock_domain_id']==self.reader.head['timeline']['clock_domain_id']
+                    and clock is not None and clock['kind']=='host_monotonic' and clock['quality']=='known'
+                    and clock['tick_period_ns']=={'numerator':'1','denominator':'1'}):
+                shared=str(int(stamp['ticks'])-int(self.reader.head['timeline']['origin_monotonic_ns']))
+        return deepcopy(dict(kind=entry['kind'],timeline_ns=entry['timeline_ns'],
+            sampling=None if stream is None else stream['sampling'],scheduled=entry.get('scheduled'),
+            receipt=receipt,receipt_shared_timeline_ns=shared,measurement=entry.get('measurement'),
+            category=entry.get('category'),count=entry.get('count'),reason=entry.get('reason','')))
 
     def initial_observation_index(self):
         """Find an observation in the initial validated CHUNK without scanning the recording.

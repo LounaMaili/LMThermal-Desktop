@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt6.QtCore import Qt, QSignalBlocker
 
 from lmthermal_viewer import ThermalImageWidget, CelsiusLegend
-from lmtr_reader import LmtrPlaybackModel
+from lmtr_reader import LmtrPlaybackModel, format_timing_evidence
 from offline_measurement import Rectangle, save_offline_png
 from lmtx_json import dumps as metadata_text
 from celsius_palette import PALETTES, CelsiusRange
@@ -128,6 +128,7 @@ class LmtrWorker(QThread):
                              'playing': model.playing, 'report': model.report,
                              'header': model.header, 'cache_bytes': model.cache_bytes,
                              'entry_metadata': model.original_entry(model.index) if model.entry_count else None,
+                             'timing': model.timing_evidence(model.index) if model.entry_count else None,
                              'source_path': model.path, 'source_generation': generation}
                     result = token, frame, state, None
                 except Exception as error:
@@ -179,6 +180,10 @@ class LmtrWindow(QMainWindow):
         row.addWidget(self.validation_status, 1)
         self.details_panel.hide(); self.details_button.toggled.connect(self.details_panel.setVisible)
         self.status = QLabel('Offline — no camera'); self.status.setWordWrap(True); layout.addWidget(self.status)
+        self.timing_status=QLabel('Timing unavailable');self.timing_status.setWordWrap(True)
+        self.timing_status.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Fixed)
+        self.timing_status.setFixedHeight(self.timing_status.fontMetrics().lineSpacing()*3+4)
+        layout.addWidget(self.timing_status)
         images = QHBoxLayout(); layout.addLayout(images, 1)
         self.image = ThermalImageWidget(); images.addWidget(self.image, 1)
         self.legend = CelsiusLegend(); images.addWidget(self.legend)
@@ -255,6 +260,7 @@ class LmtrWindow(QMainWindow):
 
     def _clear_current(self, message='Readings unavailable — loading'):
         self.frame = None
+        self.timing_status.setText('Timing unavailable — loading')
         self.image.set_observation(None)
         self.image.setEnabled(False)
         self.image._roi_anchor = None  # A load/gap cancels the gesture, not retained inspection geometry.
@@ -302,7 +308,10 @@ class LmtrWindow(QMainWindow):
         position = f"event {state['index']+1 if entry else 0}/{state['count']}"
         # Indexed totals are explicitly qualified, not promoted to full-file verification.
         self.status.setText(f"{completeness} · {position}" + (f' · {entry.elapsed_s:.3f} s' if entry else '')
-            + f"\nIndexed: {summary['observations']} observations · {summary['gap_events']} gap events · {summary['known_missing_observations']} known missing observations")
+            + f"\nIndexed: {summary['observations']} observations · {summary['temperature_planes']} temperature planes · "
+              f"{int(summary['observations'])-int(summary['temperature_planes'])} absent measurements · {summary['gap_events']} gap events")
+        timing=format_timing_evidence(state.get('timing'))
+        self.timing_status.setText(timing);self.timing_status.setToolTip(timing)
         self.validation_status.setText(f"{report['integrity_scope']} (file) · "
             + ('selected CHUNK verified' if entry else 'no CHUNK selected'))
         self.image.empty_text = ('Gap — '+entry.reason if entry and entry.state == 'gap'

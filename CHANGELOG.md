@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Changed (Periodic LMTR evidence presentation — 2026-11-14)
+- Show requested periodic cadence, original recorder intake, qualified receipt and scheduled slot/range without aligning unrelated clocks or inferring sensor precision. Preserve explicit gap categories and unavailable reasons, and distinguish indexed observation records from stored temperature planes and absent measurements.
+- Keep timing in a fixed-height operator label, clear it on new/failed loads, and add pure/offscreen regressions. Reader validation, masks, native matrices/coordinates, point/ROI arithmetic, timeline navigation, unknown-tail recovery and all 51 canonical fixtures remain unchanged. No recorder, converter, analysis-export UI, camera access or CI is added.
+
 ### Changed (Offline usability and native-provider qualification — 2026-11-13)
 - Qualify final runtime `dfaf6ed` with 264 source/build-root tests, unchanged51-file/102-outcome frozen parity, eleven exposed1,000-pixel cases and a separate no-Python Ubuntu runtime. Verify actual source/frozen GTK3 Open/Save and default Wayland Qt dialogs, all45 real observations/60 gaps and exact PNG/source identity; preserve the nonconclusive wait and diagnostic deadline regression. Retain GLIBC2.35, all44 plugins,535 manifest members and a new private install; Windows remains unexecuted with an exact-SHA handoff.
 - Bound the actual-dialog diagnostic even while GTK remains visible: wait for the selected path and enabled native button, keep event pumping after one activation and preserve progress/failure receipts. Retain the final-candidate GTK wait as nonconclusive; ordinary loading/PNG logic and scientific data are unchanged.

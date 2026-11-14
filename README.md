@@ -106,6 +106,7 @@ bytes, optional JSON precision and source files are preserved. PNG renderings sa
 exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
 
 See [R5 architecture and limits](docs/LMTR_READER.md),
+including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
 [qualification gates](docs/LMTR_R5_QUALIFICATION.md),
 [phase3 integration review](docs/LMTR_R5_INTEGRATION_REVIEW.md) and the camera-free
 [operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md). This is camera-free fixture/

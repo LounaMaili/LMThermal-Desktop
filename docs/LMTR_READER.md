@@ -25,6 +25,7 @@ Normal open verifies HEADER/version/features/END/checkpoint/navigation; selected
 fully validates the CHUNK before publishing any plane, including generator checks after
 yield. **Verify entire file / prefix** checks all committed history and chronology.
 No claim that an unvisited corrupt payload is valid follows from an opened file.
+
 Explicit recovery uses the reference full-prefix procedure and retains unknown tail,
 original completion status and failure evidence. Unsupported required features and
 committed source corruption still reject. There is no salvage-to-success fallback.
@@ -159,3 +160,44 @@ The [second physical follow-up](LMTR_INITIAL_OPEN.md#second-physical-sequence-fo
 adds unchanged-runtime full readback of 45 real observations and 60 explicit losses,
 all 107 event/time positions and native inspection checks. Its 4.309s RSS safety
 interruption remains a failed duration/loss-free recording gate, not a reader failure.
+
+## Periodic policy and actual event time
+
+The [Linux validation receipt](lmtr-periodic-validation.json) records the isolated
+software checks and source fingerprints.
+
+The normal viewer now projects the selected validated CHUNK's existing timing
+metadata into three fixed-height lines, independently of image/palette/ROI data:
+
+- requested periodic frequency and its exact integer period, or acquisition-following
+  sampling without an invented requested schedule;
+- actual recorder-intake time relative to HEADER, and original receipt evidence;
+- the selected slot/range, measurement availability/validity or explicit gap category
+  (`missed_schedule`, `preparation_overload`, `writer_overload`, source loss, etc.).
+
+Receipt is displayed on the common HEADER-relative timeline only when it belongs
+to the same reliable host-monotonic UUID with a known 1 ns tick period. Other
+readings remain original ticks/status without an inferred epoch mapping. A planned
+deadline is never substituted for actual receipt/intake; integer ns display does
+not claim nanosecond sensor precision. Multi-stream segment events do not acquire
+a fabricated common cadence. Playback-relative slider time remains unchanged.
+
+Indexed totals distinguish observation records, temperature planes (including
+all-invalid masked planes), absent measurements and gap events. These remain
+indexed/promised totals until the corresponding integrity scope has been verified.
+The selected event explicitly retains unavailable reasons and gap categories;
+unknown source-loss counts remain unknown. No gap/unavailable frame exposes stale
+temperatures or an interpolated matrix. Timing clears immediately on a new/failed
+load, and the fixed label cannot move the image as values change.
+
+The experimental Android
+[Analysis 5 Hz candidate](https://github.com/LounaMaili/LMThermal/blob/codex/r4-analysis-five-hz/docs/lmtr-r4/ANALYSIS_FIVE_HZ.md)
+uses optional producer closure evidence in addition to base v1 fields. The reader
+preserves that extension without promoting its reported counters to a new integrity
+guarantee. A complete producer ledger with missing END still has an unknown tail.
+This presentation change adds no wire/parser feature, legacy converter or product
+temporal export. The linked proposal describes a future source-hashed point/ROI
+sidecar with status/clock/slot evidence and empty readings across gaps, without
+interpolation. No R7 implementation is implied.
+
+Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
