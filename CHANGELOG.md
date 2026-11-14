@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Verified (Physical Android Analysis 5 Hz readback — 2026-11-14)
+- Verify one immutable real Android periodic Analysis file with the unchanged 26b1785 Linux reader: 54 exact Float32 planes, 216 native points, 216 sequential-binary64 ROI checks and automated Qt palette/range/resize/navigation/worker shutdown. Keep zero actual gaps separate from pinned gap regressions; publish only sanitized receipts, never real scene data.
+- Cross-link the Android finite physical result and limitations. This documentation-only follow-up changes no application/reader, thermometry, wire, canonical corpus or implementation branch, and does not establish operator preview, long-run memory, Full throughput or physical calibration acceptance.
+
 ### Changed (Periodic LMTR evidence presentation — 2026-11-14)
 - Show requested periodic cadence, original recorder intake, qualified receipt and scheduled slot/range without aligning unrelated clocks or inferring sensor precision. Preserve explicit gap categories and unavailable reasons, and distinguish indexed observation records from stored temperature planes and absent measurements.
 - Keep timing in a fixed-height operator label, clear it on new/failed loads, and add pure/offscreen regressions. Reader validation, masks, native matrices/coordinates, point/ROI arithmetic, timeline navigation, unknown-tail recovery and all 51 canonical fixtures remain unchanged. No recorder, converter, analysis-export UI, camera access or CI is added.

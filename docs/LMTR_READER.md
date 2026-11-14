@@ -201,3 +201,26 @@ sidecar with status/clock/slot evidence and empty readings across gaps, without
 interpolation. No R7 implementation is implied.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## First real Android periodic Analysis recording
+
+The [physical readback receipt](lmtr-analysis-five-hz-physical-validation.json) pins
+unchanged Desktop code `26b1785226b15dc17f977d36c2ca42eb79feeac7` and Android
+`d1b8c8917961a162270e58510c1eeb39baa94f04`. One real file contains 54 original
+Float32 planes with no missed/lost/unavailable selected measurements; all source
+hashes and 216 point/216 sequential-binary64 ROI checks agree. Automated Linux Qt
+checks include first open, palette/range independence, resize, ROI, temporal seeks,
+next/previous/play/pause, blank segment endpoints and normal worker shutdown.
+No source bytes or scene images are published or changed. Native/transport payloads
+are absent by explicit Analysis policy, not reconstructed from temperature data.
+
+The [authoritative Android result](https://github.com/LounaMaili/LMThermal/blob/codex/r4-analysis-five-hz-physical-report/docs/lmtr-r4/ANALYSIS_FIVE_HZ_PHYSICAL.md)
+distinguishes ten requested seconds from the actual 10.644 s Stop, 54 covered slots,
+210 intentional nonselections, cumulative producer evidence and sampled memory/GC.
+This was one finite selected-data/integrity pass with unchanged guards. The operator
+did not watch the Pixel preview, and Desktop interaction was automated offscreen.
+There are no actual gaps in this file; generic gaps remain separate pinned regressions.
+Neither indefinite recording, Full at 25 Hz nor absolute temperature accuracy follows.
+Only a separately reviewed/authorized 30-second proposal is prepared.
+
+Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
