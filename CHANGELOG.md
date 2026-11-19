@@ -4,6 +4,10 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (LMTR temporal analysis)
+- Plot a fixed native point or an inspection ROI mean over recorded intake time. Playback and chart selection share the original event indices. Gaps, unavailable temperatures and session/grid changes stay explicit.
+- Export a separate exact CSV with original nanosecond times, periodic and receipt evidence, mask-aware ROI statistics and blank readings for gaps or unavailable events. Recovered exports retain unknown-tail status.
+
 ### Changed (Periodic LMTR evidence presentation — 2026-11-14)
 - Show requested periodic cadence, original recorder intake, qualified receipt and scheduled slot/range without aligning unrelated clocks or inferring sensor precision. Preserve explicit gap categories and unavailable reasons, and distinguish indexed observation records from stored temperature planes and absent measurements.
 - Keep timing in a fixed-height operator label, clear it on new/failed loads, and add pure/offscreen regressions. Reader validation, masks, native matrices/coordinates, point/ROI arithmetic, timeline navigation, unknown-tail recovery and all 51 canonical fixtures remain unchanged. No recorder, converter, analysis-export UI, camera access or CI is added.

@@ -32,7 +32,7 @@ committed source corruption still reject. There is no salvage-to-success fallbac
 
 ## Bounds and UI
 
-One worker owns one descriptor and coalesced request/result slots. All index/file/hash/
+One worker owns the playback descriptor and coalesced request/result slots. All index/file/hash/
 decompression work runs there. A slider does not eagerly load duration-sized matrices
 or a timeline list. Timer requests wait for an in-flight request instead of endlessly
 superseding slow work. User scrubs can supersede pending work; obsolete results do not
@@ -63,6 +63,51 @@ Point/ROI use stored native geometry and validity; source/session/native-grid ch
 even when the old bounds would still fit. Gaps disable new image gestures. Source metadata stays separate from inspection edits. Palette,
 range and PNG change presentation only. PNG uses exclusive creation and protects the
 original file; it is not an archive rewrite or physical power-loss guarantee.
+
+## Temperature over time
+
+Open **Temperature over time** in the LMTR tab. Click one image pixel and choose
+**Plot point**, or drag a rectangle and choose **Plot ROI mean**. The native
+coordinates remain fixed until you plot a new selection. Palette, display range
+and changes to the inspection rectangle leave the plotted series intact.
+
+Dots show stored point values or valid-pixel ROI means. Separate marks on the time
+axis identify recorded gaps, unavailable measurements and segment boundaries.
+The chart never interpolates readings. The cursor follows the player, and clicking
+near a mark pauses and seeks to its original event. Use Previous/Next or the event
+slider to distinguish events that share an intake time.
+
+The worker pauses playback while it validates and visits every CHUNK, using a
+temporary read-only descriptor with a separate validator budget. Only one decoded
+CHUNK and a bounded set of scalar results are retained by the scan. The local
+limits are 50,000 file events and 8 MiB of event-reason text, plus the reader's
+existing validator and CHUNK budgets. A refusal leaves normal playback available
+if its current event can still be read. A failed or cancelled scan never publishes
+a partial series. The scan is separate from **Verify entire file / prefix**.
+
+**Export CSV…** creates a new UTF-8 file. Each row represents an actual event for
+the selected stream, or a segment boundary in which that stream participates.
+The selection uses native half-open bounds and belongs to its stream, session,
+module/model and grid. Observations from a different session or grid on the same
+stream are marked unavailable for that selection. No observations from other
+streams are substituted.
+
+- `timeline_ns` is the exact recorded intake time relative to the HEADER origin.
+  `elapsed_ns` is measured from the first file event and supplies the chart's
+  horizontal axis. Receipt ticks and their clock domain, periodic period, slots
+  and deadlines are separate evidence and keep their original integer precision.
+- `temperature_c` carries the exact Float32 point value or the deterministic
+  binary64 ROI mean in round-trip decimal form. ROI minima, maxima and valid
+  pixel counts follow the same mask-aware rules as the image inspector.
+- A gap carries its recorded category, reason and known or unknown count.
+  Unavailable observations, invalid selections and segment events have blank
+  temperature fields. A known selection with zero valid pixels has a valid
+  pixel count of zero. Blank readings never stand for 0 °C.
+- Explicit recovery marks `unknown_tail=true`; only the verified prefix is
+  exported. A finalized interrupted file retains its declared END status.
+  Neither an unknown count nor an unknown tail creates fictional events.
+
+Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
 
 ## Validation and Windows preparation
 

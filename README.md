@@ -105,6 +105,12 @@ recovery visibly retains unknown-tail status. Original metadata, native/transpor
 bytes, optional JSON precision and source files are preserved. PNG renderings save
 exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
 
+Open **Temperature over time**, then click a native pixel or drag an inspection
+rectangle on the image and choose **Plot point** or **Plot ROI mean**. The playback
+cursor follows the event being viewed. Click a sample or an event marker on the
+chart to seek to it. **Export CSV…** writes the same selection, including gaps and
+unavailable readings. See [temporal analysis and CSV semantics](docs/LMTR_READER.md#temperature-over-time).
+
 See [R5 architecture and limits](docs/LMTR_READER.md),
 including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
 [qualification gates](docs/LMTR_R5_QUALIFICATION.md),

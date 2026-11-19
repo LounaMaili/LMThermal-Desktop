@@ -272,6 +272,36 @@ class LmtrPlaybackModel:
         _, meta, _ = self._chunk(index)
         return meta['entries'][index-int(meta['entries'][0]['entry_id'])]
 
+    def _visit_entries(self, visit):
+        """Visit verified entries on the owning worker, with one CHUNK at a time.
+
+        The visitor may borrow descriptors and block bytes only for the call.
+        It must retain only derived values and must not navigate the model.
+        """
+        self._assert_source_unchanged()
+        self._cache = None
+        playback_reader = self.reader
+        # A scan has its own validation/reporting budgets. Visiting many CHUNKs
+        # must not consume ordinary playback's cumulative reporting budget.
+        with _DesktopReader(self.path, self.limits) as scan_reader:
+            scan_reader.cancellation = self.cancelled
+            self.reader = scan_reader
+            try:
+                index = 0
+                while index < self.entry_count:
+                    _, metadata, blocks = self._chunk(index)
+                    segments = {segment['id']: segment for segment in metadata['segments']}
+                    for entry in metadata['entries']:
+                        if self.cancelled():
+                            raise InterruptedError('LMTR analysis cancelled')
+                        visit(entry, segments[entry['segment_id']], blocks)
+                        index += 1
+                    del metadata, blocks, segments, entry
+                self._assert_source_unchanged()
+            finally:
+                self._cache = None
+                self.reader = playback_reader
+
     def original_entry(self, index):
         """Owned semantic metadata: callers cannot alter validated cached descriptors."""
         return deepcopy(self._entry_view(index))
