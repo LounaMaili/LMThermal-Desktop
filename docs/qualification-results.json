@@ -1,0 +1,104 @@
+{
+  "source_base": "8f167244de86fcb3efc79c9abd9c9e92567c8a33",
+  "scope": "R5 camera-free local Linux qualification",
+  "linux_tests": {
+    "tests": 227,
+    "passed": 227,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "new_actions_runs": 0,
+  "device_access": false,
+  "new_native_windows": "pending; old run43241547022 validates only pinned older runtime4c73e9f",
+  "native_linux_window": "unavailable: xcb display connection failed before window creation",
+  "offscreen_ui": {
+    "new_regressions": 9,
+    "original_lmtr_ui": 5,
+    "own_window_render_inspected": true,
+    "operator_acceptance": false
+  },
+  "resource_probes": [
+    {
+      "status": "passed",
+      "kind": "grid",
+      "readings": {
+        "geometry": [
+          2048,
+          2048
+        ],
+        "float32_bytes": 16777216,
+        "constant_c": 25
+      },
+      "source_bytes": 89835,
+      "allocated_bytes": 90112,
+      "cache_bytes": 16777216,
+      "cache_size": 1,
+      "navigation_cache_bytes": 2838,
+      "validated_records": 5,
+      "file_integrity_scope": "opened_records",
+      "selected_chunk_integrity": "fully_verified",
+      "elapsed_s": 2.320942840000498,
+      "peak_process_rss_kib": 88308,
+      "source_stat_unchanged": true,
+      "limits": "Single synthetic sample; not a total-RSS cap or whole sparse-source hash"
+    },
+    {
+      "status": "passed",
+      "kind": "sparse",
+      "readings": {
+        "target_entry": 71,
+        "target_chunk_offset": "4404298782",
+        "exact_zero_bytes": 16
+      },
+      "source_bytes": 4404323163,
+      "allocated_bytes": 593920,
+      "cache_bytes": 16,
+      "cache_size": 1,
+      "navigation_cache_bytes": 21644,
+      "validated_records": 6,
+      "file_integrity_scope": "opened_records",
+      "selected_chunk_integrity": "fully_verified",
+      "elapsed_s": 0.04564375700101664,
+      "peak_process_rss_kib": 66080,
+      "source_stat_unchanged": true,
+      "limits": "Single synthetic sample; not a total-RSS cap or whole sparse-source hash"
+    }
+  ],
+  "existing_synthetic_art_readback": [
+    {
+      "codec": "full-0",
+      "retained": 81,
+      "known_missing": 119,
+      "source_sha256": "a64e28870c06fa550e7b98ac9dd107b9b9db27353e698899b296f9c212101e3a",
+      "exact_payloads": true,
+      "full_grid_ROI_parity": true,
+      "source_unchanged": true,
+      "scope": "existing synthetic ART evidence, not a new ART or physical test"
+    },
+    {
+      "codec": "full-1",
+      "retained": 74,
+      "known_missing": 126,
+      "source_sha256": "2dbb702013b0787d3f44848c3f0d95a1d2b9818644cbefcf37461a9b48173f81",
+      "exact_payloads": true,
+      "full_grid_ROI_parity": true,
+      "source_unchanged": true,
+      "scope": "existing synthetic ART evidence, not a new ART or physical test"
+    }
+  ],
+  "corpus_members": 51,
+  "corpus_unchanged": true,
+  "vendored_algorithms_unchanged": true,
+  "warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated.",
+  "source_sha256": {
+    "lmtr_reader.py": "17f6e2289786927bc87180d6c24e63ed95eb5a5b43370cceca565fbf69cbcb08",
+    "lmtr_viewer.py": "165e2eddc4c4b5b921254e4081d0e82faf68c54c44fb6384ab40b91459ce4ea0",
+    "lmtr_reference/PROVENANCE.json": "d977b6e30a707cfd88766d145791be5f383a56374e397b79931823866deb846b",
+    "tests/test_lmtr_ui.py": "bec787c757e3c6f419da3aea212301d4668f7f43f1fce9650d2c15ebcfdcd4b6",
+    "tests/test_lmtr_hardening_reader.py": "bf126bea8f23d50063c456fd319b31a2b11a2d5df2fd228e0f0bff34a00a8ceb",
+    "tests/test_lmtr_hardening_ui.py": "277bd5ac7b919d9a93a61f8cf76a906f08df95ea05702e81c625c6b4e130ef64",
+    "tests/lmtr_test_support.py": "87b09211c1de24bc6e27e8803b95b1e8e749c4a2dd6457d6c43858c15bb38155",
+    "tools/qualify_lmtr_resources.py": "d107f719937f991ef783de6c0e5ee58614b6dbec28e1d5b390841184123b8690"
+  }
+}

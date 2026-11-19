@@ -1,0 +1,37 @@
+{
+  "status": "passed_linux_offscreen",
+  "date": "2026-11-14",
+  "branch": "codex/desktop-periodic-recording-evidence",
+  "base_commit": "dd1c1ff4d76fef4a7cf4ed90dd76354b2ed8ca86",
+  "source_files_sha256": {
+    "lmtr_reader.py": "921d10a5602d83a543061725c6e0f2ae767c1ded4c4046bd16f9ad749199ec97",
+    "lmtr_viewer.py": "b362138089f3187e977c0d21d2158b435aedcb8bd0f04c9557bb0f6083df5bdb",
+    "tests/test_lmtr_periodic_evidence.py": "93fde8fbef4a85eb6f5df5b26d8d00f493aaa15f6f7ce9ff71886c9ff6108008"
+  },
+  "full_tests": 272,
+  "new_timing_tests": 8,
+  "runtime": {
+    "python": "3.15.2",
+    "qt": "6.12.0",
+    "numpy": "2.5.4",
+    "opencv": "5.0.0"
+  },
+  "environment_note": "Existing project packaging virtual environment used; sibling legacy .venv is incompatible with the host Python upgrade and was not modified",
+  "android_candidate_base": "42294567307884b5e27c79077fab2acaad8d50db",
+  "android_source_fingerprint_sha256": "4d9f8fd780f448611e1205d749b6fbb2f5157cad583a805aab85b06a70e91541",
+  "synthetic_cases_verified_by_python_and_desktop": 24,
+  "selected_entry_point_roi_matrix_parity": true,
+  "existing_desktop_before_presentation_changes_also_verified_24_cases": true,
+  "actual_intake_and_qualified_receipt_distinct_from_schedule": true,
+  "timing_label_fixed_height": true,
+  "unchanged": [
+    "pinned LMTR reference validator",
+    "native matrices/masks and point/ROI arithmetic",
+    "canonical fixtures",
+    "legacy parsers and camera/thermometry paths"
+  ],
+  "source_immutability": true,
+  "no_operator_hardware_or_ci_test": true,
+  "future_point_roi_temporal_export": "Proposal only; no interpolation, new wire schema, R7 or product export implementation",
+  "warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated."
+}

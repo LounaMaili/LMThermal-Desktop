@@ -1,0 +1,55 @@
+name: LMTR R5 native Windows regression
+'on':
+  push:
+    branches: [codex/lmtr-r5-offline-reader]
+permissions:
+  contents: read
+concurrency:
+  group: lmtr-r5-windows-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline-windows:
+    if: github.repository == 'LounaMaili/LMThermal-Desktop' && github.ref == 'refs/heads/codex/lmtr-r5-offline-reader'
+    runs-on: windows-2022
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - name: Source and runtime receipt
+        env:
+          LMTR_R5_REPORTS: ${{ runner.temp }}/lmtr-r5-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          New-Item -ItemType Directory -Path $env:LMTR_R5_REPORTS | Out-Null
+          git rev-parse HEAD | Out-File -LiteralPath (Join-Path $env:LMTR_R5_REPORTS 'source.txt') -Encoding utf8
+          python --version 2>&1 | Out-File -LiteralPath (Join-Path $env:LMTR_R5_REPORTS 'python.txt') -Encoding utf8
+          python -m pip install -r requirements.txt 2>&1 | Tee-Object -FilePath (Join-Path $env:LMTR_R5_REPORTS 'dependencies.txt')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Complete hardware-independent suite on Windows
+        env:
+          LMTR_R5_REPORTS: ${{ runner.temp }}/lmtr-r5-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python -m unittest discover -s tests -v 2>&1 | Tee-Object -FilePath (Join-Path $env:LMTR_R5_REPORTS 'tests.txt')
+          $testExit = $LASTEXITCODE
+          git diff --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          exit $testExit
+      - name: Retain all available evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lmtr-r5-windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/lmtr-r5-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 30
+          if-no-files-found: error

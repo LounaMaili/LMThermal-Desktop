@@ -1,0 +1,149 @@
+{
+  "status": "finite_private_Linux_offline_candidate_qualified_Windows_pending",
+  "runtime_commit": "dfaf6ed9ac6433cdeabc4c52bf2f890c9e2f1e42",
+  "baseline": "582df7f407f1336d243390aab7fca880e095f653",
+  "test_counts": {
+    "Fedora_source": 264,
+    "Ubuntu_build_root": 264,
+    "skips": 0,
+    "canonical_files": 51,
+    "canonical_strict_recovery_comparisons": 102,
+    "source_exposed_cases_1000px": 11,
+    "frozen_offscreen_cases_1000px": 11,
+    "frozen_exposed_cases_1000px": 11,
+    "independent_runtime_comparisons": 102,
+    "independent_runtime_virtual_cases": 11
+  },
+  "native_provider_checks": {
+    "source-bounded-physical-gtk": {
+      "status": "passed",
+      "platform": "xcb",
+      "actions": [
+        {
+          "operation": "open",
+          "provider": "GTK3 native file chooser",
+          "activated_button": "Open",
+          "selection_matched": true,
+          "elapsed_s": 1.3518265909988258
+        },
+        {
+          "operation": "save",
+          "provider": "GTK3 native file chooser",
+          "activated_button": "Save",
+          "selection_matched": true,
+          "elapsed_s": 1.4855983759989613
+        }
+      ],
+      "source_sha256": "0ca64fc9a9a9507a241f20c1b358d176c476972603f088bd64cafcea9cb76a3f",
+      "source_unchanged": true,
+      "PNG_pixels_match": true,
+      "closed_normally": true
+    },
+    "frozen-bounded-physical-gtk": {
+      "status": "passed",
+      "platform": "xcb",
+      "actions": [
+        {
+          "operation": "open",
+          "provider": "GTK3 native file chooser",
+          "activated_button": "Open",
+          "selection_matched": true,
+          "elapsed_s": 1.2531405230001837
+        },
+        {
+          "operation": "save",
+          "provider": "GTK3 native file chooser",
+          "activated_button": "Save",
+          "selection_matched": true,
+          "elapsed_s": 1.5352596310003719
+        }
+      ],
+      "source_sha256": "0ca64fc9a9a9507a241f20c1b358d176c476972603f088bd64cafcea9cb76a3f",
+      "source_unchanged": true,
+      "PNG_pixels_match": true,
+      "closed_normally": true
+    },
+    "frozen-bounded-platform-default": {
+      "status": "passed",
+      "platform": "wayland",
+      "actions": [
+        {
+          "operation": "open",
+          "provider": "Qt fallback file chooser (not GTK/portal)",
+          "Qt_submitted": true,
+          "elapsed_s": 0.12710456399872783
+        },
+        {
+          "operation": "save",
+          "provider": "Qt fallback file chooser (not GTK/portal)",
+          "Qt_submitted": true,
+          "elapsed_s": 0.11454298600074253
+        }
+      ],
+      "source_sha256": "e456d9a34cc3ccdac3f64d6a5bd3d4a4dcf9a7e5764bd5df00e92f94d9031526",
+      "source_unchanged": true,
+      "PNG_pixels_match": true,
+      "closed_normally": true
+    }
+  },
+  "physical_file": {
+    "source_sha256": "0ca64fc9a9a9507a241f20c1b358d176c476972603f088bd64cafcea9cb76a3f",
+    "events": 107,
+    "observations": 45,
+    "gaps": 60,
+    "source_unchanged": true,
+    "all_original_roles": true,
+    "point_ROI_palettes": true,
+    "play_pause_seek": true,
+    "rapid_replacement": true,
+    "three_document_tabs": true,
+    "pending_close": true
+  },
+  "physical_file_frozen_full": {
+    "status": "valid",
+    "scope": "full",
+    "END": "interrupted",
+    "source_unchanged": true
+  },
+  "package": {
+    "archive_sha256": "c9276a4195c6c84590bf550f1072fc7e5f6341fffcf7e3e89b2c789153242ca5",
+    "archive_bytes": 146054069,
+    "verified_members": 535,
+    "ELF_files": 203,
+    "highest_GLIBC_requirement": "2.35",
+    "Qt_plugins": 44,
+    "Qt_plugins_unchanged": true,
+    "no_external_Python": true,
+    "controlled_copy_retraction": "known files removed; added/external sentinels preserved; installed candidate retained",
+    "public_release": false
+  },
+  "Windows": {
+    "native_execution": false,
+    "hashed_wheels_checked": 13,
+    "exact_handoff": "docs/WINDOWS_OFFLINE_HANDOFF.md",
+    "pending": [
+      "native Windows 11 tests/PE/runtime",
+      "real Open/Save UI/DPI",
+      "user installer and uninstall",
+      "signing/legal release decisions"
+    ]
+  },
+  "negative_evidence": [
+    "old repository venv no longer imports Qt after system Python minor upgrade; qualification venv used without resetting old environment",
+    "initial own-window cleanup assertion accessed an already-deleted Qt wrapper; product closed, diagnostic error retained",
+    "first exploratory GTK driver used the wrong response; later tests activate the actual Open/Save buttons",
+    "v2 GTK check remained in Open; exact offline test process terminated, result nonconclusive; no sole cause established",
+    "diagnostic now waits for selected path/sensitive button, pumps until return and bounds visible-dialog time; withheld-activation negative regression refused in 12.135s, not provider acceptance",
+    "older bundled GTK/fontconfig warnings on Fedora remain in raw logs; no host configuration changed"
+  ],
+  "private_evidence_id": "2026-11-13-desktop-r4-software",
+  "camera_opened": false,
+  "ADB_used": false,
+  "new_ART_runs": 0,
+  "Actions_triggered": 0,
+  "scientific_reader_or_source_coordinates_changed": false,
+  "canonical_bytes_regenerated": false,
+  "operator_acceptance": false,
+  "platform_limits": "Fedora45 Wayland/XWayland; Ubuntu22.04 userland GLIBC2.35 with shared host kernel and virtual X; not all distros or native Windows",
+  "warning": "Native-equivalent temperatures; absolute physical accuracy not yet independently validated."
+}

@@ -4,6 +4,83 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (LMTR temporal analysis)
+- Plot a fixed native point or an inspection ROI mean over recorded intake time. Playback and chart selection share the original event indices. Gaps, unavailable temperatures and session/grid changes stay explicit.
+- Export a separate exact CSV with original nanosecond times, periodic and receipt evidence, mask-aware ROI statistics and blank readings for gaps or unavailable events. Recovered exports retain unknown-tail status.
+
+### Changed (Periodic LMTR evidence presentation — 2026-11-14)
+- Show requested periodic cadence, original recorder intake, qualified receipt and scheduled slot/range without aligning unrelated clocks or inferring sensor precision. Preserve explicit gap categories and unavailable reasons, and distinguish indexed observation records from stored temperature planes and absent measurements.
+- Keep timing in a fixed-height operator label, clear it on new/failed loads, and add pure/offscreen regressions. Reader validation, masks, native matrices/coordinates, point/ROI arithmetic, timeline navigation, unknown-tail recovery and all 51 canonical fixtures remain unchanged. No recorder, converter, analysis-export UI, camera access or CI is added.
+
+### Changed (Offline usability and native-provider qualification — 2026-11-13)
+- Qualify final runtime `dfaf6ed` with 264 source/build-root tests, unchanged51-file/102-outcome frozen parity, eleven exposed1,000-pixel cases and a separate no-Python Ubuntu runtime. Verify actual source/frozen GTK3 Open/Save and default Wayland Qt dialogs, all45 real observations/60 gaps and exact PNG/source identity; preserve the nonconclusive wait and diagnostic deadline regression. Retain GLIBC2.35, all44 plugins,535 manifest members and a new private install; Windows remains unexecuted with an exact-SHA handoff.
+- Bound the actual-dialog diagnostic even while GTK remains visible: wait for the selected path and enabled native button, keep event pumping after one activation and preserve progress/failure receipts. Retain the final-candidate GTK wait as nonconclusive; ordinary loading/PNG logic and scientific data are unchanged.
+- Compact saved-document source captions so module/provenance dictionaries no longer push temperatures below the sidebar; retain original metadata, physical-accuracy and palette-fallback disclosure. Require exactly 1,000 pixels in the graphical campaign and add a still/legacy layout regression; preserve the earlier 1,020-pixel screenshots as historical evidence.
+- Bind rootless frozen-window fixture paths to the exact cloned source checkout, rather than a stale `/source` directory left in a reused dependency root. Retain historical results separately; no fixture bytes or validator changes.
+- Keep LMTR Open/recovery/PNG together, expose diagnostics on demand, label indexed observations/gaps/losses and retain exact integrity scope. Disable manual bounds in Auto and stabilize compact native ROI readouts without changing stored values, coordinates, source bytes or reader behavior.
+- Hide live-only actions in saved workspace tabs while preserving the explicit Live tab and existing ownership/finalization rules. Add layout/action regressions and an opt-in actual GTK3/Qt-selector Open/PNG check for source/frozen Linux; distinguish provider interaction from the older chooser-substituting campaign and from manual acceptance. No camera, CI, release or format change.
+
+### Validated (Second physical R4 readback — 2026-11-13)
+- Verify the unchanged Linux runtime against all 45 saved Full observations and 60 represented losses from the corrected Android short smoke: exact original-owner Float32/native/transport parity, all 107 events and exact seeks, points/ROI/palettes/ranges/PNG and source immutability. Preserve the 4.309s RSS safety interruption as failed duration/loss-free recording acceptance; no reader/code, wire, corpus or hardware behavior changes.
+
+### Fixed (LMTR initial observation — 2026-11-13)
+- Qualify the exact corrective runtime with 260 source/build-root tests, 102 unchanged-corpus comparisons, eleven frozen offline cases and three normal installed native opens. Verify one real interrupted Android Full observation through independent original-owner hashes, native points/ROI/palettes/PNG/navigation and unchanged source; preserve the failed ten-second field attempt and do not claim multi-frame or sustained recording acceptance.
+- Reproduce the empty initial screen in the installed Linux candidate: canonical examples start with a segment declaration, not pixels. Open the first observation in that same validated initial CHUNK without forcing Next, scanning the whole recording or discarding earlier events. Reader default timeline order, gap/unavailable semantics and one-CHUNK limits remain unchanged.
+- Remove the diagnostic campaign's forced seek that concealed the normal-open issue; regress automatic publication for both the masked 3×2 and uniform 384×288 examples, plus control-only/unavailable observation selection and explicit Previous-to-segment clearing. Canonical files and the pinned reference validator remain unchanged.
+
+### Added (Phase 6 distribution qualification — 2026-11-13)
+- Prepare an exact-source rootless Ubuntu 22.04/GLIBC2.35 build, pinned CPython/wheel/Debian receipts, and independent old-userland/runtime and native Fedora gates without replacing libc or removing Qt plugins.
+- Audit every delivered file and required ELF GLIBC/GLIBCXX/CXXABI version, needed library and search path; refuse omitted files/missing readelf, distinguish provided from needed versions, and map actual native COLLECT members to wheel/Debian/CPython origins with matching Debian notices and explicit unknowns.
+- Resolve native source symlink/merged-usr paths before declaring Debian ownership unknown; retain the first candidate's original inventory and build a separately identified corrected-notice candidate.
+- Correct the new provenance test double to preserve Path hashability; retain the failed 257-test checkpoint rather than mislabeling it as a product/runtime failure.
+- Check the diagnostic cursor probe synchronously before unrelated native input can arrive; retain both the immediate and later pointers. Preserve the first frozen native 10/11 result and add a deterministic queued-input regression; no measurement coordinate or application interaction mapping changes.
+- Add exact-source native Windows qualification and fixture-derived legacy-input tools, thirteen hashed Windows wheel inputs, and a reproducible user-installer/manual acceptance recipe. Preparation/downloads are not native Windows validation, legal acceptance or a public release.
+- Keep the Debian alias regression's path expectation platform-neutral and avoid embedded native-command quotes in the Windows PowerShell version guard. These handoff-only changes do not alter the Linux artifact's runtime or claim Windows execution.
+- Record the final GLIBC2.35/535-member private candidate with all44 Qt plugins retained, zero unknown native origins, 258 host/build-root tests, 102 canonical outcomes per environment, clean no-Python Ubuntu runtime and exposed XWayland/Wayland window campaigns. Preserve prior failures and leave normal-picker/operator, broader-distro, Windows, licensing/signing and public-release gates open.
+
+### Fixed (Phase 5 Desktop qualification — 2026-11-13)
+- Keep a refused legacy finalization retryable and abort application Close without discarding its owner or weakening recorder safety. Split LMTR controls into laptop-width rows while retaining source/native-coordinate/reader behavior.
+- Add opt-in camera-free source/frozen window qualification with strict native exposure, metadata/ROI/palette/PNG/timeline/source-hash/Close checks; record the current locked-session boundary instead of claiming operator/native visual acceptance.
+- Verify both Python 3.15/3.13 candidates with 249 tests, eleven frozen offline UI cases and 102 unchanged-corpus comparisons each. Retain the negative portability result: GTK/tinysparql/SQLite keeps GLIBC 2.44 despite a standalone interpreter. Native visual tests remain blocked by the locked desktop, without an unlock attempt.
+- Require Python's actual runtime notice, refuse in-checkout build output and detected source changes, and add independent byte/link/ELF ABI audits. Keep physical, clean-distro, licensing, native Windows and release gates explicit.
+
+
+### Added (Private packaging preparation — 2026-11-12)
+- Add a native one-directory PyInstaller recipe with explicit schema data, pinned isolated Qt6/headless-OpenCV environment, dependency notice inventory, SHA-256 manifest and runtime self-check. Linux portable directory is a private host prototype, not a distribution certification.
+- Prepare native Windows build and non-admin Inno Setup templates, Windows/Codex setup, AppImage/Flatpak tradeoffs and explicit license/signing/runtime gates. No installer, device, hosted CI or public release is implied.
+
+
+### Added (Desktop product workspace — 2026-11-12)
+- Added a Home/document shell for Linux live acquisition and camera-free LMTX, LMTR and historical analysis, reusing existing engines and native coordinates. Camera connection remains explicit; common LMTR recording is not enabled.
+- Bound open documents to four, retain workers through cooperative asynchronous Close, reject queued live publication during Close, and expose per-user rotating local diagnostics without automatic upload.
+- Cover format routing, exact source preservation, reader ownership, responsive pending Close, runtime/schema self-check and logging fallback. Native graphical/Windows runtime qualification remains separate from Linux offscreen tests.
+
+
+### Fixed (R5 integration review — 2026-11-12)
+- Refuse inconsistent standardized RGB/RGBA/gray descriptors on the worker before conversion/Qt rendering; keep accepted R3 algorithms and canonical bytes unchanged.
+- Cancel obsolete cooperative source work when a newer Open generation supersedes it; preserve bounded slots and asynchronous Close. Cover equal-size/mtime path replacement and worker-error recovery.
+- Record232 passing Linux tests, unavailable native display, and a non-executed fast-forward/Windows/operator integration proposal for PR4. No PR mutation, merge, hosted CI or device access.
+
+### Fixed (R5 ownership and resource qualification — 2026-11-12)
+- Prevent old-file navigation from superseding a pending Open; clear readings on error/gaps/source changes, reset ROI/pointer across sessions and make cooperative Close asynchronous without retaining pending results.
+- Freeze immutable PNG inputs before the destination dialog; keep Auto independent of invalid manual bounds and report invalid Locked edits. Preserve differently sized native planes without inventing primary-pixel correspondence.
+- Add predecode local body/cache/working-budget refusals, owned metadata copies, opaque no-grid evidence access and prompt descriptor/cache cleanup without validator/wire changes.
+- Qualify Linux with the unchanged51-case corpus, deterministic UI/ownership/resource regressions, a4M-pixel plane and sparse>4GiB indexed access. Publish explicit current Windows/native-window/operator gates; prior Windows evidence is historical only.
+
+### Validated (R5 camera-free Linux / native Windows — 2026-11-12)
+- Linux passes207 tests with no skips. Windows run43241547022 passes196/200 with four expected Linux-only skips, preserving all51 canonical outcomes and legacy readers. Retain the preceding Windows cleanup failure separately.
+- Independently verify155 retained synthetic ART R4 measurements in the R5 adapter, with exact Float32/native/transport oracle hashes, full-grid ROI parity and unchanged sources. All245 missing observations remain explicit gaps; physical Android LMTR interoperability and operator acceptance remain pending.
+
+
+### Fixed (R5 native Windows test ownership — 2026-11-12)
+- Retained failed run43240927585: all LMTR corpus/adapter/UI checks passed, but one test removed its temporary directory before closing its model descriptor. Close the model in `finally` before directory cleanup and assert descriptor closure; application behavior and refusal checks are unchanged. The failed Windows run counted200 tests with one error and four Linux-only skips.
+
+### Added (LMTR R5 offline recording analysis — 2026-11-12)
+- Added a pinned independent R3 reader, all 51 unchanged canonical files, lazy indexed event/measurement access and one decoded-CHUNK cache. Open/selected/full integrity scopes remain explicit; incomplete recovery is opt-in with an unknown tail and never repairs sources.
+- Added a camera-free timeline window using existing immutable offline measurements, native cursor/ROI, palettes/ranges and exclusive separate PNG saving. Reader work stays on one coalesced worker, with cancellation, obsolete-result guards and no timer-induced loading starvation. Stored Float32/native/transport data never enter thermometry.
+- Preserve legacy still/LMTX/recording readers and source coordinates. Physical R4 interoperability and operator/Windows runtime acceptance remain separate gates.
+
+
 ### Fixed (Final Linux LMTX regression — 2026-10-06)
 - Corrected the Windows-added viewer import test's false positive on Linux/Python 3.14: `pathlib` legitimately imports the general-purpose standard-library `fcntl` module. The test continues to reject HT-301 acquisition modules and verifies camera-free LMTX opening without a camera worker.
 - The complete Linux suite passes 191 tests with no skips, including all LMTX, legacy capture/recording/playback, ROI/presentation/offline and Linux discovery/acquisition/sequence checks. Application code, thermometry and LMTX v1 semantics are unchanged; the correction remains on its dedicated review branch.

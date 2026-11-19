@@ -1382,9 +1382,16 @@ def main() -> None:
     offline.add_argument("--capture", type=Path, help="Open a saved capture without camera acquisition")
     offline.add_argument("--lmtx", type=Path, help="Open an LMTX still without camera acquisition")
     offline.add_argument("--recording", type=Path, help="Open a recording bundle without camera acquisition")
+    offline.add_argument("--lmtr", type=Path, help="Open a read-only LMTR recording without a camera")
+    parser.add_argument("--recover-lmtr", action="store_true", help="Explicit verified-prefix LMTR recovery")
     args = parser.parse_args()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    if args.lmtr is not None:
+        from lmtr_viewer import LmtrWindow
+        window = LmtrWindow(args.lmtr, recover=args.recover_lmtr)
+        window.show()
+        sys.exit(app.exec())
     window = MainWindow(auto_connect=args.capture is None and args.recording is None and args.lmtx is None)
     if args.capture is not None:
         window.open_capture(args.capture)

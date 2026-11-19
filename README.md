@@ -1,12 +1,48 @@
 # LMThermal-Desktop
 
-Experimental desktop tooling for the Infiray HT-301 / T3-317-13. The first
+The [offline usability/qualification follow-up](docs/OFFLINE_QUALIFICATION.md) keeps
+measurements prominent, exposes technical diagnostics on demand and separates actual
+native-provider checks from offscreen/widget tests. Windows qualification remains native-only.
+
+Desktop companion application for Linux and Windows, with a Linux acquisition backend for the Infiray HT-301 / T3-317-13. The first
 radiometric PyQt MVP now uses the evidence-gated native-equivalent measurement
 session. Absolute physical accuracy has not been independently validated.
 Historical `thermal_capture.py` calculations are not part of this viewer.
 
 This desktop repository is paired with [LMThermal](https://github.com/LounaMaili/LMThermal),
 which holds the hardware and reverse-engineering documentation.
+
+## Product workspace (development branch)
+
+```bash
+./.venv/bin/python lmthermal_desktop.py
+./.venv/bin/python lmthermal_desktop.py --open /path/to/recording.lmtr
+```
+
+Home routes live acquisition, LMTX/legacy stills, LMTR and historical recordings into
+owned document tabs. Starting the workspace or Live tab never opens USB; Connect and
+radiometric initialization remain explicit. Up to four documents reuse existing readers,
+measurements, ROI, palette, metadata and separate PNG tools. LMTR stays read-only.
+See [workspace behavior and qualification](docs/PRODUCT_WORKSPACE.md).
+
+## Distribution preparation
+
+See [private Linux prototype and Windows installer preparation](docs/PACKAGING.md)
+and [Windows development with Codex](docs/WINDOWS_DEVELOPMENT.md). No public release
+is available; native Windows qualification and licensing decisions remain pending.
+The [phase6 rootless old-Linux recipe](docs/LINUX_BASELINE.md) retains Qt plugins and
+pins the interpreter, base image and wheel bytes; runtime/ABI results are recorded
+separately from public-distribution acceptance.
+The [phase6 result and private-candidate handoff](docs/phase6/QUALIFICATION.md) records
+GLIBC2.35, retained Qt plugins, actual Ubuntu/Fedora runs and the remaining manual,
+Windows, licensing and distribution gates.
+
+## Phase 5 qualification
+
+See [current qualification, fixes and deferred gates](docs/phase5/QUALIFICATION.md).
+The session may accept X11 connections while locked; native window exposure is an
+explicit check, separate from offscreen tests and operator validation. No hardware
+or native Windows acceptance is implied by source/package checks.
 
 ## Requirements
 
@@ -42,6 +78,45 @@ live camera acquisition remains Linux-only.
 See [LMTX import architecture and validation](docs/LMTX_IMPORT.md)
 for the canonical specification, resource limits, interoperability evidence,
 Windows commands and legacy-format coexistence.
+
+## Camera-free LMTR recording analysis (R5 development)
+
+```bash
+./.venv/bin/python lmthermal_viewer.py --lmtr /path/to/recording.lmtr
+# Explicit incomplete-file recovery; never repairs or rewrites the source:
+./.venv/bin/python lmthermal_viewer.py --lmtr /path/to/incomplete.lmtr --recover-lmtr
+# The same offline window can be launched without an initial file:
+./.venv/bin/python lmtr_viewer.py
+```
+
+This separate offline window reuses the native-grid image, cursor, ROI, palettes and
+Celsius legend. Navigate events with the slider/Previous/Next, seek recorder-intake
+time, or play at 0.5/1/2/4×. Gaps and segment events are blank with no readings.
+Stored Float32 values are authoritative; no thermometry is recomputed. Only one
+decoded CHUNK is cached. File navigation is asynchronous and latest-request bounded.
+See the [normal-open correction and real interrupted readback](docs/LMTR_INITIAL_OPEN.md) for exact runtime/artifact hashes and current qualification limits.
+
+Opening lands on the first observation in the initial CHUNK; Previous/seek retain
+the original blank segment/gap events. The canonical 384×288 example is uniformly
+25°C, not a photographic thermal scene.
+**Verify entire file / prefix** requests independent full validation; normal open
+certifies opening/navigation and each visited CHUNK, not unseen payloads. Explicit
+recovery visibly retains unknown-tail status. Original metadata, native/transport
+bytes, optional JSON precision and source files are preserved. PNG renderings save
+exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
+
+Open **Temperature over time**, then click a native pixel or drag an inspection
+rectangle on the image and choose **Plot point** or **Plot ROI mean**. The playback
+cursor follows the event being viewed. Click a sample or an event marker on the
+chart to seek to it. **Export CSV…** writes the same selection, including gaps and
+unavailable readings. See [temporal analysis and CSV semantics](docs/LMTR_READER.md#temperature-over-time).
+
+See [R5 architecture and limits](docs/LMTR_READER.md),
+including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
+[qualification gates](docs/LMTR_R5_QUALIFICATION.md),
+[phase3 integration review](docs/LMTR_R5_INTEGRATION_REVIEW.md) and the camera-free
+[operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md). This is camera-free fixture/
+emulator evidence, not real Android R4→Desktop interoperability or physical accuracy.
 
 ## Radiometric desktop MVP
 

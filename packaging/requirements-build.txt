@@ -1,0 +1,15 @@
+# Matched numerical/runtime versions for the private Linux prototype.
+# Headless OpenCV retains palette/image APIs while Qt6 owns every window.
+numpy==2.5.4
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+PyQt6==6.12.0
+PyQt6-Qt6==6.12.0
+PyQt6_sip==13.13.1
+pyinstaller==6.22.3
+
+# Build-tool transitive inputs pinned for repeatable resolution (wheel hashes still a release gate).
+altgraph==0.17.5
+packaging==26.3
+pyinstaller-hooks-contrib==2026.10
+setuptools==84.2.1
