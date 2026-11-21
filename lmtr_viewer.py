@@ -52,6 +52,8 @@ class LmtrWorker(QThread):
         self.requested_generation = 0
         self.ready_generation = None
         self.close_error = None
+        self._analysis_request = None
+        self._analysis_cancel = threading.Event()
 
     def request(self, token, action, value=None, *, generation=0):
         """Return refusal without overwriting a newer source-opening transaction."""
@@ -64,6 +66,8 @@ class LmtrWorker(QThread):
             elif generation != self.requested_generation or self.ready_generation != generation:
                 return False
             self.result = None
+            if action in ('series', 'csv'):
+                self._analysis_cancel.clear()
             self.pending = token, generation, action, value
             self.condition.notify()
             return True
@@ -86,7 +90,48 @@ class LmtrWorker(QThread):
     def _cancelled(self, generation):
         """Source replacement cancels old work at the same reference-reader boundaries as Stop."""
         with self.condition:
-            return self.stopped.is_set() or generation != self.requested_generation
+            return (self.stopped.is_set() or generation != self.requested_generation or
+                    (self._analysis_request is not None and self._analysis_cancel.is_set()))
+
+    def cancel_analysis(self, token, generation):
+        """Cancel one active or queued operation, never a later scan or another source."""
+        with self.condition:
+            pending = self.pending
+            queued = pending is not None and pending[:2] == (token, generation) and pending[2] in ('series', 'csv')
+            if generation != self.requested_generation or not (queued or self._analysis_request == (token, generation)):
+                return False
+            self._analysis_cancel.set()
+            return True
+
+    def _analyse(self, model, token, generation, action, value):
+        """Scope cooperative cancellation to analysis, then restore normal playback.
+
+        The reader already unwinds a cancelled scan and restores its descriptor.
+        Clear the analysis flag before re-reading the selected playback frame, so
+        a user cancellation cannot accidentally close the otherwise valid source.
+        """
+        with self.condition:
+            self._analysis_request = token, generation
+        model.pause()
+        try:
+            if action == 'series':
+                series = collect_comparison(model, value)
+                if model.cancelled():
+                    raise InterruptedError('Analysis cancelled')
+                return series, None
+            model._assert_source_unchanged()
+            count = write_comparison_csv(value[0], value[1], difference=value[2], cancelled=model.cancelled)
+            return None, f'CSV saved · {count:,} rows'
+        except InterruptedError:
+            if self.stopped.is_set() or generation != self.requested_generation:
+                raise
+            return None, 'Analysis cancelled' if action == 'series' else 'CSV cancelled'
+        except (ContractError, OSError, ValueError) as error:
+            return None, ('Analysis refused: ' if action == 'series' else 'CSV refused: ') + str(error)[:2048]
+        finally:
+            with self.condition:
+                self._analysis_request = None
+                self._analysis_cancel.clear()
 
     def _close(self, model):
         """Retain a bounded cleanup diagnostic, never an exception/payload graph."""
@@ -127,22 +172,9 @@ class LmtrWorker(QThread):
                     elif action == 'toggle': model.pause() if model.playing else model.play()
                     elif action == 'tick': model.advance()
                     elif action == 'speed': model.set_speed(value)
-                    elif action == 'series':
-                        model.pause()
-                        try:
-                            series = collect_comparison(model, value)
-                        except (ContractError, OSError, ValueError) as error:
-                            temporal_message = 'Analysis refused: ' + str(error)[:2048]
-                    elif action == 'csv':
-                        model.pause()
-                        try:
-                            model._assert_source_unchanged()
-                            count = write_comparison_csv(value[0], value[1], difference=value[2], cancelled=model.cancelled)
-                            temporal_message = f'CSV saved · {count:,} rows'
-                        except (OSError, ValueError) as error:
-                            temporal_message = 'CSV refused: ' + str(error)[:2048]
-                        finally:
-                            value = None  # The viewer owns the only persistent series reference.
+                    elif action in ('series', 'csv'):
+                        series, temporal_message = self._analyse(model, token, generation, action, value)
+                        value = None  # The viewer owns persistent scalar results.
                     if model.cancelled():
                         raise InterruptedError('LMTR load cancelled')
                     frame = model.frame()
@@ -187,6 +219,7 @@ class LmtrWindow(QMainWindow):
         self._space_key = None
         self._closing = False
         root = QWidget(); self.setCentralWidget(root); layout = QVBoxLayout(root)
+        layout.setSpacing(3)
         row = QHBoxLayout(); layout.addLayout(row)
         self.open_button = QPushButton('Open .lmtr'); row.addWidget(self.open_button)
         self.recover = QCheckBox('Recover incomplete file'); self.recover.setChecked(recover); row.addWidget(self.recover)
@@ -211,13 +244,19 @@ class LmtrWindow(QMainWindow):
         self.timing_status.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Fixed)
         self.timing_status.setFixedHeight(self.timing_status.fontMetrics().lineSpacing()*3+4)
         layout.addWidget(self.timing_status)
-        views = QSplitter(Qt.Orientation.Horizontal)
+        views = QSplitter(Qt.Orientation.Vertical)
+        inspection = QSplitter(Qt.Orientation.Horizontal)
+        inspection.setChildrenCollapsible(False)
+        views.addWidget(inspection)
         views.setChildrenCollapsible(False)
         layout.addWidget(views, 1)
         image_panel = QWidget()
         images = QHBoxLayout(image_panel); images.setContentsMargins(0, 0, 0, 0)
-        views.addWidget(image_panel)
+        inspection.addWidget(image_panel)
         self.image = ThermalImageWidget(); images.addWidget(self.image, 1)
+        # Native matrices keep their dimensions; only the offline viewport may
+        # shrink so the image and temporal axes fit simultaneously on a laptop.
+        self.image.setMinimumSize(260, 100)
         self.legend = CelsiusLegend(); images.addWidget(self.legend)
         self.temporal_panel = self._build_temporal_panel()
         # Four editable selections must not force a taller window than a laptop
@@ -227,10 +266,15 @@ class LmtrWindow(QMainWindow):
         self.temporal_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         self.temporal_scroll.setMinimumWidth(360)
         self.temporal_scroll.setWidget(self.temporal_panel)
-        views.addWidget(self.temporal_scroll)
+        inspection.addWidget(self.temporal_scroll)
+        inspection.setStretchFactor(0, 1); inspection.setStretchFactor(1, 1)
+        views.addWidget(self.temporal_panel.plot_panel)
         views.setStretchFactor(0, 1); views.setStretchFactor(1, 1)
+        self.temporal_panel.plot_panel.hide()
         self.temporal_scroll.hide()
         self.temporal_button.toggled.connect(self.temporal_scroll.setVisible)
+        self.temporal_button.toggled.connect(self.temporal_panel.plot_panel.setVisible)
+        self.temporal_button.toggled.connect(lambda visible: views.setSizes([300, 220]) if visible else None)
         self.slider = QSlider(Qt.Orientation.Horizontal); layout.addWidget(self.slider)
         controls = QHBoxLayout(); layout.addLayout(controls)
         self.previous = QPushButton('Previous'); self.play = QPushButton('Play'); self.next = QPushButton('Next')
@@ -359,6 +403,7 @@ class LmtrWindow(QMainWindow):
             self.temporal_panel.set_result(series)
         if message is not None:
             self.temporal_message.setText(message)
+            self.temporal_message.setToolTip(message)
         elif series is not None:
             self.temporal_message.clear()
         self._update_temporal_cursor()
@@ -433,12 +478,14 @@ class LmtrWindow(QMainWindow):
         panel.add_roi.connect(lambda: self._plot('roi'))
         panel.calculate.connect(self._calculate_temporal)
         panel.export.connect(self._export_temporal)
+        panel.cancel.connect(self._cancel_temporal)
         return panel
 
     def _sync_temporal_controls(self, idle):
         roi = self.image.roi
         usable = idle and self.frame is not None and self.image.isEnabled() and roi is not None
         self.temporal_panel.set_ready(idle, usable, roi is not None and roi.pixel_count == 1)
+        self.temporal_panel.set_busy(self._in_flight and self._pending_action in ('series', 'csv'))
 
     def _reset_temporal(self):
         self.temporal_panel.reset()
@@ -454,6 +501,12 @@ class LmtrWindow(QMainWindow):
         if self._request('series', selections, clear=False):
             self.timer.stop()
             self.temporal_message.setText('Calculating…')
+
+    def _cancel_temporal(self):
+        """Cancel only this active analysis/export; retain the open playback owner."""
+        if self.worker.cancel_analysis(self.token, self._generation):
+            self.temporal_message.setText('Cancelling…')
+            self.temporal_panel.cancel_button.setEnabled(False)
 
     def _update_temporal_cursor(self):
         timing = self.state['timing']

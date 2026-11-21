@@ -41,11 +41,16 @@ def check_lmtr_comparison(app, window, viewer, output, wait):
     expected = []
     for kind, region in specs:
         def where(x, y):
-            return QPoint(*map(round, native_to_widget(x, y, viewer.image.width(), viewer.image.height(), geometry=frame.geometry)))
-        QTest.mousePress(viewer.image, Qt.MouseButton.LeftButton, pos=where(region.x1, region.y1))
-        QTest.mouseRelease(viewer.image, Qt.MouseButton.LeftButton, pos=where(region.x2 - 1, region.y2 - 1))
+            return QPointF(*native_to_widget(x, y, viewer.image.width(), viewer.image.height(), geometry=frame.geometry))
+        # At less than 1:1 zoom, rounding to integer widget coordinates can leave
+        # an edge pixel or select its neighbour. Send the exact native-cell centre.
+        app.sendEvent(viewer.image, QMouseEvent(QEvent.Type.MouseButtonPress, where(region.x1, region.y1),
+                      Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier))
+        app.sendEvent(viewer.image, QMouseEvent(QEvent.Type.MouseButtonRelease, where(region.x2 - 1, region.y2 - 1),
+                      Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier))
         (panel.plot_point if kind == 'point' else panel.plot_roi).click()
         expected.append(frame.point(region.x1, region.y1) if kind == 'point' else frame.roi_statistics(region).mean_c)
+        app.processEvents()
     assert len(panel.selections) == 4 and not panel.plot_roi.isEnabled()
     started = time.monotonic()
     panel.compute.click()

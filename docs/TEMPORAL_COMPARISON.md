@@ -14,16 +14,21 @@ its source branch. All operations are offline and preserve the original LMTR.
    native bounds/session. IDs are never reused during the document's lifetime.
 4. ROI means are always available when the selection is visible. **min**/**max**
    add extrema from the same mask-aware statistics used by the image inspector.
-   Large dots represent points/means, smaller translucent dots minima and small
-   squares maxima. Display changes never alter stored values or re-read the file.
+   Dots represent points/means, downward triangles minima and upward triangles
+   maxima. Display changes never alter stored values or re-read the file.
 5. Enable **Δ** and choose left and right operands. The white trace is left minus
-   right in °C; ROI operands use means. Incompatible pairs show an explicit refusal.
+   right in °C, in a separate pane with its own temperature scale and the same time
+   axis; ROI operands use means. Incompatible pairs show an explicit refusal.
    Hiding an operand does not disable an independently requested difference.
 6. Click chart marks to pause/seek; Previous/Next/slider/Play move the shared cursor.
    Equal-time events remain separately accessible through Previous/Next. Gaps and
    unavailable events clear current values, never carrying forward the last reading.
-7. **CSV…** writes a new comparison file. Existing targets are refused. The panel
-   scrolls on short screens; the export control remains at the top.
+7. **CSV…** writes a new comparison file. Existing targets are refused. Selection
+   controls scroll on short screens; the full-width plot, legend and current values
+   remain below the image. Drag the horizontal divider to adjust their height.
+8. **Cancel** stops the current calculation or CSV export cooperatively. The source
+   and last complete result remain available; partial CSV output is removed. The
+   indeterminate progress indicator does not imply a measured completion percentage.
 
 Adding a selection invalidates the plotted result until **Calculate** completes.
 Removing one reuses the remaining data and disables a difference that referenced
@@ -133,3 +138,41 @@ No historical full campaign, physical camera, Android build, Actions run or rele
 was performed. PR #4 remains an independent draft at its original candidate.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## Linux functional acceptance tools
+
+The follow-up uses two existing **real** Android HT-301 recordings, opened read-only.
+The new `--analysis-check-output` diagnostic executes four selections, two ROI sizes,
+extrema, a compatible difference, Cancel/recalculate, hide/reactivate/rename/remove,
+chart seek/play/pause, unavailable-event clearing and 940×740 resizing. It opens and
+exports through the actual Qt fallback selectors using own-process Qt input events;
+it never replaces `QFileDialog.getOpenFileName` or `getSaveFileName`. Unsupported
+dialog providers fail explicitly. It records whether the platform exposes a native
+window, frozen-runtime status, GUI timer intervals, source hashes and screenshots.
+
+```sh
+LMThermal-Desktop --open /path/recording.lmtr \
+  --analysis-check-output /new/private/acceptance-directory
+python tools/verify_comparison_csv.py /path/recording.lmtr \
+  /new/private/acceptance-directory/comparison.csv --report /new/private/csv-check.json
+```
+
+Use a recording with at least two distinct valid pixels and enough observations for
+the real Cancel/playback exercise. This diagnostic is opt-in, never a startup test.
+The CSV verifier uses the pinned reference framing validator, then independently
+decodes original Float32 payloads with `struct` and recomputes means/extrema/deltas
+using sequential binary64 arithmetic. It checks exact integer times, stable IDs,
+event coverage and empty unavailable values, without Desktop measurement/playback
+or comparison imports. It is scoped to finalized supported materialized recordings;
+it does not certify recovery or physical temperature accuracy. Run it without `-O`.
+
+Focused follow-up suite (no historical campaign):
+
+```sh
+QT_QPA_PLATFORM=offscreen PYTHONPATH=tests python -m unittest \
+  test_lmtr_analysis_finish test_comparison_csv_verifier test_lmtr_comparison \
+  test_lmtr_temporal test_lmtr_hardening_ui test_window_check_cli test_window_check -v
+```
+
+Exposed-window automation is **not human operator acceptance**. A human's judgement
+of comfort during prolonged use remains separate from these repeatable actions.

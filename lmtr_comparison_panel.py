@@ -4,7 +4,7 @@ from dataclasses import replace
 from PyQt6.QtCore import Qt, pyqtSignal, QSignalBlocker
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-                            QCheckBox, QComboBox, QLineEdit, QColorDialog, QSizePolicy)
+                            QCheckBox, QComboBox, QLineEdit, QColorDialog, QSizePolicy, QProgressBar)
 
 from lmtr_comparison import Comparison, NamedSelection, MAX_SELECTIONS, CURVE_COLORS, difference_value
 from lmtr_temporal_chart import TemporalChart
@@ -16,6 +16,7 @@ class ComparisonPanel(QWidget):
     export = pyqtSignal()
     add_point = pyqtSignal()
     add_roi = pyqtSignal()
+    cancel = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -28,7 +29,7 @@ class ComparisonPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(4, 0, 0, 0)
         layout.setSpacing(4)
-        instruction = QLabel('Select a pixel or rectangle on the image. Add up to four, then Calculate.')
+        instruction = QLabel('Select a pixel or rectangle, add up to four, then Calculate.')
         instruction.setWordWrap(True)
         layout.addWidget(instruction)
         row = QHBoxLayout()
@@ -62,16 +63,34 @@ class ComparisonPanel(QWidget):
         layout.addWidget(self.difference_note)
         self.summary = self._label(1)
         layout.addWidget(self.summary)
+        # The viewer places this plot below the image/editor split. Only editors
+        # scroll on short screens; axes, legend and current readings stay together.
+        self.plot_panel = QWidget()
+        plot = QVBoxLayout(self.plot_panel)
+        plot.setContentsMargins(0, 0, 0, 0)
+        plot.setSpacing(2)
         self.chart = TemporalChart()
-        layout.addWidget(self.chart, 1)
-        legend = QLabel('● mean/point · small dot min · square max · white Δ\n'
-                        '│ orange gap · pink unavailable · gray segment')
+        plot.addWidget(self.chart, 1)
+        legend = QLabel('● point / ROI mean · ▽ min · △ max · white Δ (separate scale)     │ orange gap · pink unavailable · gray segment')
         legend.setWordWrap(True)
-        layout.addWidget(legend)
+        plot.addWidget(legend)
         self.reading = self._label(2)
-        layout.addWidget(self.reading)
-        self.message = self._label(1)
+        plot.addWidget(self.reading)
+        self.busy_row = QWidget()
+        busy = QHBoxLayout(self.busy_row)
+        busy.setContentsMargins(0, 0, 0, 0)
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 0)
+        self.progress.setTextVisible(False)
+        self.cancel_button = QPushButton('Cancel')
+        self.cancel_button.clicked.connect(self.cancel)
+        busy.addWidget(self.progress, 1)
+        busy.addWidget(self.cancel_button)
+        layout.insertWidget(2, self.busy_row)
+        self.busy_row.hide()
+        self.message = self._label(2)
         layout.addWidget(self.message)
+        layout.addStretch()
         self.plot_point.clicked.connect(self.add_point)
         self.plot_roi.clicked.connect(self.add_roi)
         self.compute.clicked.connect(lambda: self.calculate.emit(self.selections))
@@ -123,6 +142,11 @@ class ComparisonPanel(QWidget):
         self._idle, self._usable, self._single_pixel = idle, usable, single_pixel
         self._sync_controls()
 
+    def set_busy(self, busy):
+        """A cancellable scan/export does not prevent GUI repaint or window interaction."""
+        self.busy_row.setVisible(busy)
+        self.cancel_button.setEnabled(busy)
+
     def _sync_controls(self):
         room = len(self.selections) < MAX_SELECTIONS
         self.plot_point.setEnabled(bool(self._usable and room and self._single_pixel))
@@ -167,6 +191,7 @@ class ComparisonPanel(QWidget):
             self.item_widgets[item.id] = dict(visible=visible, color=color, name=name,
                                                minimum=minimum, maximum=maximum, remove=remove)
             visible.toggled.connect(lambda value, key=item.id: self._edit(key, visible=value))
+            name.textEdited.connect(lambda value, key=item.id: self._apply_name(key, value or key))
             name.editingFinished.connect(lambda key=item.id, field=name: self._rename(key, field))
             color.clicked.connect(lambda checked=False, key=item.id: self._choose_color(key))
             minimum.toggled.connect(lambda value, key=item.id: self._edit(key, show_min=value))
@@ -188,8 +213,21 @@ class ComparisonPanel(QWidget):
     def _rename(self, key, field):
         name = field.text().strip() or key
         field.setText(name)
-        self._edit(key, name=name)
+        self._apply_name(key, name)
+
+    def _apply_name(self, key, name):
+        """Commit visible typing immediately without rebuilding the expensive plot.
+
+        A later Add, export chooser or disabled editor can change focus before
+        editingFinished. The name shown to the user must already be authoritative.
+        Only labels change: scalar series and cached plot marks remain untouched.
+        """
+        self.selections = tuple(replace(s, name=name) if s.id == key else s for s in self.selections)
+        if self.comparison:
+            self.comparison = replace(self.comparison, selections=self.selections)
+            self.chart.comparison = self.comparison
         self._update_pair_choices()
+        self.set_cursor(*self._cursor)
 
     def _choose_color(self, key):
         item = next(s for s in self.selections if s.id == key)
@@ -253,10 +291,12 @@ class ComparisonPanel(QWidget):
             if row is None:
                 text = 'no stream event'
             elif row.temperature is not None:
-                text = f'{row.temperature:.9g} °C'
+                text = f'{row.temperature:.6g} °C'
+                if item.native.kind == 'roi':
+                    text += f' [min {row.reading.min_c:.6g}, max {row.reading.max_c:.6g}]'
             else:
                 text = row.status.replace('_', ' ') + (f' · {row.gap_category or row.reason}' if row.gap_category or row.reason else '')
-            texts.append(f'{item.id}: {text}')
+            texts.append(f'{item.id} {item.name}: {text}')
         pair = self.difference_pair()
         if pair:
             a, b = (self.comparison.by_id(key).at_event(index) for key in pair)

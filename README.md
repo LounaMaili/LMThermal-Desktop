@@ -112,7 +112,9 @@ selection in its legend row; ROI min/max are optional alongside the mean.
 Enable **Δ** and choose two compatible selections for left-minus-right readings.
 The playback cursor and chart navigation stay synchronized; no missing values are
 interpolated. **CSV…** exports all selections, the enabled difference and unavailable
-events with their original integer nanoseconds. See the
+events with their original integer nanoseconds. The full-width plot keeps temperature
+and difference scales separate; **Cancel** interrupts a calculation/export while
+keeping the document open. See the
 [comparison guide](docs/TEMPORAL_COMPARISON.md) and
 [temporal analysis semantics](docs/LMTR_READER.md#temperature-over-time).
 
