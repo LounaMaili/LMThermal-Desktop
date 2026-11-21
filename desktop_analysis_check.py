@@ -54,7 +54,7 @@ def choose_file(app, action, path, actions):
         raise RuntimeError(failures[0] if failures else 'No supported real file selector observed')
 
 
-def run(app, workspace, source, output):
+def run(app, workspace, source, output, *, include_range=False):
     """Collect four selections, inspect controls/navigation/cancel and export a real CSV."""
     source, output = Path(source).resolve(), Path(output).resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -200,6 +200,9 @@ def run(app, workspace, source, output):
         report['small_window'] = [workspace.width(), workspace.height()]
         snapshot('05-small-window.png')
         workspace.resize(1180, 900)
+        if include_range:
+            from desktop_range_check import check_range
+            check_range(app, workspace, viewer, output, report, wait, snapshot)
         choose_file(app, panel.save_csv.click, output / 'comparison.csv', report['actions'])
         wait(lambda: not viewer._in_flight, 'CSV export')
         assert 'CSV saved' in panel.message.text(), panel.message.text()

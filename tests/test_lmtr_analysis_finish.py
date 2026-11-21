@@ -148,3 +148,36 @@ class AnalysisFinishTests(unittest.TestCase):
             self.assertEqual(before, source.read_bytes())
             self.workspace.close()
             self.wait(lambda: not self.workspace._documents)
+
+    def test_range_changes_reuse_scalars_without_file_worker_or_seek_requests(self):
+        self.calculate()
+        stats = self.panel.range_panel
+        self.wait(lambda: stats.result is not None)
+        series = self.panel.comparison.series
+        instant = series[0].at_event(1).time_ns
+        with patch.object(self.viewer, '_request', wraps=self.viewer._request) as requests:
+            stats.set_bounds((instant, instant))
+            self.wait(lambda: stats.result is not None)
+            self.assertEqual(0, requests.call_count)
+        self.assertIs(series, self.panel.comparison.series)
+        self.assertEqual(1, self.viewer.state['index'])
+
+    def test_summary_csv_publishes_complete_snapshot_and_refuses_a_range_changed_in_the_chooser(self):
+        self.calculate()
+        stats = self.panel.range_panel
+        self.wait(lambda: stats.result is not None)
+        with TemporaryDirectory() as folder:
+            target = Path(folder)/'summary.csv'
+            with patch('lmtr_viewer.QFileDialog.getSaveFileName', return_value=(str(target), 'CSV')):
+                stats.save.click()
+                self.wait(lambda: not self.viewer._in_flight)
+            self.assertTrue(target.exists())
+            self.assertIn('Summary CSV saved', stats.message.text())
+            rejected = Path(folder)/'stale.csv'
+            def change_range(*args):
+                stats.full_period()
+                return str(rejected), 'CSV'
+            with patch('lmtr_viewer.QFileDialog.getSaveFileName', side_effect=change_range):
+                stats.save.click()
+            self.wait(lambda: stats.result is not None)
+            self.assertFalse(rejected.exists())

@@ -29,6 +29,10 @@ its source branch. All operations are offline and preserve the original LMTR.
 8. **Cancel** stops the current calculation or CSV export cooperatively. The source
    and last complete result remain available; partial CSV output is removed. The
    indeterminate progress indicator does not imply a measured completion percentage.
+9. **Select range** or Shift+drag creates inclusive A/B bounds on the chart.
+   The **Range statistics** tab summarizes the existing scalar series; **Full
+   period** restores the original extent. See [the range guide](TIME_RANGE_STATISTICS.md)
+   for exact arithmetic, observation/loss counts and the separate summary CSV.
 
 Adding a selection invalidates the plotted result until **Calculate** completes.
 Removing one reuses the remaining data and disables a difference that referenced

@@ -118,6 +118,14 @@ keeping the document open. See the
 [comparison guide](docs/TEMPORAL_COMPARISON.md) and
 [temporal analysis semantics](docs/LMTR_READER.md#temperature-over-time).
 
+For a selected-period summary, enable **Select range** and drag on the chart (or
+Shift+drag). Adjust **A/B**, use exact nanosecond fields or the current cursor, and
+inspect **Range statistics**. The table includes hidden selections and compatible
+Δ values; ROI statistics describe the recorded ROI means. **Full period** resets
+the bounds and **Summary CSV…** saves a separate exact export. The mean is the
+arithmetic mean of valid observations, without duration weighting or interpolation.
+See [range statistics, counts and validation](docs/TIME_RANGE_STATISTICS.md).
+
 See [R5 architecture and limits](docs/LMTR_READER.md),
 including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
 [qualification gates](docs/LMTR_R5_QUALIFICATION.md),

@@ -8,7 +8,7 @@ import threading
 from PyQt6.QtCore import QThread, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QHBoxLayout, QLabel, QPushButton, QSlider, QComboBox, QDoubleSpinBox,
-    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton, QSizePolicy, QSplitter, QScrollArea)
+    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton, QSizePolicy, QSplitter, QScrollArea, QTabWidget)
 from PyQt6.QtCore import Qt, QSignalBlocker
 
 from lmthermal_viewer import ThermalImageWidget, CelsiusLegend
@@ -17,11 +17,13 @@ from lmtr_reference import ContractError
 from lmtr_temporal import TemporalSelection
 from lmtr_comparison import collect_comparison, write_comparison_csv
 from lmtr_comparison_panel import ComparisonPanel
+from lmtr_range_statistics import write_range_summary_csv
 from offline_measurement import Rectangle, save_offline_png
 from lmtx_json import dumps as metadata_text
 from celsius_palette import PALETTES, CelsiusRange
 
 WARNING = 'Native-equivalent temperatures; absolute physical accuracy not yet independently validated.'
+ANALYSIS_ACTIONS = ('series', 'csv', 'summary_csv')
 
 
 def native_space_key(frame):
@@ -66,7 +68,7 @@ class LmtrWorker(QThread):
             elif generation != self.requested_generation or self.ready_generation != generation:
                 return False
             self.result = None
-            if action in ('series', 'csv'):
+            if action in ANALYSIS_ACTIONS:
                 self._analysis_cancel.clear()
             self.pending = token, generation, action, value
             self.condition.notify()
@@ -97,7 +99,7 @@ class LmtrWorker(QThread):
         """Cancel one active or queued operation, never a later scan or another source."""
         with self.condition:
             pending = self.pending
-            queued = pending is not None and pending[:2] == (token, generation) and pending[2] in ('series', 'csv')
+            queued = pending is not None and pending[:2] == (token, generation) and pending[2] in ANALYSIS_ACTIONS
             if generation != self.requested_generation or not (queued or self._analysis_request == (token, generation)):
                 return False
             self._analysis_cancel.set()
@@ -120,6 +122,9 @@ class LmtrWorker(QThread):
                     raise InterruptedError('Analysis cancelled')
                 return series, None
             model._assert_source_unchanged()
+            if action == 'summary_csv':
+                count = write_range_summary_csv(value[0], value[1], cancelled=model.cancelled)
+                return None, f'Summary CSV saved · {count} rows'
             count = write_comparison_csv(value[0], value[1], difference=value[2], cancelled=model.cancelled)
             return None, f'CSV saved · {count:,} rows'
         except InterruptedError:
@@ -172,7 +177,7 @@ class LmtrWorker(QThread):
                     elif action == 'toggle': model.pause() if model.playing else model.play()
                     elif action == 'tick': model.advance()
                     elif action == 'speed': model.set_speed(value)
-                    elif action in ('series', 'csv'):
+                    elif action in ANALYSIS_ACTIONS:
                         series, temporal_message = self._analyse(model, token, generation, action, value)
                         value = None  # The viewer owns persistent scalar results.
                     if model.cancelled():
@@ -266,13 +271,23 @@ class LmtrWindow(QMainWindow):
         self.temporal_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         self.temporal_scroll.setMinimumWidth(360)
         self.temporal_scroll.setWidget(self.temporal_panel)
-        inspection.addWidget(self.temporal_scroll)
+        self.analysis_tabs = QTabWidget()
+        self.analysis_tabs.setMinimumWidth(360)
+        self.analysis_tabs.addTab(self.temporal_scroll, 'Selections')
+        self.statistics_scroll = QScrollArea()
+        self.statistics_scroll.setWidgetResizable(True)
+        self.statistics_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.statistics_scroll.setWidget(self.temporal_panel.range_panel)
+        self.analysis_tabs.addTab(self.statistics_scroll, 'Range statistics')
+        inspection.addWidget(self.analysis_tabs)
+        self.chart.range_changed.connect(lambda unused: self.analysis_tabs.setCurrentIndex(1))
+        self.temporal_panel.range_mode.toggled.connect(lambda active: self.analysis_tabs.setCurrentIndex(1) if active else None)
         inspection.setStretchFactor(0, 1); inspection.setStretchFactor(1, 1)
         views.addWidget(self.temporal_panel.plot_panel)
         views.setStretchFactor(0, 1); views.setStretchFactor(1, 1)
         self.temporal_panel.plot_panel.hide()
-        self.temporal_scroll.hide()
-        self.temporal_button.toggled.connect(self.temporal_scroll.setVisible)
+        self.analysis_tabs.hide()
+        self.temporal_button.toggled.connect(self.analysis_tabs.setVisible)
         self.temporal_button.toggled.connect(self.temporal_panel.plot_panel.setVisible)
         self.temporal_button.toggled.connect(lambda visible: views.setSizes([300, 220]) if visible else None)
         self.slider = QSlider(Qt.Orientation.Horizontal); layout.addWidget(self.slider)
@@ -350,7 +365,7 @@ class LmtrWindow(QMainWindow):
 
     def _clear_current(self, message='Readings unavailable — loading'):
         self.frame = None
-        self.chart.set_cursor(None, None)
+        self.temporal_panel.set_cursor(None, None)
         self.temporal_reading.setText('')
         self.timing_status.setText('Timing unavailable — loading')
         self.image.set_observation(None)
@@ -365,7 +380,7 @@ class LmtrWindow(QMainWindow):
     def _request(self, action, value=None, *, clear=True):
         if self._closing or (action != 'open' and self.state is None): return False
         if self._in_flight and (action != 'open' and
-                (action != 'seek' or self._pending_action in ('series', 'csv'))):
+                (action != 'seek' or self._pending_action in ANALYSIS_ACTIONS)):
             return False
         token = self.token + 1
         if not self.worker.request(token, action, value, generation=self._generation): return False
@@ -385,6 +400,7 @@ class LmtrWindow(QMainWindow):
         result = self.worker.take()
         if self._closing or result is None or result[0] != self.token: return
         self._in_flight = False
+        completed_action = self._pending_action
         self._pending_action = None
         _, self.frame, state, error = result
         if error:
@@ -404,6 +420,8 @@ class LmtrWindow(QMainWindow):
         if message is not None:
             self.temporal_message.setText(message)
             self.temporal_message.setToolTip(message)
+            if completed_action == 'summary_csv':
+                self.temporal_panel.range_panel.message.setText(message)
         elif series is not None:
             self.temporal_message.clear()
         self._update_temporal_cursor()
@@ -479,16 +497,20 @@ class LmtrWindow(QMainWindow):
         panel.calculate.connect(self._calculate_temporal)
         panel.export.connect(self._export_temporal)
         panel.cancel.connect(self._cancel_temporal)
+        panel.range_panel.export_requested.connect(self._export_range_summary)
+        panel.range_panel.cancel_export.connect(self._cancel_temporal)
         return panel
 
     def _sync_temporal_controls(self, idle):
         roi = self.image.roi
         usable = idle and self.frame is not None and self.image.isEnabled() and roi is not None
         self.temporal_panel.set_ready(idle, usable, roi is not None and roi.pixel_count == 1)
-        self.temporal_panel.set_busy(self._in_flight and self._pending_action in ('series', 'csv'))
+        self.temporal_panel.set_busy(self._in_flight and self._pending_action in ANALYSIS_ACTIONS)
+        self.temporal_panel.range_panel.set_source_state(idle, self._in_flight and self._pending_action == 'summary_csv')
 
     def _reset_temporal(self):
         self.temporal_panel.reset()
+        self.analysis_tabs.setCurrentIndex(0)
 
     def _plot(self, kind):
         if self.frame is None or self.image.roi is None:
@@ -525,6 +547,24 @@ class LmtrWindow(QMainWindow):
         if path and generation == self._generation and self.temporal_panel.comparison is comparison:
             if self._request('csv', (comparison, Path(path), pair), clear=False):
                 self.temporal_message.setText('Writing CSV…')
+                return
+        if not self._closing and self.state and self.state['playing']:
+            self.timer.start()
+
+    def _export_range_summary(self, summary):
+        """Freeze bounds, labels and results before the destination's nested event loop."""
+        if summary is None or self.state is None:
+            return
+        generation = self._generation
+        source = self.state['source_path']
+        self.timer.stop()
+        path, _ = QFileDialog.getSaveFileName(self, 'Export range summary',
+                    str(source.with_name(source.stem + '-range-summary.csv')), 'CSV (*.csv)')
+        panel = self.temporal_panel.range_panel
+        if path and generation == self._generation and panel.result is summary:
+            if self._request('summary_csv', (summary, Path(path)), clear=False):
+                self.temporal_message.setText('Writing summary CSV…')
+                panel.message.setText('Writing summary CSV…')
                 return
         if not self._closing and self.state and self.state['playing']:
             self.timer.start()

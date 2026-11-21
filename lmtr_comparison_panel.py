@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushBut
 
 from lmtr_comparison import Comparison, NamedSelection, MAX_SELECTIONS, CURVE_COLORS, difference_value
 from lmtr_temporal_chart import TemporalChart
+from lmtr_range_panel import RangePanel
 
 
 class ComparisonPanel(QWidget):
@@ -71,9 +72,19 @@ class ComparisonPanel(QWidget):
         plot.setSpacing(2)
         self.chart = TemporalChart()
         plot.addWidget(self.chart, 1)
-        legend = QLabel('● point / ROI mean · ▽ min · △ max · white Δ (separate scale)     │ orange gap · pink unavailable · gray segment')
+        self.range_panel = RangePanel()
+        self.range_panel.bounds_changed.connect(self.chart.set_analysis_range)
+        self.chart.range_changed.connect(self.range_panel.set_bounds)
+        range_controls = QHBoxLayout()
+        self.range_mode = QCheckBox('Select range')
+        self.range_mode.setToolTip('Drag a range on the plot; drag A/B to adjust. Uncheck to navigate samples.')
+        self.range_mode.toggled.connect(self.chart.set_range_mode)
+        range_controls.addWidget(self.range_mode)
+        self.chart.setToolTip('Shift+drag selects a range. Drag A/B to adjust exact event bounds. Uncheck Select range to navigate samples.')
+        legend = QLabel('● point / ROI mean · ▽ min · △ max · white Δ     │ orange gap · pink unavailable · gray segment')
         legend.setWordWrap(True)
-        plot.addWidget(legend)
+        range_controls.addWidget(legend, 1)
+        plot.addLayout(range_controls)
         self.reading = self._label(2)
         plot.addWidget(self.reading)
         self.busy_row = QWidget()
@@ -114,6 +125,8 @@ class ComparisonPanel(QWidget):
         self.comparison = None
         self._next_id = 1
         self._cursor = (None, None)
+        self.range_mode.setChecked(False)
+        self.range_panel.reset()
         self.difference_check.setChecked(False)
         self.message.clear()
         self._rebuild_items()
@@ -228,6 +241,7 @@ class ComparisonPanel(QWidget):
             self.chart.comparison = self.comparison
         self._update_pair_choices()
         self.set_cursor(*self._cursor)
+        self._update_range_comparison()
 
     def _choose_color(self, key):
         item = next(s for s in self.selections if s.id == key)
@@ -266,6 +280,7 @@ class ComparisonPanel(QWidget):
                                     else 'Δ = left − right, same observation only' if self.difference_check.isChecked() else '')
         self.difference_note.setToolTip(self.difference_note.text())
         self.chart.set_comparison(self.comparison, self.difference_pair())
+        self._update_range_comparison()
         summary = f'{len(self.selections)}/{MAX_SELECTIONS} selections'
         if self.comparison:
             first = self.comparison.series[0]
@@ -276,10 +291,18 @@ class ComparisonPanel(QWidget):
         self.set_cursor(*self._cursor)
         self._sync_controls()
 
+    def _update_range_comparison(self):
+        # Keep a refused requested pair visible in the summary as incompatible;
+        # the plot and detailed CSV retain their existing compatibility gate.
+        pair = (self.left.currentData(), self.right.currentData()) if self.difference_check.isChecked() else None
+        self.range_panel.set_comparison(self.comparison, pair)
+        self.range_mode.setEnabled(self.comparison is not None)
+
     def set_cursor(self, time_ns, index):
         """Show per-selection current values; a blank event never inherits the last reading."""
         self._cursor = time_ns, index
         self.chart.set_cursor(time_ns, index)
+        self.range_panel.set_cursor(time_ns)
         if not self.comparison or index is None:
             self.reading.clear()
             return

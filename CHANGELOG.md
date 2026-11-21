@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Selected-period thermal statistics — 2026-11-21)
+- Select an inclusive range on the temporal chart, adjust its A/B handles or exact nanosecond fields, use the playback cursor as a bound, and restore the full period. Range edits retain the current playback state and cached scalar series.
+- Summarize all four point/ROI-mean series and the requested compatible difference with minimum, maximum, explicitly arithmetic observation mean, valid/unavailable counts and separate known/unknown losses. Empty ranges and incompatible pairs never fabricate temperatures.
+- Calculate incrementally in bounded cancellable GUI turns, with only the latest pending range and no new LMTR traversal. Export a separate exact summary CSV through the existing exclusive/cancellable worker writer; the detailed CSV and original recordings remain intact.
+- Add focused semantic/UI regressions, an actual-selector range scenario and independent summary verification against payload-verified detailed values. No Android, Recorder, wire format, CI or Windows changes.
+
 ### Fixed (Linux thermal-analysis usability — 2026-11-21)
 - Keep the comparison plot, legend and current values below the image across the window width. Give differences a separate Celsius scale on the shared time axis, distinguish ROI extrema with triangle markers, and fit a 940×740 window without changing native coordinates or scalar results.
 - Add explicit cooperative Cancel for calculation and CSV export, retaining the open source and previous complete result. Commit typed selection names immediately to operand labels and export metadata.

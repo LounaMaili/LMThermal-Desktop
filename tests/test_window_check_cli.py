@@ -28,6 +28,10 @@ class WindowCheckCliTests(unittest.TestCase):
                       ['--open', lmtr, '--analysis-check-output', str(report)],
                       ['--open', lmtr, '--analysis-check-output', str(ROOT/'forbidden-analysis-output')],
                       ['--open', lmtr, '--recover-lmtr', '--analysis-check-output', str(root/'new')]]
+            cases += [['--range-check-output', str(root/'new')],
+                      ['--open', lmtr, '--range-check-output', str(report)],
+                      ['--open', lmtr, '--analysis-check-output', str(root/'one'), '--range-check-output', str(root/'two')],
+                      ['--open', still, '--range-check-output', str(root/'new')]]
             for args in cases:
                 result=subprocess.run([sys.executable,str(ROOT/'lmthermal_desktop.py'),*args],
                     env={**os.environ,'QT_QPA_PLATFORM':'unavailable-test-platform'},capture_output=True,text=True,timeout=10)

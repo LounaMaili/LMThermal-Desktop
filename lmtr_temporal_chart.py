@@ -1,5 +1,6 @@
 """Qt plot of actual stored samples and explicit non-reading events."""
 from dataclasses import dataclass
+from bisect import bisect_left
 
 from lmtr_comparison import difference_value
 
@@ -29,6 +30,7 @@ class PlotTrack:
 class TemporalChart(QWidget):
     """Cached marks and an independently moving playback cursor."""
     seek_event = pyqtSignal(int)
+    range_changed = pyqtSignal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,6 +43,10 @@ class TemporalChart(QWidget):
         self._cursor_index = None
         self._range = (0.0, 1.0)
         self._delta_range = (0.0, 1.0)
+        self.analysis_bounds = None
+        self.range_mode = False
+        self._range_drag = None
+        self._range_anchor = None
 
     def set_comparison(self, comparison, difference=None):
         """Invalidate the cached marks only when data or display properties change."""
@@ -76,6 +82,57 @@ class TemporalChart(QWidget):
     def set_cursor(self, time_ns, index):
         self._cursor_ns, self._cursor_index = time_ns, index
         self.update()
+
+    def set_analysis_range(self, bounds):
+        """Range overlay shares the original time axis, independent of the cursor cache."""
+        self.analysis_bounds = bounds
+        if bounds is None:
+            self._range_drag = None
+        self.update()
+
+    def set_range_mode(self, enabled):
+        self.range_mode = enabled
+        self.setCursor(Qt.CursorShape.CrossCursor if enabled else Qt.CursorShape.ArrowCursor)
+
+    def _snapped_time(self, x):
+        """Snap a display position to an exact original instant, never a float timestamp."""
+        rect = self._bounds()
+        fraction = min(1, max(0, (x - rect.left()) / rect.width()))
+        approximate = self.series.first_ns + round((self.series.last_ns - self.series.first_ns) * fraction)
+        choices = []
+        for series in self.comparison.series if self.comparison else (self.series,):
+            position = bisect_left(series.times, approximate)
+            if position < len(series.times):
+                choices.append(series.times[position])
+            if position:
+                choices.append(series.times[position - 1])
+        return min(choices, key=lambda ns: (abs(ns - approximate), ns)) if choices else approximate
+
+    def _drag_range(self, x):
+        value = self._snapped_time(x)
+        a, b = self.analysis_bounds or (value, value)
+        if self._range_drag == 'A':
+            bounds = min(value, b), b
+        elif self._range_drag == 'B':
+            bounds = a, max(value, a)
+        else:
+            bounds = min(value, self._range_anchor), max(value, self._range_anchor)
+        self.set_analysis_range(bounds)
+        self.range_changed.emit(bounds)
+
+    def _paint_analysis_range(self, painter):
+        if self.series is None or self.analysis_bounds is None:
+            return
+        rect = self._bounds()
+        a, b = (self.time_x(ns) for ns in self.analysis_bounds)
+        painter.fillRect(QRectF(a, rect.top(), max(1, b - a), rect.height()), QColor(103, 227, 210, 22))
+        for x, label, direction in ((a, 'A', 1), (b, 'B', -1)):
+            painter.setPen(QPen(QColor('#67e3d2'), 1.5))
+            painter.drawLine(QPointF(x, rect.top()), QPointF(x, rect.bottom()))
+            painter.setBrush(QColor('#67e3d2'))
+            painter.drawPolygon(QPolygonF((QPointF(x, rect.top()), QPointF(x - 5, rect.top() - 7), QPointF(x + 5, rect.top() - 7))))
+            painter.drawText(QPointF(x + 7 if direction == 1 else x - 16, rect.top() + 14), label)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
 
     def resizeEvent(self, event):
         self._layer = None
@@ -206,6 +263,7 @@ class TemporalChart(QWidget):
             self._make_layer()
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self._layer)
+        self._paint_analysis_range(painter)
         if self.series is None or self._cursor_ns is None:
             return
         x = self.time_x(self._cursor_ns)
@@ -224,7 +282,17 @@ class TemporalChart(QWidget):
             return
         pos = event.position()
         rect = self._bounds()
-        if not rect.adjusted(-6, -4, 6, 15).contains(pos):
+        if not rect.adjusted(-6, -9, 6, 15).contains(pos):
+            return
+        handle = None
+        if self.analysis_bounds and (self.range_mode or pos.y() < rect.top()):
+            ax, bx = (self.time_x(ns) for ns in self.analysis_bounds)
+            if min(abs(pos.x() - ax), abs(pos.x() - bx)) <= 8:
+                handle = 'A' if abs(pos.x() - ax) < abs(pos.x() - bx) else 'B'
+        if handle or self.range_mode or event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            self._range_drag = handle or 'new'
+            self._range_anchor = self._snapped_time(pos.x())
+            self._drag_range(pos.x())
             return
         fraction = min(1, max(0, (pos.x() - rect.left()) / rect.width()))
         start, end = self.series.first_ns, self.series.last_ns
@@ -240,3 +308,12 @@ class TemporalChart(QWidget):
             return abs(pos.x() - self.time_x(row.time_ns)), abs(pos.y() - y), row.index != self._cursor_index, row.index
 
         self.seek_event.emit(min(candidates, key=distance)[1].index)
+
+    def mouseMoveEvent(self, event):
+        if self._range_drag is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            self._drag_range(event.position().x())
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self._range_drag is not None:
+            self._drag_range(event.position().x())
+            self._range_drag = None
