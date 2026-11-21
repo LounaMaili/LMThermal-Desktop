@@ -4,6 +4,12 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Added (Multi-selection temporal comparison — 2026-11-21)
+- Compare up to four named/color-coded native points or ROI means in the existing LMTR workspace. Show/hide/remove selections, display optional ROI minima/maxima, and inspect exact left-minus-right differences only for compatible same-observation readings.
+- Calculate all selections in one bounded, cancellable reader traversal. Presentation edits reuse scalar results; original event navigation, shared reason-text admission and unavailable/session/grid boundaries remain intact without interpolation.
+- Export comparison CSV with selection and operand IDs, original integer nanoseconds, round-trip values and explicit unavailable events, including hidden selections. LMTR sources remain read-only.
+- Extend the opt-in frozen-window check for comparison controls/CSV/cursor synchronization and add a developer-only synthetic demo generator. No Android, thermometry, validator/canonical fixture, CI or release changes.
+
 ### Added (LMTR temporal analysis)
 - Plot a fixed native point or an inspection ROI mean over recorded intake time. Playback and chart selection share the original event indices. Gaps, unavailable temperatures and session/grid changes stay explicit.
 - Export a separate exact CSV with original nanosecond times, periodic and receipt evidence, mask-aware ROI statistics and blank readings for gaps or unavailable events. Recovered exports retain unknown-tail status.

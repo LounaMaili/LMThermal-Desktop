@@ -14,6 +14,92 @@ from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QDialog, QPlainTextEdit
 
 
+def check_lmtr_comparison(app, window, viewer, output, wait):
+    """Exercise the shipped comparison controls in source AND frozen runtimes.
+
+    Only the export destination chooser is substituted. All collection, plot
+    selection, navigation and CSV writing use the actual widgets/worker.
+    """
+    import csv
+    from PyQt6.QtCore import QPoint
+    from PyQt6.QtGui import QColor
+    from mvp_presentation import native_to_widget
+    from offline_measurement import Rectangle
+    frame = viewer.frame
+    if frame is None or frame.temperature_c is None:
+        return {'status': 'not_applicable', 'reason': 'no temperature plane'}
+    viewer.details_button.setChecked(False)
+    viewer.temporal_button.setChecked(True)
+    window.resize(1000, 850)
+    app.processEvents()
+    panel = viewer.temporal_panel
+    width, height = frame.geometry.width, frame.geometry.height
+    specs = (('point', Rectangle(0, 0, 1, 1)),
+             ('point', Rectangle(width - 1, height - 1, width, height)),
+             ('roi', Rectangle(0, 0, width, height)),
+             ('roi', Rectangle(0, 0, width, 1)))
+    expected = []
+    for kind, region in specs:
+        def where(x, y):
+            return QPoint(*map(round, native_to_widget(x, y, viewer.image.width(), viewer.image.height(), geometry=frame.geometry)))
+        QTest.mousePress(viewer.image, Qt.MouseButton.LeftButton, pos=where(region.x1, region.y1))
+        QTest.mouseRelease(viewer.image, Qt.MouseButton.LeftButton, pos=where(region.x2 - 1, region.y2 - 1))
+        (panel.plot_point if kind == 'point' else panel.plot_roi).click()
+        expected.append(frame.point(region.x1, region.y1) if kind == 'point' else frame.roi_statistics(region).mean_c)
+    assert len(panel.selections) == 4 and not panel.plot_roi.isEnabled()
+    started = time.monotonic()
+    panel.compute.click()
+    wait(lambda: panel.comparison is not None and not viewer._in_flight, 'four-selection collection')
+    elapsed = (time.monotonic() - started) * 1000
+    index = viewer.state['index']
+    actual = [series.at_event(index).temperature for series in panel.comparison.series]
+    assert actual == expected, (actual, expected)
+    panel.item_widgets['S1']['name'].setText('Target A')
+    panel.item_widgets['S1']['name'].editingFinished.emit()
+    with patch('lmtr_comparison_panel.QColorDialog.getColor', return_value=QColor('#67e3d2')):
+        panel.item_widgets['S1']['color'].click()
+    panel.item_widgets['S3']['minimum'].click()
+    panel.item_widgets['S3']['maximum'].click()
+    assert len(panel.chart.tracks) == 6
+    panel.item_widgets['S2']['visible'].click()
+    assert len(panel.chart.tracks) == 5
+    panel.item_widgets['S2']['visible'].click()
+    panel.difference_check.click()
+    assert panel.difference_pair() == ('S1', 'S2')
+    assert len(panel.chart.tracks) == 7
+    app.processEvents()
+    assert window.width() <= 1000
+    assert panel.save_csv.isVisible() and panel.save_csv.isEnabled()
+    window.grab().save(str(output / 'comparison.png'))
+    # Seek an actual gap if present, otherwise a segment boundary: neither has Celsius.
+    first = panel.comparison.series[0]
+    blank = next((r for r in first.rows if r.event == 'gap'), first.rows[0])
+    if blank.temperature is None:
+        pos = QPoint(round(panel.chart.time_x(blank.time_ns)), round(panel.chart._bounds().bottom() + 7))
+        QTest.mouseClick(panel.chart, Qt.MouseButton.LeftButton, pos=pos)
+        wait(lambda: not viewer._in_flight, 'chart-to-player seek')
+        assert viewer.state['index'] == blank.index
+        assert panel.chart._cursor_index == blank.index and viewer.frame is None
+        assert 'unavailable' in panel.reading.text()
+    path = output / 'comparison.csv'
+    with patch('lmtr_viewer.QFileDialog.getSaveFileName', return_value=(str(path), 'CSV')):
+        panel.save_csv.click()
+        wait(lambda: not viewer._in_flight, 'comparison CSV')
+    with path.open(newline='', encoding='utf-8') as source:
+        rows = list(csv.DictReader(source))
+    assert len(rows) == sum(len(s.rows) for s in panel.comparison.series) + len(first.rows)
+    for row in rows:
+        if row['status'] != 'valid':
+            assert row['temperature_c'] == ''
+    # A later player event must move the existing chart cursor, not recalculate it.
+    viewer.slider.setValue(index)
+    wait(lambda: not viewer._in_flight, 'player-to-chart seek')
+    assert panel.chart._cursor_index == index
+    return dict(status='passed', selections=4, reading_values=actual, csv_rows=len(rows),
+                collection_with_event_wait_ms=elapsed, blank_event_index=blank.index,
+                window_size=[window.width(), window.height()], export_dialog_substituted=True)
+
+
 def hashes(path):
     """Include all regular source members, including legacy sidecars, before and after inspection."""
     paths = sorted(path.rglob('*')) if path.is_dir() else [path]
@@ -147,6 +233,8 @@ def run(app, window, path, output, *, expect_error=False):
                 viewer.verify_button.click();wait(lambda:not viewer._in_flight,'full verification')
                 result['integrity_status'] = viewer.validation_status.text()
                 result['checks'].append('timeline_blank_event_recovery_full_verification')
+                result['comparison'] = check_lmtr_comparison(app, window, viewer, output, wait)
+                result['checks'].append('four_selections_extrema_difference_gap_csv_cursor')
             elif viewer.playback is not None:
                 viewer.timeline_slider.setValue(2)
                 wait(lambda: viewer.playback.index==2 and 'sequence 3 |' in viewer.playback_status_label.text(),'legacy gap')

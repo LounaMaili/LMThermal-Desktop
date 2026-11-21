@@ -8,14 +8,15 @@ import threading
 from PyQt6.QtCore import QThread, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QHBoxLayout, QLabel, QPushButton, QSlider, QComboBox, QDoubleSpinBox,
-    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton, QSizePolicy, QSplitter)
+    QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton, QSizePolicy, QSplitter, QScrollArea)
 from PyQt6.QtCore import Qt, QSignalBlocker
 
 from lmthermal_viewer import ThermalImageWidget, CelsiusLegend
 from lmtr_reader import LmtrPlaybackModel, format_timing_evidence
 from lmtr_reference import ContractError
-from lmtr_temporal import TemporalSelection, collect_temporal_series, write_temporal_csv
-from lmtr_temporal_chart import TemporalChart
+from lmtr_temporal import TemporalSelection
+from lmtr_comparison import collect_comparison, write_comparison_csv
+from lmtr_comparison_panel import ComparisonPanel
 from offline_measurement import Rectangle, save_offline_png
 from lmtx_json import dumps as metadata_text
 from celsius_palette import PALETTES, CelsiusRange
@@ -129,15 +130,15 @@ class LmtrWorker(QThread):
                     elif action == 'series':
                         model.pause()
                         try:
-                            series = collect_temporal_series(model, value)
+                            series = collect_comparison(model, value)
                         except (ContractError, OSError, ValueError) as error:
                             temporal_message = 'Analysis refused: ' + str(error)[:2048]
                     elif action == 'csv':
                         model.pause()
                         try:
                             model._assert_source_unchanged()
-                            count = write_temporal_csv(value[0], value[1], cancelled=model.cancelled)
-                            temporal_message = f'CSV saved · {count:,} events'
+                            count = write_comparison_csv(value[0], value[1], difference=value[2], cancelled=model.cancelled)
+                            temporal_message = f'CSV saved · {count:,} rows'
                         except (OSError, ValueError) as error:
                             temporal_message = 'CSV refused: ' + str(error)[:2048]
                         finally:
@@ -219,10 +220,17 @@ class LmtrWindow(QMainWindow):
         self.image = ThermalImageWidget(); images.addWidget(self.image, 1)
         self.legend = CelsiusLegend(); images.addWidget(self.legend)
         self.temporal_panel = self._build_temporal_panel()
-        views.addWidget(self.temporal_panel)
+        # Four editable selections must not force a taller window than a laptop
+        # screen. The chart/legend remain reachable in the bounded scroll viewport.
+        self.temporal_scroll = QScrollArea()
+        self.temporal_scroll.setWidgetResizable(True)
+        self.temporal_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        self.temporal_scroll.setMinimumWidth(360)
+        self.temporal_scroll.setWidget(self.temporal_panel)
+        views.addWidget(self.temporal_scroll)
         views.setStretchFactor(0, 1); views.setStretchFactor(1, 1)
-        self.temporal_panel.hide()
-        self.temporal_button.toggled.connect(self.temporal_panel.setVisible)
+        self.temporal_scroll.hide()
+        self.temporal_button.toggled.connect(self.temporal_scroll.setVisible)
         self.slider = QSlider(Qt.Orientation.Horizontal); layout.addWidget(self.slider)
         controls = QHBoxLayout(); layout.addLayout(controls)
         self.previous = QPushButton('Previous'); self.play = QPushButton('Play'); self.next = QPushButton('Next')
@@ -348,10 +356,7 @@ class LmtrWindow(QMainWindow):
         series = state.pop('temporal_series')
         message = state.pop('temporal_message')
         if series is not None:
-            self.chart.set_series(series)
-            count = sum(row.temperature is not None for row in series.rows)
-            coverage = ' · verified prefix, unknown tail' if series.unknown_tail else f' · END {series.end_status}'
-            self.temporal_summary.setText(f'{series.selection.label} · {count:,} readings / {len(series.rows):,} events{coverage}')
+            self.temporal_panel.set_result(series)
         if message is not None:
             self.temporal_message.setText(message)
         elif series is not None:
@@ -418,103 +423,59 @@ class LmtrWindow(QMainWindow):
             f'Native ROI [{roi.x1},{roi.x2}) × [{roi.y1},{roi.y2}): min {result.min_c:.8g}, max {result.max_c:.8g}, mean {result.mean_c:.8g} °C · {result.valid_pixel_count}/{result.pixel_count} valid pixels')
 
     def _build_temporal_panel(self):
-        panel = QWidget()
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(4, 0, 0, 0)
-        instruction = QLabel('Click one image pixel or drag a rectangle, then plot the selection.')
-        instruction.setWordWrap(True)
-        layout.addWidget(instruction)
-        controls = QHBoxLayout()
-        layout.addLayout(controls)
-        self.plot_point = QPushButton('Plot point')
-        self.plot_roi = QPushButton('Plot ROI mean')
-        self.save_csv = QPushButton('Export CSV…')
-        for control in (self.plot_point, self.plot_roi, self.save_csv):
-            controls.addWidget(control)
-        self.temporal_summary = QLabel()
-        self.temporal_reading = QLabel()
-        self.temporal_message = QLabel()
-        for label in (self.temporal_summary, self.temporal_reading, self.temporal_message):
-            label.setWordWrap(True)
-            label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
-            label.setFixedHeight(label.fontMetrics().lineSpacing() * 2 + 3)
-            label.setTextFormat(Qt.TextFormat.PlainText)
-        layout.addWidget(self.temporal_summary)
-        self.chart = TemporalChart()
-        layout.addWidget(self.chart, 1)
-        legend = QLabel('<span style="color:#008779">●</span> Stored reading &nbsp; '
-                        '<span style="color:#ac6100">│</span> Gap &nbsp; '
-                        '<span style="color:#b23769">│</span> Unavailable &nbsp; │ Segment')
-        legend.setWordWrap(True)
-        layout.addWidget(legend)
-        layout.addWidget(self.temporal_reading)
-        layout.addWidget(self.temporal_message)
+        panel = ComparisonPanel()
+        self.chart = panel.chart
+        self.plot_point, self.plot_roi = panel.plot_point, panel.plot_roi
+        self.save_csv = panel.save_csv
+        self.temporal_summary, self.temporal_reading, self.temporal_message = panel.summary, panel.reading, panel.message
         self.chart.seek_event.connect(lambda index: self._request('seek', index))
-        self.plot_point.clicked.connect(lambda: self._plot('point'))
-        self.plot_roi.clicked.connect(lambda: self._plot('roi'))
-        self.save_csv.clicked.connect(self._export_temporal)
+        panel.add_point.connect(lambda: self._plot('point'))
+        panel.add_roi.connect(lambda: self._plot('roi'))
+        panel.calculate.connect(self._calculate_temporal)
+        panel.export.connect(self._export_temporal)
         return panel
 
     def _sync_temporal_controls(self, idle):
         roi = self.image.roi
         usable = idle and self.frame is not None and self.image.isEnabled() and roi is not None
-        self.plot_point.setEnabled(usable and roi.pixel_count == 1)
-        self.plot_roi.setEnabled(usable)
-        self.save_csv.setEnabled(idle and self.chart.series is not None)
+        self.temporal_panel.set_ready(idle, usable, roi is not None and roi.pixel_count == 1)
 
     def _reset_temporal(self):
-        self.chart.set_series(None)
-        self.temporal_summary.clear()
-        self.temporal_reading.clear()
-        self.temporal_message.clear()
+        self.temporal_panel.reset()
 
     def _plot(self, kind):
         if self.frame is None or self.image.roi is None:
             return
         roi = self.image.roi
         selected = TemporalSelection.from_frame(self.frame, kind, Rectangle(roi.x1, roi.y1, roi.x2, roi.y2))
-        if self._request('series', selected, clear=False):
+        self.temporal_panel.add_selection(selected)
+
+    def _calculate_temporal(self, selections):
+        if self._request('series', selections, clear=False):
             self.timer.stop()
-            self.temporal_message.setText('Reading and validating recording CHUNKs…')
+            self.temporal_message.setText('Calculating…')
 
     def _update_temporal_cursor(self):
-        series, timing = self.chart.series, self.state['timing']
-        if series is None or timing is None:
-            return
-        index = self.state['index']
-        self.chart.set_cursor(int(timing['timeline_ns']), index)
-        row = series.at_event(index)
-        if row is None:
-            summary = 'No event for the plotted stream'
-        elif row.temperature is not None:
-            summary = f'{row.temperature:.9g} °C'
-            if series.selection.kind == 'roi':
-                r = row.reading
-                summary += f' mean · {r.min_c:.8g}–{r.max_c:.8g} °C · {r.valid_pixel_count}/{r.pixel_count} valid'
-        elif row.event == 'gap':
-            summary = f'Gap · {row.gap_category} · missing {row.gap_count or "unknown"} · {row.reason}'
-        elif row.status == 'other_native_space':
-            summary = 'Unavailable · different native grid or source session'
-        elif row.status == 'no_valid_pixels':
-            summary = 'Unavailable · no valid pixels in selection'
-        else:
-            summary = row.status.replace('_', ' ') + (f' · {row.reason}' if row.reason else '')
-        self.temporal_reading.setText(f'Event {index + 1} · {summary}')
+        timing = self.state['timing']
+        self.temporal_panel.set_cursor(int(timing['timeline_ns']) if timing else None,
+                                       self.state['index'] if timing else None)
 
     def _export_temporal(self):
-        series, generation = self.chart.series, self._generation
-        if series is None or self.state is None:
+        comparison, generation = self.temporal_panel.comparison, self._generation
+        if comparison is None or self.state is None:
             return
+        pair = self.temporal_panel.difference_pair()
         source = self.state['source_path']
-        self.timer.stop()  # Keep a playback tick from occupying the worker when the chooser returns.
-        path, _ = QFileDialog.getSaveFileName(self, 'Export temporal measurements',
-                                             str(source.with_name(source.stem + '-temperatures.csv')), 'CSV (*.csv)')
-        if path and generation == self._generation and self.chart.series is series:
-            if self._request('csv', (series, Path(path)), clear=False):
+        self.timer.stop()  # A destination chooser can run a nested Qt event loop.
+        path, _ = QFileDialog.getSaveFileName(self, 'Export temporal comparison',
+                                             str(source.with_name(source.stem + '-comparison.csv')), 'CSV (*.csv)')
+        if path and generation == self._generation and self.temporal_panel.comparison is comparison:
+            if self._request('csv', (comparison, Path(path), pair), clear=False):
                 self.temporal_message.setText('Writing CSV…')
                 return
         if not self._closing and self.state and self.state['playing']:
             self.timer.start()
+
     def _save(self):
         # A native destination chooser runs a nested event loop. Freeze all immutable
         # export inputs BEFORE opening it: playback/file switches may continue meanwhile.

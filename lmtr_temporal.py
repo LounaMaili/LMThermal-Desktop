@@ -12,6 +12,7 @@ from offline_measurement import Geometry, Rectangle, Statistics, statistics
 # Local analysis limits, independent of playback admission and the LMTR wire.
 MAX_TEMPORAL_EVENTS = 50_000
 MAX_TEMPORAL_TEXT_BYTES = 8 * 1024**2
+MAX_TEMPORAL_SELECTIONS = 4
 
 CSV_COLUMNS = (
     'recording_id', 'stream_id', 'selected_session_id', 'selection',
@@ -144,100 +145,132 @@ def _sample_selection(entry, blocks, selection, cancelled):
     return Statistics(1, 1, mean_c=float(matrix[r.y1, r.x1]))
 
 
-def collect_temporal_series(model, selection):
-    """Keep only scalar projections of verified entries, never planes or frame objects."""
+def _collect_row(entry, segment, blocks, selection, cancelled):
+    """Project only compatible observations; every unavailable event remains explicit."""
+    if entry.get('stream_id', selection.stream_id) != selection.stream_id:
+        return
+    stream = next((s for s in segment['streams'] if s['stream_id'] == selection.stream_id), None)
+    if stream is None:
+        return
+    kind = entry['kind']
+    measurement = entry.get('measurement', {})
+    status = kind
+    reason = entry.get('reason', segment['reason'] if kind == 'segment_start' else '')
+    reading = None
+    if kind == 'observation':
+        if _native_identity(stream) != selection.identity:
+            status = 'other_native_space'
+            reason = measurement.get('reason', '')
+        elif measurement['status'] != 'available':
+            status = 'measurement_unavailable'
+            reason = measurement['reason']
+        else:
+            reading = _sample_selection(entry, blocks, selection, cancelled)
+            status = 'valid' if reading.valid_pixel_count else 'no_valid_pixels'
+    schedule = entry.get('scheduled') or {}
+    receipt = entry.get('receipt') or {}
+    stamp = receipt.get('stamp') or {}
+    return TemporalRow(
+        int(entry['entry_id']), int(entry['timeline_ns']), kind, status, entry['segment_id'],
+        stream['session_id'], reason, measurement.get('status', ''),
+        entry.get('category', ''), entry.get('count'), stream['sampling'].get('period_ns'),
+        tuple(schedule.get(k) for k in ('first_slot', 'last_slot', 'first_deadline_ns', 'last_deadline_ns')),
+        (receipt.get('status'), stamp.get('clock_domain_id'), stamp.get('ticks')), reading,
+    )
+
+
+def collect_temporal_selections(model, selections):
+    """Project all selections in ONE verified CHUNK traversal with shared scan budgets.
+
+    Callers bound the selection count. No matrices escape the visitor. Text is
+    charged across all result rows, so additional selections cannot multiply the
+    existing reason-text admission limit.
+    """
+    if not 1 <= len(selections) <= MAX_TEMPORAL_SELECTIONS:
+        raise TemporalLimitError('Choose between one and four selections')
     if model.entry_count > MAX_TEMPORAL_EVENTS:
         raise TemporalLimitError(f'Temporal analysis admits up to {MAX_TEMPORAL_EVENTS:,} file events')
-    rows = []
+    rows = [[] for _ in selections]
     text_bytes = 0
 
     def collect(entry, segment, blocks):
         nonlocal text_bytes
-        if entry.get('stream_id', selection.stream_id) != selection.stream_id:
-            return
-        stream = next((s for s in segment['streams'] if s['stream_id'] == selection.stream_id), None)
-        if stream is None:
-            return
-        kind = entry['kind']
-        measurement = entry.get('measurement', {})
-        status = kind
-        reason = entry.get('reason', segment['reason'] if kind == 'segment_start' else '')
-        reading = None
-        if kind == 'observation':
-            if _native_identity(stream) != selection.identity:
-                status = 'other_native_space'
-                reason = measurement.get('reason', '')
-            elif measurement['status'] != 'available':
-                status = 'measurement_unavailable'
-                reason = measurement['reason']
-            else:
-                reading = _sample_selection(entry, blocks, selection, model.cancelled)
-                status = 'valid' if reading.valid_pixel_count else 'no_valid_pixels'
-        schedule = entry.get('scheduled') or {}
-        receipt = entry.get('receipt') or {}
-        stamp = receipt.get('stamp') or {}
-        text_bytes += len(reason.encode('utf-8'))
-        if text_bytes > MAX_TEMPORAL_TEXT_BYTES:
-            raise TemporalLimitError('Temporal analysis exceeds the 8 MiB event reason budget')
-        rows.append(TemporalRow(
-            int(entry['entry_id']), int(entry['timeline_ns']), kind, status, entry['segment_id'],
-            stream['session_id'], reason, measurement.get('status', ''),
-            entry.get('category', ''), entry.get('count'), stream['sampling'].get('period_ns'),
-            tuple(schedule.get(k) for k in ('first_slot', 'last_slot', 'first_deadline_ns', 'last_deadline_ns')),
-            (receipt.get('status'), stamp.get('clock_domain_id'), stamp.get('ticks')), reading,
-        ))
+        for selection, output in zip(selections, rows):
+            if model.cancelled():
+                raise InterruptedError('Temporal comparison cancelled')
+            row = _collect_row(entry, segment, blocks, selection, model.cancelled)
+            if row is None:
+                continue
+            text_bytes += len(row.reason.encode('utf-8'))
+            if text_bytes > MAX_TEMPORAL_TEXT_BYTES:
+                raise TemporalLimitError('Temporal analysis exceeds the 8 MiB event reason budget')
+            output.append(row)
 
     model._visit_entries(collect)
     header = model.header
-    return TemporalSeries(
+    return tuple(TemporalSeries(
         selection, header['recording_id'], header['timeline']['clock_domain_id'],
         model.first_time_ns, model.last_time_ns, model.report['status'], model.report.get('declared_end_status'),
-        bool(model.report.get('unknown_tail')), tuple(rows),
-        tuple(row.index for row in rows), tuple(row.time_ns for row in rows),
-    )
+        bool(model.report.get('unknown_tail')), tuple(output),
+        tuple(row.index for row in output), tuple(row.time_ns for row in output),
+    ) for selection, output in zip(selections, rows))
 
 
-def write_temporal_csv(series, path, *, cancelled=lambda: False):
-    """Write one row per represented event, preserving blanks and round-trip values."""
-    path = Path(path)
+def collect_temporal_series(model, selection):
+    """Single-selection API using the same bounded multi-selection traversal."""
+    return collect_temporal_selections(model, (selection,))[0]
+
+
+def temporal_csv_record(series, row):
+    """Exact scalar values and original evidence shared by both CSV projections."""
     selection = series.selection
     region = selection.region
-    common = (
+    reading = row.reading
+    count_status = ('known' if row.gap_count is not None else 'unknown') if row.event == 'gap' else ''
+    return dict(zip(CSV_COLUMNS, (
         series.recording_id, selection.stream_id, selection.identity[0], selection.kind,
         region.x1, region.y1, region.x2, region.y2, *selection.identity[3],
         series.clock_domain_id, series.first_ns, series.file_status, series.end_status,
         str(series.unknown_tail).lower(),
-    )
-    # Exclusive creation also refuses an existing symlink or hard link to the source.
+        row.index, row.time_ns, row.time_ns - series.first_ns, row.event,
+        row.segment_id, row.session_id, row.status, row.measurement_status,
+        row.reason, row.gap_category, row.gap_count, count_status, row.period_ns,
+        *row.schedule, *row.receipt, row.temperature,
+        reading.min_c if reading else None, reading.max_c if reading else None,
+        reading.valid_pixel_count if reading else None, reading.pixel_count if reading else None,
+    )))
+
+
+def write_csv_records(columns, records, path, *, cancelled=lambda: False):
+    """Publish exclusively and remove only our own partial file on failure/cancellation."""
+    path = Path(path)
     if cancelled():
         raise InterruptedError('CSV export cancelled')
     output = path.open('x', newline='', encoding='utf-8')
     identity = os.fstat(output.fileno())
+    count = 0
     try:
         with output:
-            writer = csv.writer(output)
-            writer.writerow(CSV_COLUMNS)
-            for row in series.rows:
+            writer = csv.DictWriter(output, fieldnames=columns)
+            writer.writeheader()
+            for record in records:
                 if cancelled():
                     raise InterruptedError('CSV export cancelled')
-                reading = row.reading
-                count_status = ('known' if row.gap_count is not None else 'unknown') if row.event == 'gap' else ''
-                writer.writerow((
-                    *common, row.index, row.time_ns, row.time_ns - series.first_ns, row.event,
-                    row.segment_id, row.session_id, row.status, row.measurement_status,
-                    row.reason, row.gap_category, row.gap_count, count_status, row.period_ns,
-                    *row.schedule, *row.receipt, row.temperature,
-                    reading.min_c if reading else None, reading.max_c if reading else None,
-                    reading.valid_pixel_count if reading else None, reading.pixel_count if reading else None,
-                ))
+                writer.writerow(record)
+                count += 1
         if cancelled():
             raise InterruptedError('CSV export cancelled')
     except BaseException:
-        # A cancelled or failed export may only clean up the file it created.
         try:
             if os.path.samestat(identity, path.lstat()):
                 path.unlink()
         except FileNotFoundError:
             pass
         raise
-    return len(series.rows)
+    return count
+
+
+def write_temporal_csv(series, path, *, cancelled=lambda: False):
+    """Write one row per represented event, preserving blanks and round-trip values."""
+    return write_csv_records(CSV_COLUMNS, (temporal_csv_record(series, row) for row in series.rows),
+                             path, cancelled=cancelled)
