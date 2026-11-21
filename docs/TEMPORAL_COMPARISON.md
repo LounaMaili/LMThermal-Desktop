@@ -110,4 +110,26 @@ The tool uses the existing fixture writer and requires the source checkout/tests
 It is not a product recorder and never replaces the canonical fixtures. It supplies
 no evidence of physical accuracy or live acquisition performance.
 
+## Linux candidate receipt — 2026-11-21
+
+The [scoped machine-readable receipt](diagnostics/2026-11-21-temporal-comparison.json)
+pins runtime `d43ef5e9fe480853f2d3e6cc8d2fd0f605c003c8`; later documentation does not
+change that executable. Its private x86_64 archive is **146,093,940 bytes**, SHA-256
+`8f473e4deb90aa8db15988f380cf464203db667d8bdc7915965fb22f4c4f3101`.
+
+- **51/51 source tests** and the same **51/51 in the existing Ubuntu build root**.
+- Frozen comparison checks pass in the build root, a native Fedora xcb window and
+  a separate Ubuntu 22.04.5 userland without Python, venv, sources or network.
+- All four selections, extrema, difference, gap seek, cursor synchronization,
+  CSV, source hashes and normal Close pass. All **310 exported rows** were also
+  compared with the original **62 events** and exact stored point/ROI values.
+- The bundle audit verifies **535 files**, maximum required **GLIBC 2.35**, and
+  zero unmapped native components. The archive and executable require no system
+  installation. This is a private candidate, not a public release.
+
+The GUI checks use own-process Qt events and substitute the export destination
+chooser. Manual operator acceptance and new native Windows validation remain open.
+No historical full campaign, physical camera, Android build, Actions run or release
+was performed. PR #4 remains an independent draft at its original candidate.
+
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.

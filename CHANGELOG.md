@@ -9,6 +9,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Calculate all selections in one bounded, cancellable reader traversal. Presentation edits reuse scalar results; original event navigation, shared reason-text admission and unavailable/session/grid boundaries remain intact without interpolation.
 - Export comparison CSV with selection and operand IDs, original integer nanoseconds, round-trip values and explicit unavailable events, including hidden selections. LMTR sources remain read-only.
 - Extend the opt-in frozen-window check for comparison controls/CSV/cursor synchronization and add a developer-only synthetic demo generator. No Android, thermometry, validator/canonical fixture, CI or release changes.
+- Validate runtime `d43ef5e` with 51 targeted tests on the host and Ubuntu build root, frozen/native/no-Python comparison checks, all 310 CSV rows against their 62 original events, and a 535-file/GLIBC 2.35 bundle audit. Preserve manual operator/Windows gates; no historical full campaigns rerun.
 
 ### Added (LMTR temporal analysis)
 - Plot a fixed native point or an inspection ROI mean over recorded intake time. Playback and chart selection share the original event indices. Gaps, unavailable temperatures and session/grid changes stay explicit.
