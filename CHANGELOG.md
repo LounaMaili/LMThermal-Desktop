@@ -9,6 +9,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Summarize all four point/ROI-mean series and the requested compatible difference with minimum, maximum, explicitly arithmetic observation mean, valid/unavailable counts and separate known/unknown losses. Empty ranges and incompatible pairs never fabricate temperatures.
 - Calculate incrementally in bounded cancellable GUI turns, with only the latest pending range and no new LMTR traversal. Export a separate exact summary CSV through the existing exclusive/cancellable worker writer; the detailed CSV and original recordings remain intact.
 - Add focused semantic/UI regressions, an actual-selector range scenario and independent summary verification against payload-verified detailed values. No Android, Recorder, wire format, CI or Windows changes.
+- Qualify runtime `2cfac6b` with 48 host/build-root tests, real-file range interaction during playback in exposed Fedora windows, four independently verified summary CSVs, a separate no-Python runtime and a 535-file/GLIBC 2.35 bundle audit. Preserve the human acceptance and long-recording performance limitations.
 
 ### Fixed (Linux thermal-analysis usability — 2026-11-21)
 - Keep the comparison plot, legend and current values below the image across the window width. Give differences a separate Celsius scale on the shared time axis, distinguish ROI extrema with triangle markers, and fit a 940×740 window without changing native coordinates or scalar results.

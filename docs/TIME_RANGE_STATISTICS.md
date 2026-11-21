@@ -121,3 +121,40 @@ including handle adjustment during Play, Full period, exact fields, empty ranges
 CSV and screenshots. It is automated application interaction, not human acceptance.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
+
+## Linux candidate receipt — 2026-11-21
+
+Runtime source is `2cfac6b17b9a2d9f10727664f5bb32971461be88`. Later documentation
+does not change the executable. The private archive is **146,153,661 bytes**,
+SHA-256 `337600f9c75d2314a498d34e9f03e754cf179073bedddd034e5b58fa92ba1edb`.
+See the [sanitized validation receipt](diagnostics/2026-11-21-time-range-statistics.json).
+
+- **48/48 targeted tests** pass on the host and in the existing offline Ubuntu
+  build root. The synthetic frozen integration check also passes.
+- Fresh extraction verifies all **535 manifest files**, with highest observed
+  **GLIBC 2.35** requirement. The extracted binary passes the real-file range
+  scenario in a separate userland without Python, source checkout, venv or network.
+- Two real recordings pass the exposed **Fedora 45 xcb** scenario using actual
+  Qt fallback Open/CSV selectors. Range dragging/handles during Play, exact bounds,
+  full reset, queued cancellation, unavailable ranges and 940×740 resizing pass.
+- The first selected range `[845971314, 2444489381]` ns contains nine valid
+  observations per series; the second `[1080430786, 3242014609]` ns contains 23
+  valid observations and 32 declared losses. In that second range S1 min/max/mean
+  are `36.25070571899414`, `36.311927795410156`, `36.27823721844217` °C and the
+  Δ mean is `15.2589983732804` °C.
+- **Four summary CSVs / 20 rows** are independently checked against **630 unique
+  detailed rows** and original Float32 payloads: two useful ranges, one genuinely
+  empty interval and one explicit gap-only interval. Original hashes are unchanged.
+
+Private evidence is under `build/time-range-statistics-20261121/` in the primary
+Desktop checkout: `REPORT.md`, `launch.sh`, `linux-build/bundle/`, verified extracted
+`candidate/`, screenshots/CSV/receipts in `final-real/` and `final-gaps/`, and the
+isolated runtime receipt in `clean-runtime/`. Private captures are not in Git.
+
+These are automated actions in real application windows, not human manual acceptance.
+The two original recordings have interrupted END status and are short. Maximum-size
+native GUI stress, prolonged comfort, other scaling/themes and a new Wayland-specific
+run are not claimed. Small-window statistics scroll while the plot remains visible.
+No new camera capture, Android/Recorder work, wire change, Windows campaign, Actions,
+release, PR #4 modification or merge was performed. Early layout iterations are
+retained separately; only the final frozen receipts support this candidate.
