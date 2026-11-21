@@ -8,6 +8,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Keep the comparison plot, legend and current values below the image across the window width. Give differences a separate Celsius scale on the shared time axis, distinguish ROI extrema with triangle markers, and fit a 940×740 window without changing native coordinates or scalar results.
 - Add explicit cooperative Cancel for calculation and CSV export, retaining the open source and previous complete result. Commit typed selection names immediately to operand labels and export metadata.
 - Add an opt-in own-process GUI scenario using actual Open/CSV Qt selectors, screenshots and cancellation/playback evidence, plus an independent struct/stdlib CSV verifier. Preserve the distinction between exposed-window automation and human operator acceptance. No scientific arithmetic, reader, recorder, Android, CI or release changes.
+- Qualify runtime `5be6ce9` with 38 host/build-root tests, two real-file exposed Fedora scenarios, 630 independently verified CSV rows, a separate no-Python runtime and a 535-file/GLIBC 2.35 audit. Preserve interrupted-capture status and the remaining human acceptance gate; see `docs/LINUX_ANALYSIS_ACCEPTANCE.md`.
 
 ### Added (Multi-selection temporal comparison — 2026-11-21)
 - Compare up to four named/color-coded native points or ROI means in the existing LMTR workspace. Show/hide/remove selections, display optional ROI minima/maxima, and inspect exact left-minus-right differences only for compatible same-observation readings.

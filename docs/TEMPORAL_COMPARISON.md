@@ -141,6 +141,9 @@ Native-equivalent temperatures; absolute physical accuracy not yet independently
 
 ## Linux functional acceptance tools
 
+See the [follow-up candidate and acceptance results](LINUX_ANALYSIS_ACCEPTANCE.md)
+for the exact executable, real-input scope and remaining human gate.
+
 The follow-up uses two existing **real** Android HT-301 recordings, opened read-only.
 The new `--analysis-check-output` diagnostic executes four selections, two ROI sizes,
 extrema, a compatible difference, Cancel/recalculate, hide/reactivate/rename/remove,
