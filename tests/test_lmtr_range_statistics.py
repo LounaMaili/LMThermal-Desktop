@@ -201,3 +201,44 @@ class RangeWidgetTests(unittest.TestCase):
         self.assertIsNone(self.stats.result)
         self.assertIsNone(self.chart.analysis_bounds)
         self.assertFalse(self.stats.timer.isActive())
+
+    def test_coincident_handles_can_expand_in_either_direction_with_exact_exported_bounds(self):
+        first, last = self.data.series[0].first_ns, self.data.series[0].last_ns
+        instant = START + 100_000_000
+        seek = QSignalSpy(self.chart.seek_event)
+        y = self.chart._bounds().top() - 3
+
+        def drag(source, x):
+            self.mouse(QEvent.Type.MouseButtonPress, self.chart.time_x(source), y, Qt.MouseButton.LeftButton)
+            self.mouse(QEvent.Type.MouseMove, x, y, Qt.MouseButton.LeftButton)
+            self.mouse(QEvent.Type.MouseButtonRelease, x, y, Qt.MouseButton.NoButton)
+            self.wait(lambda: self.stats.result is not None)
+
+        def check(bounds, valid, mean):
+            self.assertEqual(bounds, self.chart.analysis_bounds)
+            self.assertEqual(bounds, self.stats.bounds)
+            summary = self.stats.result
+            self.assertEqual(bounds, (summary.start_ns, summary.end_ns))
+            self.assertEqual((valid, mean), (summary.rows[0].valid_observations, summary.rows[0].mean_c))
+            with TemporaryDirectory() as folder:
+                target = Path(folder) / 'range.csv'
+                write_range_summary_csv(summary, target)
+                with target.open(newline='') as output:
+                    rows = list(csv.DictReader(output))
+                self.assertEqual({tuple(map(str, bounds))},
+                                 {(r['range_start_ns'], r['range_end_ns']) for r in rows})
+
+        self.stats.set_bounds((instant, instant))
+        drag(instant, self.chart.time_x(instant))
+        check((instant, instant), 0, None)
+        drag(instant, self.chart.time_x(first) - 30)
+        check((first, instant), 3, 30.0)
+        # Bring A back onto B. A remains selected throughout this drag even
+        # when it crosses B, so it clamps rather than moving the other bound.
+        drag(first, self.chart.time_x(last) + 30)
+        check((instant, instant), 0, None)
+        drag(instant, self.chart.time_x(last) + 30)
+        check((instant, last), 0, None)
+        drag(last, self.chart.time_x(first) - 30)
+        check((instant, instant), 0, None)
+        self.assertEqual(0, len(seek))

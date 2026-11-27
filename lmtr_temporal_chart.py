@@ -47,6 +47,7 @@ class TemporalChart(QWidget):
         self.range_mode = False
         self._range_drag = None
         self._range_anchor = None
+        self._range_press_x = None
 
     def set_comparison(self, comparison, difference=None):
         """Invalidate the cached marks only when data or display properties change."""
@@ -98,6 +99,10 @@ class TemporalChart(QWidget):
         """Snap a display position to an exact original instant, never a float timestamp."""
         rect = self._bounds()
         fraction = min(1, max(0, (x - rect.left()) / rect.width()))
+        if fraction == 0:
+            return self.series.first_ns
+        if fraction == 1:
+            return self.series.last_ns
         approximate = self.series.first_ns + round((self.series.last_ns - self.series.first_ns) * fraction)
         choices = []
         for series in self.comparison.series if self.comparison else (self.series,):
@@ -111,6 +116,15 @@ class TemporalChart(QWidget):
     def _drag_range(self, x):
         value = self._snapped_time(x)
         a, b = self.analysis_bounds or (value, value)
+        if self._range_drag == 'coincident':
+            # Wait for movement past the shared instant. A click or a move
+            # that still snaps to it must leave a zero-duration range intact.
+            if x < self._range_press_x and value < a:
+                self._range_drag = 'A'
+            elif x > self._range_press_x and value > b:
+                self._range_drag = 'B'
+            else:
+                return
         if self._range_drag == 'A':
             bounds = min(value, b), b
         elif self._range_drag == 'B':
@@ -288,9 +302,13 @@ class TemporalChart(QWidget):
         if self.analysis_bounds and (self.range_mode or pos.y() < rect.top()):
             ax, bx = (self.time_x(ns) for ns in self.analysis_bounds)
             if min(abs(pos.x() - ax), abs(pos.x() - bx)) <= 8:
-                handle = 'A' if abs(pos.x() - ax) < abs(pos.x() - bx) else 'B'
+                if ax == bx:
+                    handle = 'coincident'
+                else:
+                    handle = 'A' if abs(pos.x() - ax) < abs(pos.x() - bx) else 'B'
         if handle or self.range_mode or event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
             self._range_drag = handle or 'new'
+            self._range_press_x = pos.x()
             self._range_anchor = self._snapped_time(pos.x())
             self._drag_range(pos.x())
             return

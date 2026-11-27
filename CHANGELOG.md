@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Desktop integration finalization — 2026-11-27)
+- Drag coincident time-range handles in either direction. A click preserves the single instant, and each drag keeps the selected handle while clamping to the opposite bound and recording limits.
+- Make analysis dequeue and cancellation ownership atomic. A cancellation accepted at worker startup or during collection cannot publish a replacement series.
+- Stream SHA-256 hashing in the independent CSV verifier using the Python 3.10 standard library. Detailed and summary checks retain the same exact comparisons.
+
 ### Added (Selected-period thermal statistics — 2026-11-21)
 - Select an inclusive range on the temporal chart, adjust its A/B handles or exact nanosecond fields, use the playback cursor as a bound, and restore the full period. Range edits retain the current playback state and cached scalar series.
 - Summarize all four point/ROI-mean series and the requested compatible difference with minimum, maximum, explicitly arithmetic observation mean, valid/unavailable counts and separate known/unknown losses. Empty ranges and incompatible pairs never fabricate temperatures.

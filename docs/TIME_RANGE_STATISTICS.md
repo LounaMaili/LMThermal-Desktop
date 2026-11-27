@@ -13,6 +13,8 @@ the existing detailed comparison CSV and the original recordings.
 3. Drag the A/B handles to adjust either bound. Handles snap to exact original
    event times, including gaps. Close instants can share a display pixel; the
    nanosecond fields preserve their distinction. Both bounds are inclusive.
+   When the handles coincide, drag left to expand A or right to expand B. An
+   unmoved click keeps the single instant selected.
 4. Enter integer **A (ns)** / **B (ns)** and press **Apply** for precise limits,
    including periods between events. Editing invalidates the old summary until
    Apply succeeds. Invalid/reversed/out-of-recording bounds are refused.

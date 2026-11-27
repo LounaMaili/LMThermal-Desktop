@@ -126,12 +126,16 @@ the bounds and **Summary CSV…** saves a separate exact export. The mean is the
 arithmetic mean of valid observations, without duration weighting or interpolation.
 See [range statistics, counts and validation](docs/TIME_RANGE_STATISTICS.md).
 
+See the [final Linux candidate and Fedora recipe](docs/DESKTOP_INTEGRATION_FINAL.md)
+for the tested runtime SHA, real-recording evidence and remaining operator checks.
+
 See [R5 architecture and limits](docs/LMTR_READER.md),
 including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
 [qualification gates](docs/LMTR_R5_QUALIFICATION.md),
 [phase3 integration review](docs/LMTR_R5_INTEGRATION_REVIEW.md) and the camera-free
-[operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md). This is camera-free fixture/
-emulator evidence, not real Android R4→Desktop interoperability or physical accuracy.
+[operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md) for the earlier R5 fixture,
+emulator and review evidence. Native Windows results predate the latest analysis
+interface. Absolute physical temperature accuracy remains unverified.
 
 ## Radiometric desktop MVP
 

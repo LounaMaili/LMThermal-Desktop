@@ -58,11 +58,22 @@ def check_range(app, workspace, viewer, output, report, wait, snapshot):
     stats.apply.click()
     wait(lambda: stats.result is not None, 'calculate after range cancellation')
     gesture(a, b)
+    gesture(a, b, handle=True)
+    assert stats.bounds == chart.analysis_bounds == (b, b)
+    snapshot('09-coincident-handles.png')
+    gesture(b, a, handle=True)
+    assert stats.bounds == chart.analysis_bounds == (a, b)
+    gesture(b, a, handle=True)
+    assert stats.bounds == chart.analysis_bounds == (a, a)
+    gesture(a, b, handle=True)
+    assert stats.bounds == chart.analysis_bounds == (a, b)
+    assert (stats.result.start_ns, stats.result.end_ns) == (a, b)
     chosen = stats.bounds
     report['range_statistics'] = dict(bounds_ns=list(chosen), inclusive=True,
         aggregation='arithmetic mean of valid observations, not time weighted',
         rows=[asdict(row) for row in stats.result.rows], playback_continued=True,
-        scalar_series_reused=True, queued_calculation_cancelled=True)
+        scalar_series_reused=True, queued_calculation_cancelled=True,
+        coincident_handles_expand_left_and_right=True)
     snapshot('06-range-statistics.png')
     choose_file(app, stats.save.click, output / 'range-summary.csv', report['actions'])
     wait(lambda: not viewer._in_flight, 'range summary CSV export')

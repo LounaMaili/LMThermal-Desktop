@@ -105,21 +105,25 @@ class LmtrWorker(QThread):
             self._analysis_cancel.set()
             return True
 
-    def _analyse(self, model, token, generation, action, value):
+    def _analyse(self, model, generation, action, value):
         """Scope cooperative cancellation to analysis, then restore normal playback.
 
         The reader already unwinds a cancelled scan and restores its descriptor.
         Clear the analysis flag before re-reading the selected playback frame, so
         a user cancellation cannot accidentally close the otherwise valid source.
         """
-        with self.condition:
-            self._analysis_request = token, generation
-        model.pause()
         try:
+            model.pause()
+            if model.cancelled():
+                raise InterruptedError('Analysis cancelled before processing')
             if action == 'series':
                 series = collect_comparison(model, value)
-                if model.cancelled():
-                    raise InterruptedError('Analysis cancelled')
+                # Complete the scan and close its cancellation window atomically.
+                # An accepted cancellation must prevent publication of the series.
+                with self.condition:
+                    if model.cancelled():
+                        raise InterruptedError('Analysis cancelled')
+                    self._analysis_request = None
                 return series, None
             model._assert_source_unchanged()
             if action == 'summary_csv':
@@ -154,6 +158,10 @@ class LmtrWorker(QThread):
                     if self.stopped.is_set(): break
                     token, generation, action, value = self.pending
                     self.pending = None
+                    if action in ANALYSIS_ACTIONS:
+                        # Cancel must always find the token, even while this
+                        # thread is between dequeue and entering _analyse.
+                        self._analysis_request = token, generation
                 # Do not keep the preceding result/frame alive in loop locals while
                 # validating another CHUNK or an entire source file.
                 result = frame = state = None
@@ -178,7 +186,7 @@ class LmtrWorker(QThread):
                     elif action == 'tick': model.advance()
                     elif action == 'speed': model.set_speed(value)
                     elif action in ANALYSIS_ACTIONS:
-                        series, temporal_message = self._analyse(model, token, generation, action, value)
+                        series, temporal_message = self._analyse(model, generation, action, value)
                         value = None  # The viewer owns persistent scalar results.
                     if model.cancelled():
                         raise InterruptedError('LMTR load cancelled')
@@ -193,6 +201,10 @@ class LmtrWorker(QThread):
                              'temporal_series': series, 'temporal_message': temporal_message}
                     result = token, frame, state, None
                 except Exception as error:
+                    with self.condition:
+                        if self._analysis_request == (token, generation):
+                            self._analysis_request = None
+                            self._analysis_cancel.clear()
                     self._close(model)
                     model = None
                     result = token, None, None, (type(error).__name__ + ': ' + str(error))[:8192]

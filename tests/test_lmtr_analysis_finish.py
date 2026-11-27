@@ -50,19 +50,22 @@ class AnalysisFinishTests(unittest.TestCase):
         self.wait(lambda: self.panel.comparison is not None and not self.viewer._in_flight)
 
     def test_cancel_calculation_retains_open_file_then_allows_a_new_calculation(self):
-        entered = threading.Event()
+        entered, proceed = threading.Event(), threading.Event()
         def slow(model, selected):
             entered.set()
-            deadline = time.monotonic() + 5
-            while not model.cancelled() and time.monotonic() < deadline:
-                time.sleep(.002)
+            if not proceed.wait(5):
+                raise TimeoutError('Test did not release the active scan')
             return collect_comparison(model, selected)
         with patch('lmtr_viewer.collect_comparison', side_effect=slow):
-            self.panel.compute.click()
-            token = self.viewer.token
-            self.wait(entered.is_set)
-            self.assertTrue(self.panel.cancel_button.isEnabled())
-            self.panel.cancel_button.click()
+            try:
+                self.panel.compute.click()
+                token = self.viewer.token
+                self.assertTrue(entered.wait(5))
+                self.assertTrue(self.panel.cancel_button.isEnabled())
+                self.panel.cancel_button.click()
+                self.assertEqual('Cancelling…', self.panel.message.text())
+            finally:
+                proceed.set()
             self.wait(lambda: not self.viewer._in_flight)
         self.assertEqual('Analysis cancelled', self.panel.message.text())
         self.assertIsNotNone(self.viewer.frame)
@@ -70,6 +73,61 @@ class AnalysisFinishTests(unittest.TestCase):
         self.calculate()
         self.assertEqual(30, self.panel.comparison.series[0].at_event(1).temperature)
         self.assertFalse(self.viewer.worker.cancel_analysis(token, self.viewer._generation))
+
+    def test_cancel_queued_analysis_before_worker_can_take_the_request(self):
+        self.calculate()
+        prior = self.panel.comparison
+        # The same condition guards queue ownership. Hold it on the GUI thread
+        # until Cancel has run, so the worker cannot dequeue in this test.
+        with patch('lmtr_viewer.collect_comparison', wraps=collect_comparison) as collect:
+            with self.viewer.worker.condition:
+                self.panel.compute.click()
+                self.assertIsNotNone(self.viewer.worker.pending)
+                self.panel.cancel_button.click()
+                self.assertEqual('Cancelling…', self.panel.message.text())
+            self.wait(lambda: not self.viewer._in_flight)
+            collect.assert_not_called()
+        self.assertEqual('Analysis cancelled', self.panel.message.text())
+        self.assertIs(prior, self.panel.comparison)
+        self.calculate()
+        self.assertIsNot(prior, self.panel.comparison)
+
+    def test_cancel_at_worker_handoff_cannot_publish_a_result(self):
+        self.calculate()
+        prior = self.panel.comparison
+        worker = self.viewer.worker
+        entered, proceed = threading.Event(), threading.Event()
+        analyse = worker._analyse
+
+        def pause_at_entry(*args):
+            entered.set()
+            if not proceed.wait(5):
+                raise TimeoutError('Test did not release the worker handoff')
+            return analyse(*args)
+
+        with patch.object(worker, '_analyse', side_effect=pause_at_entry), \
+                patch('lmtr_viewer.collect_comparison', wraps=collect_comparison) as collect:
+            try:
+                self.panel.compute.click()
+                abandoned_token = self.viewer.token
+                self.assertTrue(entered.wait(5))
+                self.assertIsNone(worker.pending)
+                self.panel.cancel_button.click()
+                self.assertEqual('Cancelling…', self.panel.message.text())
+            finally:
+                proceed.set()
+            self.wait(lambda: not self.viewer._in_flight)
+            collect.assert_not_called()
+        self.assertEqual('Analysis cancelled', self.panel.message.text())
+        self.assertIs(prior, self.panel.comparison)
+        self.calculate()
+        current = self.panel.comparison
+        self.assertIsNot(prior, current)
+        # Even a result already queued on the Qt side must be ignored after the
+        # request token has advanced.
+        with patch.object(worker, 'take', return_value=(abandoned_token, None, None, None)):
+            self.viewer._receive()
+        self.assertIs(current, self.panel.comparison)
 
     def test_cancel_export_removes_partial_csv_and_preserves_playback_and_results(self):
         self.calculate()

@@ -28,8 +28,12 @@ def exact(actual, expected):
 
 
 def source_hash(path):
+    """Hash the source with bounded memory on Python 3.10 and later."""
+    digest = hashlib.sha256()
     with path.open('rb') as source:
-        return hashlib.file_digest(source, 'sha256').hexdigest()
+        for block in iter(lambda: source.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def sample(entry, blocks, row):
