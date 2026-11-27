@@ -8,6 +8,7 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 - Drag coincident time-range handles in either direction. A click preserves the single instant, and each drag keeps the selected handle while clamping to the opposite bound and recording limits.
 - Make analysis dequeue and cancellation ownership atomic. A cancellation accepted at worker startup or during collection cannot publish a replacement series.
 - Stream SHA-256 hashing in the independent CSV verifier using the Python 3.10 standard library. Detailed and summary checks retain the same exact comparisons.
+- Qualify runtime `53008ef` with 71 targeted tests, the standalone Fedora and isolated no-Python scenarios, and independent real-file CSV verification on CPython 3.10.22. See `docs/DESKTOP_INTEGRATION_FINAL.md`.
 
 ### Added (Selected-period thermal statistics — 2026-11-21)
 - Select an inclusive range on the temporal chart, adjust its A/B handles or exact nanosecond fields, use the playback cursor as a bound, and restore the full period. Range edits retain the current playback state and cached scalar series.
