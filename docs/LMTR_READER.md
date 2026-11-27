@@ -66,46 +66,41 @@ original file; it is not an archive rewrite or physical power-loss guarantee.
 
 ## Temperature over time
 
-Open **Temperature over time** in the LMTR tab. Click one image pixel and choose
-**Plot point**, or drag a rectangle and choose **Plot ROI mean**. The native
-coordinates remain fixed until you plot a new selection. Palette, display range
-and changes to the inspection rectangle leave the plotted series intact.
+Open **Temperature over time**, choose a native pixel/rectangle, then **Add point**
+or **Add ROI**. Up to four named selections share one **Calculate** traversal.
+The [comparison guide](TEMPORAL_COMPARISON.md) documents display commands, difference
+eligibility and CSV columns. Adding a selection clears the old chart until the next
+calculation; display edits and removals reuse the scalar results without reading again.
 
-Dots show stored point values or valid-pixel ROI means. Separate marks on the time
-axis identify recorded gaps, unavailable measurements and segment boundaries.
-The chart never interpolates readings. The cursor follows the player, and clicking
-near a mark pauses and seeks to its original event. Use Previous/Next or the event
-slider to distinguish events that share an intake time.
+Dots show stored point values or valid-pixel ROI means; optional smaller marks show
+ROI extrema. Recorded gaps, unavailable measurements and segment boundaries retain
+axis marks. No lines interpolate missing observations. Playback/plot selection uses
+original event indices and integer intake nanoseconds, including tied times.
 
-The worker pauses playback while it validates and visits every CHUNK, using a
-temporary read-only descriptor with a separate validator budget. Only one decoded
-CHUNK and a bounded set of scalar results are retained by the scan. The local
-limits are 50,000 file events and 8 MiB of event-reason text, plus the reader's
-existing validator and CHUNK budgets. A refusal leaves normal playback available
-if its current event can still be read. A failed or cancelled scan never publishes
-a partial series. The scan is separate from **Verify entire file / prefix**.
+Collection pauses playback and visits every verified CHUNK on the owning worker,
+with a separate temporary read-only validator. Limits remain 50,000 file events,
+one decoded CHUNK and the existing reader admission budgets. At most four scalar
+rows per file event are retained; the 8 MiB reason-text budget applies to the entire
+comparison, not independently to each curve. No planes/frame objects are retained.
+Differences are lazy scalar projections, not another file scan or cached event history.
+A failure/cancellation never publishes a partial comparison. Close or source replacement
+cancels between reader records, selections and ROI statistic blocks; a single native
+operation still has no certified cancellation latency. Normal playback remains available
+after an analysis-limit refusal if the current event can still be read.
 
-**Export CSV…** creates a new UTF-8 file. Each row represents an actual event for
-the selected stream, or a segment boundary in which that stream participates.
-The selection uses native half-open bounds and belongs to its stream, session,
-module/model and grid. Observations from a different session or grid on the same
-stream are marked unavailable for that selection. No observations from other
-streams are substituted.
+Each selection belongs to its original stream, source session, module/model and native
+grid. Later incompatible observations stay unavailable for that selection. Differences
+require two distinct selections from the same recording, timeline clock, stream and
+native identity, and exactly matching event ID, time, segment and session with valid
+measurements on both sides. Cross-stream/acquisition alignment is not inferred from
+matching clocks or equal timestamps. Source files are never repaired or rewritten.
 
-- `timeline_ns` is the exact recorded intake time relative to the HEADER origin.
-  `elapsed_ns` is measured from the first file event and supplies the chart's
-  horizontal axis. Receipt ticks and their clock domain, periodic period, slots
-  and deadlines are separate evidence and keep their original integer precision.
-- `temperature_c` carries the exact Float32 point value or the deterministic
-  binary64 ROI mean in round-trip decimal form. ROI minima, maxima and valid
-  pixel counts follow the same mask-aware rules as the image inspector.
-- A gap carries its recorded category, reason and known or unknown count.
-  Unavailable observations, invalid selections and segment events have blank
-  temperature fields. A known selection with zero valid pixels has a valid
-  pixel count of zero. Blank readings never stand for 0 °C.
-- Explicit recovery marks `unknown_tail=true`; only the verified prefix is
-  exported. A finalized interrupted file retains its declared END status.
-  Neither an unknown count nor an unknown tail creates fictional events.
+The separate exclusive UTF-8 CSV exports all selections, even hidden ones, plus the
+enabled compatible difference. It preserves exact integer times/receipt/periodic evidence,
+round-trip point/ROI values, ROI extrema/counts, blank unavailable values and explicit
+known/unknown gap counts. Source identity, half-open native bounds, selection IDs/names,
+visibility and difference operand IDs/statuses remain traceable. Recovery keeps
+`unknown_tail=true` and the original completion status; it creates no fictional events.
 
 Native-equivalent temperatures; absolute physical accuracy not yet independently validated.
 

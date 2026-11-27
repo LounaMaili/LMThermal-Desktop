@@ -4,6 +4,32 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Desktop integration finalization — 2026-11-27)
+- Drag coincident time-range handles in either direction. A click preserves the single instant, and each drag keeps the selected handle while clamping to the opposite bound and recording limits.
+- Make analysis dequeue and cancellation ownership atomic. A cancellation accepted at worker startup or during collection cannot publish a replacement series.
+- Stream SHA-256 hashing in the independent CSV verifier using the Python 3.10 standard library. Detailed and summary checks retain the same exact comparisons.
+- Qualify runtime `53008ef` with 71 targeted tests, the standalone Fedora and isolated no-Python scenarios, and independent real-file CSV verification on CPython 3.10.22. See `docs/DESKTOP_INTEGRATION_FINAL.md`.
+
+### Added (Selected-period thermal statistics — 2026-11-21)
+- Select an inclusive range on the temporal chart, adjust its A/B handles or exact nanosecond fields, use the playback cursor as a bound, and restore the full period. Range edits retain the current playback state and cached scalar series.
+- Summarize all four point/ROI-mean series and the requested compatible difference with minimum, maximum, explicitly arithmetic observation mean, valid/unavailable counts and separate known/unknown losses. Empty ranges and incompatible pairs never fabricate temperatures.
+- Calculate incrementally in bounded cancellable GUI turns, with only the latest pending range and no new LMTR traversal. Export a separate exact summary CSV through the existing exclusive/cancellable worker writer; the detailed CSV and original recordings remain intact.
+- Add focused semantic/UI regressions, an actual-selector range scenario and independent summary verification against payload-verified detailed values. No Android, Recorder, wire format, CI or Windows changes.
+- Qualify runtime `2cfac6b` with 48 host/build-root tests, real-file range interaction during playback in exposed Fedora windows, four independently verified summary CSVs, a separate no-Python runtime and a 535-file/GLIBC 2.35 bundle audit. Preserve the human acceptance and long-recording performance limitations.
+
+### Fixed (Linux thermal-analysis usability — 2026-11-21)
+- Keep the comparison plot, legend and current values below the image across the window width. Give differences a separate Celsius scale on the shared time axis, distinguish ROI extrema with triangle markers, and fit a 940×740 window without changing native coordinates or scalar results.
+- Add explicit cooperative Cancel for calculation and CSV export, retaining the open source and previous complete result. Commit typed selection names immediately to operand labels and export metadata.
+- Add an opt-in own-process GUI scenario using actual Open/CSV Qt selectors, screenshots and cancellation/playback evidence, plus an independent struct/stdlib CSV verifier. Preserve the distinction between exposed-window automation and human operator acceptance. No scientific arithmetic, reader, recorder, Android, CI or release changes.
+- Qualify runtime `5be6ce9` with 38 host/build-root tests, two real-file exposed Fedora scenarios, 630 independently verified CSV rows, a separate no-Python runtime and a 535-file/GLIBC 2.35 audit. Preserve interrupted-capture status and the remaining human acceptance gate; see `docs/LINUX_ANALYSIS_ACCEPTANCE.md`.
+
+### Added (Multi-selection temporal comparison — 2026-11-21)
+- Compare up to four named/color-coded native points or ROI means in the existing LMTR workspace. Show/hide/remove selections, display optional ROI minima/maxima, and inspect exact left-minus-right differences only for compatible same-observation readings.
+- Calculate all selections in one bounded, cancellable reader traversal. Presentation edits reuse scalar results; original event navigation, shared reason-text admission and unavailable/session/grid boundaries remain intact without interpolation.
+- Export comparison CSV with selection and operand IDs, original integer nanoseconds, round-trip values and explicit unavailable events, including hidden selections. LMTR sources remain read-only.
+- Extend the opt-in frozen-window check for comparison controls/CSV/cursor synchronization and add a developer-only synthetic demo generator. No Android, thermometry, validator/canonical fixture, CI or release changes.
+- Validate runtime `d43ef5e` with 51 targeted tests on the host and Ubuntu build root, frozen/native/no-Python comparison checks, all 310 CSV rows against their 62 original events, and a 535-file/GLIBC 2.35 bundle audit. Preserve manual operator/Windows gates; no historical full campaigns rerun.
+
 ### Added (LMTR temporal analysis)
 - Plot a fixed native point or an inspection ROI mean over recorded intake time. Playback and chart selection share the original event indices. Gaps, unavailable temperatures and session/grid changes stay explicit.
 - Export a separate exact CSV with original nanosecond times, periodic and receipt evidence, mask-aware ROI statistics and blank readings for gaps or unavailable events. Recovered exports retain unknown-tail status.

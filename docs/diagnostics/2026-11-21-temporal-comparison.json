@@ -1,0 +1,124 @@
+{
+  "base_commit": "5c67906448dbbd4675cfa446acc148747c4ad7c8",
+  "runtime_commit": "d43ef5e9fe480853f2d3e6cc8d2fd0f605c003c8",
+  "branch": "codex/desktop-temporal-comparison",
+  "status": "passed",
+  "scope": "Focused software comparison checks; no historical campaigns, hardware, Android, Actions or release",
+  "source_tests": {
+    "count": 51,
+    "failures": 0,
+    "skips": 0
+  },
+  "ubuntu_build_tests": {
+    "count": 51,
+    "failures": 0,
+    "skips": 0
+  },
+  "bundle": {
+    "archive_bytes": 146093940,
+    "archive_sha256": "8f473e4deb90aa8db15988f380cf464203db667d8bdc7915965fb22f4c4f3101",
+    "source_clean": true,
+    "files_verified": 535,
+    "highest_required_glibc": "2.35",
+    "unmapped_native_members": 0
+  },
+  "integration": {
+    "build_window": {
+      "status": "passed",
+      "platform": "offscreen",
+      "closed_normally": true,
+      "source_unchanged": true,
+      "comparison": {
+        "status": "passed",
+        "selections": 4,
+        "reading_values": [
+          20.04155158996582,
+          24.000070571899414,
+          24.705336118116975,
+          22.225178509950638
+        ],
+        "csv_rows": 310,
+        "collection_with_event_wait_ms": 929.1472699987935,
+        "blank_event_index": 13,
+        "window_size": [
+          1000,
+          850
+        ],
+        "export_dialog_substituted": true
+      }
+    },
+    "native_window": {
+      "status": "passed",
+      "platform": "xcb",
+      "closed_normally": true,
+      "source_unchanged": true,
+      "comparison": {
+        "status": "passed",
+        "selections": 4,
+        "reading_values": [
+          20.04155158996582,
+          24.000070571899414,
+          24.705336118116975,
+          22.225178509950638
+        ],
+        "csv_rows": 310,
+        "collection_with_event_wait_ms": 792.9516450021765,
+        "blank_event_index": 13,
+        "window_size": [
+          1000,
+          850
+        ],
+        "export_dialog_substituted": true
+      }
+    },
+    "clean_runtime": {
+      "status": "passed",
+      "platform": "offscreen",
+      "closed_normally": true,
+      "source_unchanged": true,
+      "comparison": {
+        "status": "passed",
+        "selections": 4,
+        "reading_values": [
+          20.04155158996582,
+          24.000070571899414,
+          24.705336118116975,
+          22.225178509950638
+        ],
+        "csv_rows": 310,
+        "collection_with_event_wait_ms": 877.6865889958572,
+        "blank_event_index": 13,
+        "window_size": [
+          1000,
+          850
+        ],
+        "export_dialog_substituted": true
+      }
+    }
+  },
+  "standalone_environment": "Separate existing Ubuntu 22.04.5 root, no Python/venv/source/network mounts, shared Fedora kernel",
+  "csv_verification": {
+    "status": "passed",
+    "csv_rows_verified": 310,
+    "event_count": 62,
+    "source_sha256": "beb175812b03cf43a2e5cbc0d61225941afdeaafecb4edd1dca53b9d68e13152",
+    "checks": [
+      "each original integer timeline_ns",
+      "each selection against original frame point/ROI",
+      "each difference exact binary64 subtraction",
+      "all unavailable fields blank"
+    ]
+  },
+  "limitations": [
+    "Automated own-process Qt interaction; export chooser substituted",
+    "No new Windows, manual operator, physical camera or absolute-accuracy validation",
+    "No maximum-size or long-duration performance certification"
+  ],
+  "pre_acceptance_corrections": [
+    "Default right operand and removal of a difference operand corrected by targeted tests",
+    "Four-selection panel scrolls instead of forcing a 960-pixel-tall window",
+    "Synthetic demo removes unused context closure on gap-only chunks",
+    "Local test invocation corrected from test_workspace to test_desktop_workspace",
+    "Build namespace preflight required sandbox escalation; runtime mount preflight corrected before execution"
+  ]
+}

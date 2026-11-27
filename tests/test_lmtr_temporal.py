@@ -207,6 +207,7 @@ class TemporalWorkspaceTests(unittest.TestCase):
                                  geometry=viewer.frame.geometry)
         QTest.mouseClick(viewer.image, Qt.MouseButton.LeftButton, pos=QPoint(*map(round, where)))
         viewer.plot_point.click()
+        viewer.temporal_panel.compute.click()
         self.wait(lambda: viewer.chart.series is not None and not viewer._in_flight)
 
     def test_workspace_chart_gap_seek_csv_and_playback_cursor(self):

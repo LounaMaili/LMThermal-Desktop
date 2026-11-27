@@ -1,5 +1,10 @@
 # Desktop distribution preparation
 
+The [2026-11-21 temporal comparison candidate](TEMPORAL_COMPARISON.md#linux-candidate-receipt--2026-11-21)
+adds four-selection analysis on a separate branch above `5c67906`. Its exact runtime,
+archive hash and focused standalone/native checks are recorded there; older campaigns
+below retain their original scope. PR #4 and release status are unchanged.
+
 Status: private development prototype; no public release, signing or store upload.
 The workspace and R5 review are prerequisites, not assumed merged into main.
 See the [phase6 old-Linux/rootless recipe](LINUX_BASELINE.md) for the replacement build

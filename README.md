@@ -105,18 +105,37 @@ recovery visibly retains unknown-tail status. Original metadata, native/transpor
 bytes, optional JSON precision and source files are preserved. PNG renderings save
 exclusively to separate files. Historical LMTX and `.lmthermal` readers remain intact.
 
-Open **Temperature over time**, then click a native pixel or drag an inspection
-rectangle on the image and choose **Plot point** or **Plot ROI mean**. The playback
-cursor follows the event being viewed. Click a sample or an event marker on the
-chart to seek to it. **Export CSV…** writes the same selection, including gaps and
-unavailable readings. See [temporal analysis and CSV semantics](docs/LMTR_READER.md#temperature-over-time).
+Open **Temperature over time**, click a native pixel or drag an inspection rectangle,
+then **Add point** or **Add ROI**. Add up to four selections and choose **Calculate**
+for one shared pass over the recording. Rename/recolor, show/hide or remove each
+selection in its legend row; ROI min/max are optional alongside the mean.
+Enable **Δ** and choose two compatible selections for left-minus-right readings.
+The playback cursor and chart navigation stay synchronized; no missing values are
+interpolated. **CSV…** exports all selections, the enabled difference and unavailable
+events with their original integer nanoseconds. The full-width plot keeps temperature
+and difference scales separate; **Cancel** interrupts a calculation/export while
+keeping the document open. See the
+[comparison guide](docs/TEMPORAL_COMPARISON.md) and
+[temporal analysis semantics](docs/LMTR_READER.md#temperature-over-time).
+
+For a selected-period summary, enable **Select range** and drag on the chart (or
+Shift+drag). Adjust **A/B**, use exact nanosecond fields or the current cursor, and
+inspect **Range statistics**. The table includes hidden selections and compatible
+Δ values; ROI statistics describe the recorded ROI means. **Full period** resets
+the bounds and **Summary CSV…** saves a separate exact export. The mean is the
+arithmetic mean of valid observations, without duration weighting or interpolation.
+See [range statistics, counts and validation](docs/TIME_RANGE_STATISTICS.md).
+
+See the [final Linux candidate and Fedora recipe](docs/DESKTOP_INTEGRATION_FINAL.md)
+for the tested runtime SHA, real-recording evidence and remaining operator checks.
 
 See [R5 architecture and limits](docs/LMTR_READER.md),
 including [declared periodic cadence and actual event evidence](docs/LMTR_READER.md#periodic-policy-and-actual-event-time),
 [qualification gates](docs/LMTR_R5_QUALIFICATION.md),
 [phase3 integration review](docs/LMTR_R5_INTEGRATION_REVIEW.md) and the camera-free
-[operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md). This is camera-free fixture/
-emulator evidence, not real Android R4→Desktop interoperability or physical accuracy.
+[operator recipe](docs/LMTR_R5_OPERATOR_CHECK.md) for the earlier R5 fixture,
+emulator and review evidence. Native Windows results predate the latest analysis
+interface. Absolute physical temperature accuracy remains unverified.
 
 ## Radiometric desktop MVP
 
