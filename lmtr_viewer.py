@@ -6,14 +6,14 @@ import sys
 import threading
 import time
 
-from PyQt6.QtCore import QEvent, QThread, QTimer, pyqtSignal
-from PyQt6.QtGui import QColor, QPainter
+from PyQt6.QtCore import QThread, QTimer, pyqtSignal
+from PyQt6.QtGui import QColor, QKeySequence, QPainter, QShortcut
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
     QHBoxLayout, QLabel, QPushButton, QSlider, QComboBox, QDoubleSpinBox,
     QFileDialog, QCheckBox, QMessageBox, QPlainTextEdit, QDialog, QToolButton,
     QSizePolicy, QSplitter, QScrollArea, QTabWidget, QLineEdit, QTextEdit, QAbstractSpinBox,
     QStyle, QStyleOptionSlider)
-from PyQt6.QtCore import Qt, QSignalBlocker
+from PyQt6.QtCore import Qt
 
 from lmthermal_viewer import ThermalImageWidget, CelsiusLegend
 from lmtr_reader import LmtrPlaybackModel, format_timing_evidence
@@ -35,7 +35,9 @@ TIMELINE_STEPS = 1_000_000
 class IntakeSlider(QSlider):
     """A click or drag targets the timeline directly, independent of event density."""
 
-    def _move_head(self, event):
+    seek_requested = pyqtSignal(int)
+
+    def _move_head(self, event, *, pressed=False):
         option = QStyleOptionSlider()
         self.initStyleOption(option)
         style = self.style()
@@ -45,13 +47,16 @@ class IntakeSlider(QSlider):
                                       QStyle.SubControl.SC_SliderHandle, self)
         span = max(1, groove.width() - handle.width())
         x = round(event.position().x()) - groove.left() - handle.width() // 2
-        self.setValue(QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x, span, option.upsideDown))
+        value = QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), x, span, option.upsideDown)
+        if pressed or value != self.value():
+            self.setValue(value)
+            self.seek_requested.emit(value)
         event.accept()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.setSliderDown(True)
-            self._move_head(event)
+            self._move_head(event, pressed=True)
         else:
             super().mousePressEvent(event)
 
@@ -77,6 +82,7 @@ class LmtrImage(ThermalImageWidget):
         super().__init__()
         self.tool = 'inspect'
         self.pinned = None
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
 
     def pin(self, point):
         self.pinned = point
@@ -345,6 +351,9 @@ class LmtrWindow(QMainWindow):
         self._rate = 1.0
         self._skipped = 0
         self._seek_index = self._seek_ns = None
+        self._scrubbing = False
+        self._clock_caption_ns = 0
+        self._slider_value = None
         root = QWidget(); self.setCentralWidget(root); layout = QVBoxLayout(root)
         layout.setSpacing(3)
         row = QHBoxLayout(); layout.addLayout(row)
@@ -454,12 +463,13 @@ class LmtrWindow(QMainWindow):
         self.roi_label.setFixedHeight(self.roi_label.fontMetrics().lineSpacing()*2+4)
         warning = QLabel(WARNING); warning.setWordWrap(True); layout.addWidget(warning)
         self.worker = LmtrWorker(self); self.worker.available.connect(self._receive); self.worker.finished.connect(self._worker_finished); self.worker.start()
-        self.timer = QTimer(self); self.timer.setInterval(16); self.timer.setTimerType(Qt.TimerType.PreciseTimer)
+        self.timer = QTimer(self); self.timer.setInterval(25); self.timer.setTimerType(Qt.TimerType.PreciseTimer)
         self.timer.timeout.connect(self._tick)
         self.open_button.clicked.connect(self._choose)
-        self.slider.sliderPressed.connect(self._pause_playback)
-        self.slider.valueChanged.connect(self._seek_slider)
-        self.slider.sliderReleased.connect(self._update_playhead)
+        self.slider.sliderPressed.connect(self._start_scrub)
+        self.slider.seek_requested.connect(self._seek_slider)
+        self.slider.actionTriggered.connect(lambda unused: self._seek_slider(self.slider.sliderPosition()))
+        self.slider.sliderReleased.connect(self._end_scrub)
         self.previous.clicked.connect(lambda:self._request('step', -1)); self.next.clicked.connect(lambda:self._request('step', 1))
         self.play.clicked.connect(self._toggle_playback)
         self.speed.currentIndexChanged.connect(self._speed_changed)
@@ -475,8 +485,18 @@ class LmtrWindow(QMainWindow):
         self.metadata_button.clicked.connect(self._metadata)
         self.verify_button.clicked.connect(lambda:self._request('verify'))
         self.save_button.setEnabled(False); self.metadata_button.setEnabled(False)
+        self.shortcuts = []
+        for key, action in ((Qt.Key.Key_Space, self._toggle_playback),
+                            (Qt.Key.Key_Left, lambda: self._request('step', -1)),
+                            (Qt.Key.Key_Right, lambda: self._request('step', 1))):
+            shortcut = QShortcut(QKeySequence(key), self)
+            shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
+            shortcut.setAutoRepeat(key != Qt.Key.Key_Space)
+            shortcut.activated.connect(action)
+            self.shortcuts.append(shortcut)
         app = QApplication.instance()
-        app.installEventFilter(self)
+        app.focusChanged.connect(self._update_shortcuts)
+        self._update_shortcuts(None, app.focusWidget())
         self._set_image_tool()
         self._sync_controls()
         self._presentation()
@@ -503,19 +523,11 @@ class LmtrWindow(QMainWindow):
         self.clear_point.setEnabled(ready and self.image.pinned is not None)
         self._sync_temporal_controls()
 
-    def eventFilter(self, watched, event):
-        if (event.type() == QEvent.Type.KeyPress and self.isVisible()
-                and isinstance(watched, QWidget) and watched.window() is self.window()
-                and not isinstance(watched, (QLineEdit, QPlainTextEdit, QTextEdit, QAbstractSpinBox, QComboBox))
-                and event.modifiers() == Qt.KeyboardModifier.NoModifier and self.play.isEnabled()):
-            if event.key() == Qt.Key.Key_Space:
-                if not event.isAutoRepeat():
-                    self._toggle_playback()
-                return True
-            if event.key() in (Qt.Key.Key_Left, Qt.Key.Key_Right):
-                self._request('step', -1 if event.key() == Qt.Key.Key_Left else 1)
-                return True
-        return super().eventFilter(watched, event)
+    def _update_shortcuts(self, previous, current):
+        editing = current is not None and isinstance(
+            current, (QLineEdit, QPlainTextEdit, QTextEdit, QAbstractSpinBox, QComboBox))
+        for shortcut in self.shortcuts:
+            shortcut.setEnabled(not editing)
 
     def _shown_ns(self):
         timing = self.state['timing']
@@ -534,12 +546,23 @@ class LmtrWindow(QMainWindow):
         seconds, fraction = divmod(rest, 1000)
         return f'{minutes:02}:{seconds:02}.{fraction:03}'
 
-    def _update_playhead(self):
+    def _update_playhead(self, *, clock_ns=None):
         if self.state is None:
             self.time_label.setText('No recording timeline')
             return
         first, last = self.state['first_ns'], self.state['last_ns']
         head = self._head_ns()
+        if not self._scrubbing:
+            position = (head - first) * TIMELINE_STEPS // max(1, last - first)
+            if position != self._slider_value:
+                self._slider_value = position
+                self.slider.setValue(position)
+        # A smooth thumb needs frequent updates. The caption can change less
+        # often and avoid repeatedly laying out text while Python decodes.
+        if clock_ns is not None and clock_ns < self._clock_caption_ns:
+            return
+        if clock_ns is not None:
+            self._clock_caption_ns = clock_ns + 200_000_000
         mode = ('Playback' if self._playing else 'Seeking' if self._pending_action in ('seek', 'time')
                 else 'Paused')
         if mode == 'Seeking' and self._seek_index is not None:
@@ -550,9 +573,6 @@ class LmtrWindow(QMainWindow):
         text += f"   ·   Display skipped {self._skipped} events   ·   Recorded gaps {self.state['report']['summary']['gap_events']}"
         if self.time_label.text() != text:
             self.time_label.setText(text)
-        if not self.slider.isSliderDown():
-            with QSignalBlocker(self.slider):
-                self.slider.setValue((head - first) * TIMELINE_STEPS // max(1, last - first))
 
     def _pause_playback(self, *unused):
         """Freeze the visible event immediately, even while a projection is decoding."""
@@ -591,6 +611,15 @@ class LmtrWindow(QMainWindow):
             self._anchor_clock = time.monotonic_ns()
         self._rate = self.speed.currentData()
 
+    def _start_scrub(self):
+        self._scrubbing = True
+        self._pause_playback()
+
+    def _end_scrub(self):
+        self._scrubbing = False
+        self._slider_value = None
+        self._update_playhead()
+
     def _seek_slider(self, position):
         if self.state is None:
             return
@@ -599,7 +628,8 @@ class LmtrWindow(QMainWindow):
 
     def _seek_typed(self):
         if self.state is not None:
-            self._request('time', self.state['first_ns'] + round(self.seconds.value() * 1e9))
+            desired_ns = self.state['first_ns'] + round(self.seconds.value() * 1e9)
+            self._request('time', min(self.state['last_ns'], desired_ns))
 
     def open_path(self, path):
         if self._closing: return False
@@ -667,7 +697,7 @@ class LmtrWindow(QMainWindow):
         # A slow selected read must not be endlessly superseded by timer requests.
         # User scrubs still replace the pending slot; no catch-up frame queue exists.
         if self._playing and self.state is not None:
-            self._update_playhead()
+            self._update_playhead(clock_ns=time.monotonic_ns())
             if not self._in_flight:
                 self._request('tick', (self._head_ns(), self.state['index']), clear=False)
     def _receive(self):

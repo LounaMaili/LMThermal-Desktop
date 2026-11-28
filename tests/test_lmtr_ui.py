@@ -144,6 +144,11 @@ class LmtrUiTests(unittest.TestCase):
         self.assertEqual((1, 0), w.image.pinned)
         self.assertIn('mean 25', w.roi_label.text())
         self.assertEqual((int(w.state['timing']['timeline_ns']), 1), w.temporal_panel._cursor)
+        editor = w.seconds.lineEdit()
+        editor.setFocus()
+        QTest.keyClick(editor, Qt.Key.Key_Left)
+        self.assertFalse(w._in_flight)
+        self.assertEqual(1, w.state['index'])
 
     def test_drag_previews_latest_timestamp_and_stops_on_a_gap(self):
         w = self.window
