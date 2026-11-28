@@ -194,7 +194,7 @@ class AnalysisFinishTests(unittest.TestCase):
             self.viewer.open_path(source)
             self.wait(lambda: self.viewer.state and not self.viewer._in_flight)
             self.panel.add_selection(TemporalSelection.from_frame(self.viewer.frame, 'point', Rectangle(1, 0, 2, 1)))
-            self.viewer.slider.setValue(4)
+            self.viewer._request('seek', 4)
             self.wait(lambda: not self.viewer._in_flight)
             self.panel.add_selection(TemporalSelection.from_frame(self.viewer.frame, 'point', Rectangle(1, 0, 2, 1)))
             self.calculate()

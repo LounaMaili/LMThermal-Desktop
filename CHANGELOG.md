@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed (Interactive LMTR playback)
+- Drive the time bar with a monotonic playback clock and keep the displayed event time, display skips and recorded gaps explicit.
+- Keep Pause, time scrubbing and measurement tools usable while the worker is reading. Supersede stale frame requests, seek by indexed nanosecond time and step through exact events with the keyboard.
+- Add a direct native-point tool and retain compatible point and ROI selections across navigation. Calculating temporal curves pauses playback and retains cooperative cancellation.
+
 ### Fixed (Desktop integration finalization — 2026-11-27)
 - Drag coincident time-range handles in either direction. A click preserves the single instant, and each drag keeps the selected handle while clamping to the opposite bound and recording limits.
 - Make analysis dequeue and cancellation ownership atomic. A cancellation accepted at worker startup or during collection cannot publish a replacement series.

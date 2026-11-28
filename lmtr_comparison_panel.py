@@ -151,8 +151,8 @@ class ComparisonPanel(QWidget):
         self.message.clear()
         self._refresh_display()
 
-    def set_ready(self, idle, usable, single_pixel):
-        self._idle, self._usable, self._single_pixel = idle, usable, single_pixel
+    def set_ready(self, idle, usable, point_ready):
+        self._idle, self._usable, self._single_pixel = idle, usable, point_ready
         self._sync_controls()
 
     def set_busy(self, busy):
@@ -162,12 +162,16 @@ class ComparisonPanel(QWidget):
 
     def _sync_controls(self):
         room = len(self.selections) < MAX_SELECTIONS
-        self.plot_point.setEnabled(bool(self._usable and room and self._single_pixel))
+        self.plot_point.setEnabled(bool(self._single_pixel and room))
         self.plot_roi.setEnabled(bool(self._usable and room))
         self.compute.setEnabled(bool(self._idle and self.selections))
         self.editor.setEnabled(self._idle)
         self.difference_controls.setEnabled(self._idle and len(self.selections) >= 2)
         self.save_csv.setEnabled(self._idle and self.comparison is not None)
+        self.plot_point.setToolTip('Add the pinned pixel as a temperature curve.' if self.plot_point.isEnabled()
+                                   else 'Pin a pixel with the Point tool and leave space among the four curves.')
+        self.plot_roi.setToolTip('Add the mean temperature of the selected rectangle as a curve.' if self.plot_roi.isEnabled()
+                                 else 'Drag a rectangle on a valid image and leave space among the four curves.')
 
     def _rebuild_items(self):
         """Rebuild only after adding/removing; editing names must preserve keyboard focus."""

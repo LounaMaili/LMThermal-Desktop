@@ -5,7 +5,7 @@ integrity are separate claims. One decoded CHUNK is retained, never a recording'
 matrices. The owned descriptor belongs to the playback worker and must be closed.
 """
 from copy import deepcopy
-from bisect import bisect_right
+from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from pathlib import Path
 import struct
@@ -72,6 +72,47 @@ class _DesktopReader(Reader):
         if decoded > self.limits.decoded_cache_bytes or charge > self.limits.working_bytes:
             raise ContractError('local_resource_limit', 'Desktop CHUNK decoded/working budget before decompression')
         return super().decode(record)
+
+    def time_chunk(self, end, target_ns, before):
+        """Locate a time through authenticated index ranges without decoding probe images.
+
+        This is navigation evidence only. The chosen frame still goes through
+        the ordinary R3 CHUNK verification before anything is displayed.
+        """
+        owner = end
+        ref = end['json']['root']
+        parent = None
+        while ref is not None:
+            page = self.reference(ref, owner, 3)
+            self.index_page(page)
+            data = page['json']
+            if parent is not None and (
+                data['depth'] != owner['json']['depth'] - 1 or
+                any(data[key] != parent[key] for key in ('time_first_ns', 'time_last_ns', 'stream_ids'))
+            ):
+                raise ContractError('invalid_container', 'Timeline page bounds')
+            children = data['children']
+            if before:
+                child = next((c for c in reversed(children) if int(c['time_first_ns']) <= target_ns), None)
+            else:
+                child = next((c for c in children if int(c['time_last_ns']) >= target_ns), None)
+            if child is None:
+                return None
+            ref, owner = child['record'], page
+            if data['depth'] == 0:
+                record = self.reference(ref, owner, 2)
+                entries = self.metadata(record)['entries']
+                first = int(ref['first'])
+                times = [int(e['timeline_ns']) for e in entries]
+                if (not times or times[0] != int(child['time_first_ns']) or
+                        times[-1] != int(child['time_last_ns']) or
+                        len(entries) != int(ref['last']) - first + 1 or
+                        any(int(e['entry_id']) != first + i for i, e in enumerate(entries)) or
+                        any(a > b for a, b in zip(times, times[1:]))):
+                    raise ContractError('invalid_container', 'Timeline CHUNK bounds')
+                return first, times
+            parent = child
+        return None
 
 
 @dataclass(frozen=True)
@@ -457,15 +498,41 @@ class LmtrPlaybackModel:
         return self.entry
     def seek_time_ns(self, timeline_ns):
         """Select the first stored event at/after original intake time, without FPS inference."""
+        index = self.index_at_time_ns(timeline_ns)
+        return None if index is None else self.seek(index)
+
+    def index_at_time_ns(self, timeline_ns, *, before=False):
+        """Resolve stored timestamps exactly, including ties across CHUNKs."""
         if type(timeline_ns) is not int or timeline_ns < 0: raise ValueError('Invalid intake time')
-        # Exact integers decide chronology; Float64 seconds are presentation only.
-        low, high = 0, self.entry_count
-        while low < high:
-            mid = (low+high)//2
-            if int(self._entry_view(mid)['timeline_ns']) < timeline_ns: low = mid+1
-            else: high = mid
-        index = low
-        return None if index >= self.entry_count else self.seek(index)
+        if not self.entry_count:
+            return None
+        self._assert_source_unchanged()
+        search = bisect_right if before else bisect_left
+        shift = int(before)
+        if self._cache:
+            entries = self._cache[1]['entries']
+            first, last = (int(entries[i]['timeline_ns']) for i in (0,-1))
+            # Strict side matters when two neighboring CHUNKs share a time.
+            if (first <= timeline_ns < last if before else first < timeline_ns <= last):
+                slot = search(entries, timeline_ns, key=lambda e: int(e['timeline_ns'])) - shift
+                return int(entries[slot]['entry_id'])
+        if self.recovered:
+            # Recovery has a fixed verified prefix but no trusted terminal tree.
+            index = search(range(self.entry_count), timeline_ns,
+                           key=lambda i: int(self._entry_view(i)['timeline_ns'])) - shift
+            return index if 0 <= index < self.entry_count else None
+        target = self.reader.time_chunk(self.reader.terminal(), timeline_ns, before)
+        if target is None:
+            return None
+        first, times = target
+        slot = search(times, timeline_ns) - shift
+        return first + slot if 0 <= slot < len(times) else None
+
+    def project_time_ns(self, timeline_ns):
+        """Project the playback head to a real event; keep navigation static on a pause."""
+        index = self.index_at_time_ns(timeline_ns, before=True)
+        if index is not None:
+            self.index = index
     def step(self, delta): return self.seek(self.index+delta)
     def play(self, now=None):
         if not self.entry_count: return
@@ -485,6 +552,6 @@ class LmtrPlaybackModel:
         if self.playing:
             now = time.monotonic() if now is None else now
             target = self._anchor_elapsed+max(0,now-self._anchor_time)*self.speed
-            self.index = max(0,min(bisect_right(self._times,target)-1,self.entry_count-1))
+            self.project_time_ns(self.first_time_ns + round(target * 1e9))
             if target >= self.duration_s: self.pause()
         return self.entry

@@ -184,13 +184,13 @@ def run(app, workspace, source, output, *, include_range=False):
             wait(lambda: not viewer._in_flight and not viewer.state['playing'], 'pause')
         assert panel.chart._cursor_index == viewer.state['index']
         blank = next((r for r in original_series[0].rows if r.event == 'gap'), original_series[0].rows[0])
-        viewer.slider.setValue(blank.index)
+        viewer._request('seek', blank.index)
         wait(lambda: not viewer._in_flight, 'unavailable event navigation')
         assert viewer.frame is None and 'unavailable' in panel.reading.text()
         report['unavailable_event'] = dict(index=blank.index, event=blank.event, status=blank.status,
                                            category=blank.gap_category, reason=blank.reason)
         snapshot('04-unavailable.png')
-        viewer.slider.setValue(target.index)
+        viewer._request('seek', target.index)
         wait(lambda: not viewer._in_flight and viewer.frame is not None, 'image recovery')
         workspace.resize(940, 740)
         QTest.qWait(60)

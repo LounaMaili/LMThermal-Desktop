@@ -1,4 +1,5 @@
 """Pinned R3 corpus plus offline adapter/cache/source-integrity regressions."""
+from contextlib import closing
 import hashlib
 import json
 from pathlib import Path
@@ -7,7 +8,9 @@ import unittest
 from unittest.mock import patch
 
 from lmtr_reference import Reader, ContractError
+from lmtr_reference.container import write_plan
 from lmtr_reader import LmtrPlaybackModel, MAX_CACHE_BYTES
+from lmtr_test_support import rehash_segment, segmented_plan
 from offline_measurement import Rectangle, save_offline_png
 from celsius_palette import CelsiusRange
 
@@ -116,6 +119,24 @@ class LmtrReaderTests(unittest.TestCase):
         self.assertEqual(0,model.step(-999).index)
         with self.assertRaises(IndexError): model.entries[-1]
         with self.assertRaises(ValueError): model.seek_time_ns(-1)
+
+    def test_indexed_time_seek_checks_only_target_chunk_and_resolves_ties(self):
+        plan = segmented_plan()
+        second = plan['chunks'][1]['metadata']
+        second['segments'][0]['start_timeline_ns'] = '2000000'
+        second['entries'][0]['timeline_ns'] = '2000000'
+        rehash_segment(second)
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / 'time-index.lmtr'
+            write_plan(plan, source)
+            with closing(LmtrPlaybackModel(source)) as model:
+                with patch.object(model.reader, 'decode', wraps=model.reader.decode) as decode:
+                    self.assertEqual(4, model.seek_time_ns(3_000_001).index)
+                    self.assertEqual(25, model.frame().point(0, 0))
+                    decode.assert_called_once()
+                    self.assertEqual(2, model.index_at_time_ns(2_000_000))
+                    self.assertEqual(3, model.index_at_time_ns(2_000_000, before=True))
+                    decode.assert_called_once()
     def test_source_change_is_refused_even_for_cached_chunk(self):
         with TemporaryDirectory() as root:
             path=Path(root)/'copy.lmtr'; path.write_bytes((ROOT/'files/illustration-01-stored.lmtr').read_bytes())

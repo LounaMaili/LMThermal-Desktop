@@ -97,7 +97,7 @@ def check_lmtr_comparison(app, window, viewer, output, wait):
         if row['status'] != 'valid':
             assert row['temperature_c'] == ''
     # A later player event must move the existing chart cursor, not recalculate it.
-    viewer.slider.setValue(index)
+    viewer._request('seek', index)
     wait(lambda: not viewer._in_flight, 'player-to-chart seek')
     assert panel.chart._cursor_index == index
     return dict(status='passed', selections=4, reading_values=actual, csv_rows=len(rows),
@@ -232,9 +232,9 @@ def run(app, window, path, output, *, expect_error=False):
             assert dialogs == [True]
             result['checks'].append('original_metadata_dialog')
             if lmtr:
-                viewer.slider.setValue(0);wait(lambda:not viewer._in_flight,'segment/gap navigation')
+                viewer._request('seek', 0);wait(lambda:not viewer._in_flight,'segment/gap navigation')
                 assert viewer.frame is None and image.image is None and not viewer.save_button.isEnabled()
-                viewer.slider.setValue(1);wait(lambda:viewer.frame is not None,'observation recovery')
+                viewer._request('seek', 1);wait(lambda:viewer.frame is not None,'observation recovery')
                 viewer.verify_button.click();wait(lambda:not viewer._in_flight,'full verification')
                 result['integrity_status'] = viewer.validation_status.text()
                 result['checks'].append('timeline_blank_event_recovery_full_verification')

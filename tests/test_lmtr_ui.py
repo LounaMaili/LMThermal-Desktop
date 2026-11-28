@@ -3,13 +3,21 @@ import os
 os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
 from pathlib import Path
 import sys
+from tempfile import TemporaryDirectory
+from threading import Event
 import time
 import unittest
 from unittest.mock import patch
+from PyQt6.QtCore import QPoint, Qt
+from PyQt6.QtTest import QTest
 from PyQt6.QtWidgets import QApplication
 
+from lmtr_reader import LmtrPlaybackModel
+from lmtr_reference.container import write_plan
+from lmtr_test_support import gap_plan
 from lmtr_viewer import LmtrWindow
 from roi_measurement import NativeROI
+from mvp_presentation import native_to_widget
 
 ROOT=Path(__file__).parent/'fixtures/lmtr/files'
 
@@ -75,11 +83,109 @@ class LmtrUiTests(unittest.TestCase):
         self.assertIsNone(w.frame);self.assertIsNone(w.image.image)
         self.assertIsNone(w.legend.bounds);self.assertFalse(w.save_button.isEnabled())
         self.assertNotIn('mvp_camera_worker',sys.modules)
-    def test_timer_never_supersedes_an_inflight_load(self):
-        w=self.window;w._in_flight=True
-        with patch.object(w.worker,'request') as request:
-            for _ in range(50):w._tick()
-            request.assert_not_called()
+    def test_pause_and_image_tools_work_while_the_worker_is_projecting(self):
+        self.opened()
+        w = self.window
+        w.temporal_button.click()
+        entered, release = Event(), Event()
+        project = LmtrPlaybackModel.project_time_ns
+
+        def blocked(model, ns):
+            entered.set()
+            if not release.wait(5):
+                raise TimeoutError('Playback probe was not released')
+            project(model, ns)
+
+        def pixel(x, y):
+            mapped = native_to_widget(x, y, w.image.width(), w.image.height(), **w.image._mapping())
+            return QPoint(*(round(value) for value in mapped))
+
+        with patch.object(LmtrPlaybackModel, 'project_time_ns', blocked):
+            try:
+                QTest.keyClick(w, Qt.Key.Key_Space)
+                self.wait(entered.is_set)
+                self.assertEqual('Pause', w.play.text())
+                self.assertTrue(w.play.isEnabled())
+                first_token = w.token
+                w._tick()
+                self.assertEqual(first_token, w.token)
+                w.palette.setCurrentText('Turbo')
+                w.auto.click()
+                self.assertTrue(w.minimum.isEnabled())
+                w.image_tool.setCurrentText('Point')
+                QTest.mouseClick(w.image, Qt.MouseButton.LeftButton, pos=pixel(1, 0))
+                self.assertEqual((1, 0), w.image.pinned)
+                self.assertIn('30', w.point.text())
+                self.assertEqual('Turbo', w.image.palette)
+                self.assertIsNone(w.image.roi)
+                self.assertTrue(w.plot_point.isEnabled())
+                w.plot_point.click()
+                w.image_tool.setCurrentText('ROI')
+                QTest.mousePress(w.image, Qt.MouseButton.LeftButton, pos=pixel(0, 0))
+                QTest.mouseMove(w.image, pixel(1, 0))
+                QTest.mouseRelease(w.image, Qt.MouseButton.LeftButton, pos=pixel(1, 0))
+                self.assertIn('mean 25', w.roi_label.text())
+                self.assertTrue(w.plot_roi.isEnabled())
+                QTest.keyClick(w, Qt.Key.Key_Space)
+                self.assertEqual('Play', w.play.text())
+                self.assertFalse(w._in_flight)
+                self.assertEqual(1, w.state['index'])
+            finally:
+                release.set()
+        # The pending tick projected the final event. A subsequent fine step
+        # must still start from the paused frame, and expose the blank segment.
+        QTest.keyClick(w, Qt.Key.Key_Left)
+        self.wait(lambda: not w._in_flight)
+        self.assertEqual(0, w.state['index'])
+        self.assertIsNone(w.image.image)
+        self.assertIn('unavailable', w.point.text())
+        QTest.keyClick(w, Qt.Key.Key_Right)
+        self.wait(lambda: not w._in_flight)
+        self.assertEqual((1, 0), w.image.pinned)
+        self.assertIn('mean 25', w.roi_label.text())
+        self.assertEqual((int(w.state['timing']['timeline_ns']), 1), w.temporal_panel._cursor)
+
+    def test_drag_previews_latest_timestamp_and_stops_on_a_gap(self):
+        w = self.window
+        with TemporaryDirectory() as path:
+            source = Path(path) / 'gap.lmtr'
+            write_plan(gap_plan(), source)
+            w.open_path(source)
+            self.wait(lambda: w.frame is not None)
+            entered, release = Event(), Event()
+            seek = LmtrPlaybackModel.seek_time_ns
+            last_ns = w.state['last_ns']
+
+            def blocked(model, ns):
+                if ns == last_ns:
+                    entered.set()
+                    if not release.wait(5):
+                        raise TimeoutError('Scrub probe was not released')
+                return seek(model, ns)
+
+            slider = w.slider
+            y = slider.height() // 2
+            with patch.object(LmtrPlaybackModel, 'seek_time_ns', blocked):
+                try:
+                    QTest.mousePress(slider, Qt.MouseButton.LeftButton, pos=QPoint(slider.width() - 1, y))
+                    self.wait(entered.is_set)
+                    QTest.mouseMove(slider, QPoint(slider.width() // 2, y))
+                    self.assertTrue(slider.isSliderDown())
+                    self.assertTrue(w._in_flight)
+                finally:
+                    release.set()
+                self.wait(lambda: not w._in_flight)
+                # A preview arrived while still holding the slider.
+                self.assertTrue(slider.isSliderDown())
+                self.assertEqual(2, w.state['index'])
+                self.assertIn('Gap', w.image.empty_text)
+                self.assertIsNone(w.image.image)
+                self.assertIn('Recorded gaps 1', w.time_label.text())
+                QTest.mouseRelease(slider, Qt.MouseButton.LeftButton, pos=QPoint(slider.width() // 2, y))
+                self.assertEqual('Play', w.play.text())
+                self.assertEqual((2_000_000, 2), w.temporal_panel._cursor)
+            w.close()
+            self.wait(lambda: not w.worker.isRunning())
 
     def test_laptop_width_keeps_navigation_and_palette_controls_inside_window(self):
         self.opened();self.window.details_button.setChecked(True)
