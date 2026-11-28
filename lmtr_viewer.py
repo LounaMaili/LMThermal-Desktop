@@ -376,10 +376,18 @@ class LmtrWindow(QMainWindow):
         row.addWidget(self.validation_status, 1)
         self.details_panel.hide(); self.details_button.toggled.connect(self.details_panel.setVisible)
         self.status = QLabel('Offline — no camera'); self.status.setWordWrap(True); layout.addWidget(self.status)
+        timeline_info = QHBoxLayout()
+        layout.addLayout(timeline_info)
         self.timing_status=QLabel('Timing unavailable');self.timing_status.setWordWrap(True)
         self.timing_status.setSizePolicy(QSizePolicy.Policy.Ignored,QSizePolicy.Policy.Fixed)
-        self.timing_status.setFixedHeight(self.timing_status.fontMetrics().lineSpacing()*3+4)
-        layout.addWidget(self.timing_status)
+        timing_height = self.timing_status.fontMetrics().lineSpacing()*3+4
+        self.timing_status.setFixedHeight(timing_height)
+        timeline_info.addWidget(self.timing_status, 1)
+        self.time_label = QLabel('No recording timeline')
+        self.time_label.setWordWrap(True)
+        self.time_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.time_label.setFixedHeight(timing_height)
+        timeline_info.addWidget(self.time_label, 1)
         views = QSplitter(Qt.Orientation.Vertical)
         inspection = QSplitter(Qt.Orientation.Horizontal)
         inspection.setChildrenCollapsible(False)
@@ -421,9 +429,6 @@ class LmtrWindow(QMainWindow):
         self.temporal_button.toggled.connect(self.analysis_tabs.setVisible)
         self.temporal_button.toggled.connect(self.temporal_panel.plot_panel.setVisible)
         self.temporal_button.toggled.connect(lambda visible: views.setSizes([300, 220]) if visible else None)
-        self.time_label = QLabel('No recording timeline')
-        self.time_label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
-        layout.addWidget(self.time_label)
         self.slider = IntakeSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(0, TIMELINE_STEPS)
         self.slider.setToolTip('Timeline · click or drag to pause and seek. Left/Right step one event; Space plays or pauses.')
@@ -570,7 +575,7 @@ class LmtrWindow(QMainWindow):
         text = f'{mode}  {self._time_text(head - first)} / {self._time_text(last - first)}'
         if self._playing:
             text += f'   ·   Image {self._time_text(self._shown_ns() - first)}'
-        text += f"   ·   Display skipped {self._skipped} events   ·   Recorded gaps {self.state['report']['summary']['gap_events']}"
+        text += f"\nDisplay skipped {self._skipped} events   ·   Recorded gaps {self.state['report']['summary']['gap_events']}"
         if self.time_label.text() != text:
             self.time_label.setText(text)
 
