@@ -32,20 +32,37 @@ committed source corruption still reject. There is no salvage-to-success fallbac
 
 ## Bounds and UI
 
-One worker owns the playback descriptor and coalesced request/result slots. All index/file/hash/
-decompression work runs there. A slider does not eagerly load duration-sized matrices
+One worker owns the playback descriptor and coalesced request/result slots. It handles
+index and file reads, and can delegate verified payload work during Linux playback.
+A slider does not eagerly load duration-sized matrices
 or a timeline list. Timer requests wait for an in-flight request instead of endlessly
 superseding slow work. User scrubs can supersede pending work; obsolete results do not
 publish. Shutdown cancels between records; one synchronous operation has no proven
 latency bound. Close disables/clears the window immediately and completes asynchronously
 when its worker releases the descriptor; it never blocks the GUI or terminates a thread.
 
-One decoded-CHUNK cache is at most64MiB; evict before loading. This is **retained decoded
-bytes**, not total process memory. Reference input body up to65MiB, decompression/
-logical-slice/JSON/statistics scratch, a selected owned frame, result/UI copies, image
-and Qt graphics can coexist. The reference currently decodes once for validation and
-again to materialize analysis blocks; no claim of zero-copy or memory-admission proof.
+One current decoded CHUNK is at most 64 MiB and is evicted before a different one is
+selected. The Desktop adapter retains the exact bytes already checked by the pinned
+R3 payload validator. It runs the same block inflation, decoded hashes and R3 logical
+checks once on those bytes. Owned frame slices, runtime scratch and Qt graphics use
+additional memory.
+
+On Linux with four or more available logical CPUs, up to three spawned verifier
+processes handle at most four speculative CHUNKs per playing source. The combined
+working reservation is at most 24 MiB per source, further capped by the local
+decoded and working limits. The reservation uses the same body, decoded, logical,
+stored scratch and metadata charges used for an ordinary selected CHUNK. Process
+runtimes and IPC copies are separate RSS costs. Selection rechecks the source stamp
+and the authenticated index relation, including the stream and time bounds checked
+after a selected leaf is yielded by R3. Unavailable, oversized and recovered
+lookahead uses the synchronous verified path. A speculative failure is reported if
+its event is selected. Close, source replacement and explicit full verification
+discard results and join the verifier processes from the worker. Running payload
+checks finish at their normal CHUNK boundary.
+
 Navigation caches retain at most16 records/8MiB raw bodies, at most two pages/depth.
+The reader also retains the verified END and the last selected compressed CHUNK
+for exact-time lookup when the latter has at most 1 MiB of body bytes.
 Reference reporting state has a65536-record/hash local budget. Desktop's current slider
 admits at most1000000 events; recovered fixed ranges cap65536 CHUNKs. These are explicit
 local refusals, not v1 wire changes. Large-file/indefinite-runtime performance is unproven beyond the finite probes below.
@@ -155,7 +172,7 @@ views) + largest stored block +8×serialized metadata. This is an explicit conse
 buffer estimate, **not a proven Python-object/RSS ceiling**. Graphics, owned frames,
 metadata object graphs and runtime overhead remain separate. A valid wire file can
 exceed local admission; there is no silent partial decode or weakened validation.
-The original R3 decode still runs in full after these checks.
+The original R3 payload validator runs in full after these checks.
 
 HEADER/entry values crossing the worker boundary are owned copies. Public logical
 payload bytes are immutable, including opaque observations without primary geometry.

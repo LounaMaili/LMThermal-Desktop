@@ -5,6 +5,11 @@ import json
 import sys
 from pathlib import Path
 
+if __name__ == '__main__':
+    # PyInstaller's multiprocessing entry point must run before importing Qt.
+    from multiprocessing import freeze_support
+    freeze_support()
+
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,

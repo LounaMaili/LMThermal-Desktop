@@ -95,8 +95,10 @@ time bar to pause and preview the first event at or after the selected recorder
 time. Use **Seek time** for typed elapsed seconds, and **Left/Right** or
 **Previous/Next** to inspect individual events, including ties at the same time.
 Gaps and segment events are blank with no readings.
-Stored Float32 values are authoritative; no thermometry is recomputed. Only one
-decoded CHUNK is cached. File navigation is asynchronous and latest-request bounded.
+Stored Float32 values are authoritative; no thermometry is recomputed. The reader
+keeps one current decoded CHUNK. On Linux with at least four available logical
+CPUs, playback can verify up to four upcoming CHUNKs in a separate bounded queue.
+File navigation is asynchronous and latest-request bounded.
 During playback, the timeline follows elapsed time and the image label identifies
 the displayed event's time. Events skipped by display and recorded gaps have
 separate counters. Use **Point** to pin a native pixel or **ROI** to drag a

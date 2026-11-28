@@ -1,22 +1,26 @@
 """Read-only indexed LMTR analysis using the pinned independent R3 validator.
 
 Only verified source Float32 values enter analysis. Index navigation and full-file
-integrity are separate claims. One decoded CHUNK is retained, never a recording's
-matrices. The owned descriptor belongs to the playback worker and must be closed.
+integrity are separate claims. Playback bounds both the displayed CHUNK and
+speculative verification work. The worker owns the read-only descriptor.
 """
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
 from copy import deepcopy
 from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
+from multiprocessing import get_context
 from pathlib import Path
 import struct
 import os
+import sys
 import time
 import weakref
 
 import numpy as np
 from lmtr_reference import Reader, ContractError
-from lmtr_reference.container import inflate
-from lmtr_reference.metadata import sha
+from lmtr_reference.jsoncodec import require
+from lmtr_verified_blocks import decode_verified_blocks, verify_ahead
 from offline_measurement import (Geometry, NativePlane, OfflineMeasurement,
                                  freeze, statistics)
 
@@ -24,6 +28,10 @@ from offline_measurement import (Geometry, NativePlane, OfflineMeasurement,
 MAX_UI_ENTRIES = 1_000_000
 MAX_RECOVERY_CHUNKS = 65536
 MAX_CACHE_BYTES = 64 * 1024**2
+LOOKAHEAD_CHUNKS = 4
+LOOKAHEAD_PROCESSES = 3
+LOOKAHEAD_BYTES = 24 * 1024**2
+RECENT_RECORD_BYTES = 1024**2
 
 
 @dataclass(frozen=True)
@@ -44,10 +52,25 @@ class LmtrReadLimits:
             raise ValueError('Invalid local LMTR resource limits')
 
 
+@dataclass
+class _Ticket:
+    record: dict
+    future: object
+    charge: int
+
+
 class _DesktopReader(Reader):
     """Add pre-allocation local refusals without changing the pinned R3 validator."""
     def __init__(self, path, limits):
         self.limits = limits
+        self._end = None
+        self._recent = None
+        self._tickets = {}
+        self._scheduled = None
+        self._pool = None
+        self._parallel = False
+        self.capture_blocks = False
+        self.captured_blocks = None
         try:
             super().__init__(path)
         except BaseException:
@@ -60,10 +83,29 @@ class _DesktopReader(Reader):
             raise ContractError('local_resource_limit', 'Desktop CHUNK body budget before body allocation')
         return info
 
-    def decode(self, record):
-        # The original metadata checker establishes lengths/features/closure before
-        # any source length is used here. Full R3 decode still follows independently.
-        meta = self.metadata(record)
+    def terminal(self):
+        # The model checks descriptor and path identity around every source
+        # operation. Keep the END only after its entire closure has passed.
+        if self._end is None:
+            self._end = super().terminal()
+        return self._end
+
+    def record(self, offset, expected=None):
+        if expected == 2:
+            ticket = self._tickets.get(offset)
+            if ticket is not None or (self._recent and self._recent['offset'] == offset):
+                require(not self.cancellation(), 'cooperative reader cancellation', 'cancelled')
+                return ticket.record if ticket else self._recent
+        return super().record(offset, expected)
+
+    def metadata(self, record):
+        if '_desktop_metadata' not in record:
+            # Reader.metadata sets its own field before completing every check.
+            # Keep a separate marker set only after that call returns successfully.
+            record['_desktop_metadata'] = super().metadata(record)
+        return record['_desktop_metadata']
+
+    def _admit(self, record, meta):
         decoded = sum(int(b['decoded']) for b in meta['blocks'])
         logical = sum(int(p['length']) for e in meta['entries'] for p in e.get('payloads', ()))
         stored = max((int(b['stored']) for b in meta['blocks']), default=0)
@@ -71,14 +113,37 @@ class _DesktopReader(Reader):
         charge = len(record['body']) + decoded + logical + stored + 8 * metadata_bytes
         if decoded > self.limits.decoded_cache_bytes or charge > self.limits.working_bytes:
             raise ContractError('local_resource_limit', 'Desktop CHUNK decoded/working budget before decompression')
-        return super().decode(record)
+        return charge
 
-    def time_chunk(self, end, target_ns, before):
-        """Locate a time through authenticated index ranges without decoding probe images.
+    def decode(self, record):
+        meta = self.metadata(record)
+        self._admit(record, meta)
+        ticket = self._tickets.get(record['offset'])
+        verified = None
+        if ticket is not None and ticket.record is record and ticket.future.done():
+            del self._tickets[record['offset']]
+            try:
+                verified, error = ticket.future.result()
+            except BrokenProcessPool:
+                self._parallel = False
+            else:
+                if error is not None:
+                    raise ContractError(*error)
+        blocks, result = verified if verified is not None else decode_verified_blocks(record['body'], meta, self.head)
+        # Match Reader.decode's cumulative reporting admission even when a
+        # selected CHUNK was prepared in another process.
+        offset = record['offset']
+        require(len(self.logical) + len(result['logical_hashes']) <= 65536 or offset in self.selected,
+                'logical-hash reporting budget', 'local_resource_limit')
+        self.logical.update(result['logical_hashes'])
+        self.selected.add(offset)
+        if self.capture_blocks:
+            self.captured_blocks = blocks
+        return meta, result
 
-        This is navigation evidence only. The chosen frame still goes through
-        the ordinary R3 CHUNK verification before anything is displayed.
-        """
+    def _indexed_leaf(self, end, choose):
+        """Find the authenticated record on a selected index branch."""
+
         owner = end
         ref = end['json']['root']
         parent = None
@@ -91,28 +156,126 @@ class _DesktopReader(Reader):
                 any(data[key] != parent[key] for key in ('time_first_ns', 'time_last_ns', 'stream_ids'))
             ):
                 raise ContractError('invalid_container', 'Timeline page bounds')
-            children = data['children']
-            if before:
-                child = next((c for c in reversed(children) if int(c['time_first_ns']) <= target_ns), None)
-            else:
-                child = next((c for c in children if int(c['time_last_ns']) >= target_ns), None)
+            child = choose(data['children'])
             if child is None:
                 return None
             ref, owner = child['record'], page
             if data['depth'] == 0:
-                record = self.reference(ref, owner, 2)
-                entries = self.metadata(record)['entries']
-                first = int(ref['first'])
-                times = [int(e['timeline_ns']) for e in entries]
-                if (not times or times[0] != int(child['time_first_ns']) or
-                        times[-1] != int(child['time_last_ns']) or
-                        len(entries) != int(ref['last']) - first + 1 or
-                        any(int(e['entry_id']) != first + i for i, e in enumerate(entries)) or
-                        any(a > b for a, b in zip(times, times[1:]))):
-                    raise ContractError('invalid_container', 'Timeline CHUNK bounds')
-                return first, times
+                return owner, child
             parent = child
         return None
+
+    def time_chunk(self, end, target_ns, before):
+        """Locate an exact time without decoding unrelated CHUNKs."""
+        def choose(children):
+            if before:
+                return next((c for c in reversed(children) if int(c['time_first_ns']) <= target_ns), None)
+            return next((c for c in children if int(c['time_last_ns']) >= target_ns), None)
+        selected = self._indexed_leaf(end, choose)
+        if selected is None:
+            return None
+        owner, child = selected
+        ref = child['record']
+        record = self.reference(ref, owner, 2)
+        entries = self.metadata(record)['entries']
+        first = int(ref['first'])
+        times = [int(e['timeline_ns']) for e in entries]
+        if (not times or times[0] != int(child['time_first_ns']) or
+                times[-1] != int(child['time_last_ns']) or
+                len(entries) != int(ref['last']) - first + 1 or
+                any(int(e['entry_id']) != first + i for i, e in enumerate(entries)) or
+                any(a > b for a, b in zip(times, times[1:]))):
+            raise ContractError('invalid_container', 'Timeline CHUNK bounds')
+        if len(record['body']) <= RECENT_RECORD_BYTES:
+            self._recent = record
+        return first, times
+
+    def prepare(self, start, count, *, already_decoded):
+        """Keep a bounded sequential verification window, independent of frame requests."""
+        if not self._parallel or start >= count:
+            return True
+        if self._scheduled is not None and self._scheduled[0] == start:
+            offset = self._scheduled[1]
+            ticket = self._tickets.get(offset)
+            if ticket is not None:
+                return already_decoded or ticket.future.done()
+        cursor = start
+        window = []
+        budget = min(LOOKAHEAD_BYTES, self.limits.decoded_cache_bytes, self.limits.working_bytes // 2)
+        try:
+            for _ in range(LOOKAHEAD_CHUNKS):
+                selected = self._indexed_leaf(self.terminal(), lambda items: next(
+                    (c for c in items if int(c['record']['first']) <= cursor <= int(c['record']['last'])), None))
+                if selected is None:
+                    break
+                owner, child = selected
+                ref = child['record']
+                window.append((owner, ref))
+                cursor = int(ref['last']) + 1
+                if cursor >= count:
+                    break
+        except (ContractError, OSError):
+            # A speculative error cannot affect the currently selected event.
+            # Ordinary navigation will report it if the user selects this CHUNK.
+            pass
+        wanted = {int(ref['offset']) for _, ref in window}
+        for offset, ticket in tuple(self._tickets.items()):
+            if offset not in wanted and (ticket.future.cancel() or ticket.future.done()):
+                del self._tickets[offset]
+        used = sum(ticket.charge for ticket in self._tickets.values())
+        for owner, ref in window:
+            offset = int(ref['offset'])
+            if offset in self._tickets:
+                continue
+            # Give speculative envelope/body reads the same working reservation
+            # as their subsequent metadata and payload validation.
+            if len(self._tickets) >= LOOKAHEAD_CHUNKS or used + int(ref['length']) - 112 > budget:
+                break
+            try:
+                # Do not allocate a body from an optimistic (possibly malformed)
+                # reference length. Validate the actual envelope first.
+                if self.envelope(offset)['length'] != int(ref['length']):
+                    break
+                record = self.reference(ref, owner, 2)
+                meta = self.metadata(record)
+                charge = self._admit(record, meta)
+            except (ContractError, OSError):
+                break  # The selected path, if reached, will report the error.
+            if used + charge > budget:
+                break
+            try:
+                if self._pool is None:
+                    self._pool = ProcessPoolExecutor(max_workers=LOOKAHEAD_PROCESSES,
+                                                     mp_context=get_context('spawn'))
+                future = self._pool.submit(verify_ahead, record['body'], meta, self.head)
+            except (BrokenProcessPool, ImportError, OSError):
+                self._parallel = False
+                return True
+            self._tickets[offset] = _Ticket(record, future, charge)
+            used += charge
+        if not window:
+            return True
+        offset = int(window[0][1]['offset'])
+        ticket = self._tickets.get(offset)
+        if all(int(ref['offset']) in self._tickets for _, ref in window):
+            self._scheduled = (start, offset)
+        # An oversized candidate or a busy pool after a large jump still has
+        # a synchronous verified path.
+        return already_decoded or ticket is None or ticket.future.done()
+
+    def reset_lookahead(self):
+        if self._pool is not None:
+            self._pool.shutdown(wait=True, cancel_futures=True)
+            self._pool = None
+        self._tickets.clear()
+        self._scheduled = None
+
+    def close(self):
+        try:
+            self.reset_lookahead()
+        finally:
+            self._recent = self._end = None
+            super().close()
 
 
 @dataclass(frozen=True)
@@ -205,6 +368,8 @@ class LmtrPlaybackModel:
             self.first_time_ns = int(self.summary['first_timeline_ns'] or 0)
             self.last_time_ns = int(self.summary['last_timeline_ns'] or 0)
             self.reader.cancellation = cancelled
+            self.reader._parallel = (sys.platform == 'linux' and not self.recovered
+                                     and len(os.sched_getaffinity(0)) >= LOOKAHEAD_PROCESSES + 1)
             if self.recovered:
                 # R3 has verified this prefix and chronology. Retain only fixed ranges,
                 # not decoded payloads or a fabricated END/index for the unknown tail.
@@ -260,11 +425,11 @@ class LmtrPlaybackModel:
     def _identity(self):
         """Detect replacement/modification; the reader never repairs a changing source."""
         st = self.path.stat()
-        return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns
+        return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns
 
     def _descriptor_identity(self):
         st = os.fstat(self.reader.file.fileno())
-        return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns
+        return st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns
 
     def _assert_source_unchanged(self):
         """Compare path and owned descriptor before AND after admitted source operations."""
@@ -281,33 +446,41 @@ class LmtrPlaybackModel:
             if int(meta['entries'][0]['entry_id']) <= index <= int(meta['entries'][-1]['entry_id']):
                 return self._cache
         self._cache = None  # Evict before decoding a new CHUNK, not after.
-        if self.recovered:
-            match = next((r for r in self._recovery_refs if r[0] <= index <= r[1]), None)
-            if match is None: raise ValueError('No verified prefix entry')
-            record = self.reader.record(match[2])
-            meta, _ = self.reader.decode(record)
-        else:
-            end = self.reader.terminal()
-            # Exhaust the generator: its child range/stream checks follow the yield.
-            matches = list(self.reader.walk(end['json']['root'], end, index))
-            if len(matches) != 1: raise ValueError('invalid_container: selected CHUNK coverage')
-            record, meta = matches[0]
-        prefix = 4+struct.unpack_from('<I', record['body'])[0]
-        blocks = {}
-        total = 0
-        # R3 decoded and checked these same immutable body bytes above. Reconstruct
-        # owned blocks for analysis without changing that independent validation path.
-        for b in meta['blocks']:
-            total += int(b['decoded'])
-            if total > self.limits.decoded_cache_bytes: raise ValueError('local_resource_limit: decoded cache budget')
-            start = prefix+int(b['offset'])
-            stored = record['body'][start:start+int(b['stored'])]
-            data = stored if b['codec'] == 0 else inflate(stored, int(b['decoded']))
-            if sha(data) != b['hash']: raise ValueError('committed_payload_integrity')
-            blocks[b['id']] = data
+        self.reader.capture_blocks = True
+        try:
+            if self.recovered:
+                match = next((r for r in self._recovery_refs if r[0] <= index <= r[1]), None)
+                if match is None: raise ValueError('No verified prefix entry')
+                record = self.reader.record(match[2])
+                meta, _ = self.reader.decode(record)
+            else:
+                end = self.reader.terminal()
+                # Exhaust the generator: its child range/stream checks follow the yield.
+                matches = list(self.reader.walk(end['json']['root'], end, index))
+                if len(matches) != 1: raise ValueError('invalid_container: selected CHUNK coverage')
+                record, meta = matches[0]
+            blocks = self.reader.captured_blocks
+        finally:
+            self.reader.capture_blocks = False
+            self.reader.captured_blocks = None
         self._assert_source_unchanged()
         self._cache = record['offset'], meta, blocks
         return self._cache
+
+    def prepare_playback(self):
+        """Return promptly if the displayed event is waiting on a verified CHUNK."""
+        if self.cancelled():
+            raise InterruptedError('LMTR load cancelled')
+        self._assert_source_unchanged()
+        start = self.index
+        ready = False
+        if self._cache is not None:
+            entries = self._cache[1]['entries']
+            last = int(entries[-1]['entry_id'])
+            if int(entries[0]['entry_id']) <= self.index <= last:
+                start = last + 1
+                ready = True
+        return self.reader.prepare(start, self.entry_count, already_decoded=ready)
 
     def _entry_view(self, index):
         _, meta, _ = self._chunk(index)
@@ -355,19 +528,23 @@ class LmtrPlaybackModel:
     def read_payloads(self, index):
         """Return exact immutable logical bytes, including observations without a grid."""
         _, meta, blocks = self._chunk(index)
-        entry = self._entry_view(index)
-        if entry['kind'] != 'observation': return freeze({})
+        entry = meta['entries'][index-int(meta['entries'][0]['entry_id'])]
+        payloads = self._payloads(entry, blocks)
+        self._assert_source_unchanged()
+        return freeze(payloads)
+
+    @staticmethod
+    def _payloads(entry, blocks):
         payloads = {}
-        for p in entry['payloads']:
+        for p in entry.get('payloads', ()):
             if p['kind'] == 'materialized':
                 start, length = int(p['offset']), int(p['length'])
                 payloads[p['id']] = blocks[p['block_id']][start:start+length]
-        for p in entry['payloads']:
+        for p in entry.get('payloads', ()):
             if p['kind'] == 'view':
                 start, length = int(p['offset']), int(p['length'])
                 payloads[p['id']] = payloads[p['parent_payload_id']][start:start+length]
-        self._assert_source_unchanged()
-        return freeze(payloads)
+        return payloads
 
     def describe(self, index):
         entry = self._entry_view(index)
@@ -424,7 +601,7 @@ class LmtrPlaybackModel:
         index = self.index if index is None else index
         if not self.entry_count: return None
         _, meta, blocks = self._chunk(index)
-        entry = self._entry_view(index)
+        entry = meta['entries'][index-int(meta['entries'][0]['entry_id'])]
         if entry['kind'] != 'observation': return None
         segment = next(s for s in meta['segments'] if s['id'] == entry['segment_id'])
         stream = next(s for s in segment['streams'] if s['stream_id'] == entry['stream_id'])
@@ -432,7 +609,7 @@ class LmtrPlaybackModel:
         if stream['geometry'] is None:
             return None  # Opaque-only observations have evidence/metadata, no invented pixel grid.
         geometry = Geometry(stream['geometry']['width_px'], stream['geometry']['height_px'])
-        payloads = self.read_payloads(index)
+        payloads = self._payloads(entry, blocks)
         descriptors = {p['id']: p for p in entry['payloads']}
         measurement = entry['measurement']
         temperature = payloads.get(measurement.get('temperature_payload_id'))
@@ -478,15 +655,17 @@ class LmtrPlaybackModel:
                     'integrity_scope': 'selected_chunks', 'file_validation': self.report}
         self._assert_source_unchanged()
         return OfflineMeasurement(self.path, 'lmthermal-recording', geometry, temperature,
-                                  mask, tuple(natives), freeze(manifest),
-                                  evidence=freeze({'descriptors': descriptors}),
-                                  payload_bytes=freeze(payloads), stats=stats, preview_bytes=preview,
+                                  mask, tuple(natives), manifest,
+                                  evidence={'descriptors': descriptors},
+                                  payload_bytes=payloads, stats=stats, preview_bytes=preview,
                                   protected_paths=(self.path,))
 
     def verify_full(self):
         """Explicit background scan; never label merely selected access full integrity."""
         self._assert_source_unchanged()
         self._cache = None
+        self.reader.reset_lookahead()
+        self.reader._recent = self.reader._end = None
         self.report = deepcopy(self.reader.check(full=True, recover=self.recovered, cancelled=self.cancelled))
         self._assert_source_unchanged()
         self.manifest['validation'] = self.report

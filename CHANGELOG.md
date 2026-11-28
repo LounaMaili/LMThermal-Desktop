@@ -4,6 +4,11 @@ All notable changes to LMThermal-Desktop will be documented in this file.
 
 ## [Unreleased]
 
+### Changed (LMTR playback throughput)
+- Keep the block bytes already checked against the committed payload hashes and the pinned R3 payload rules. Parse repeated CHUNK metadata and END closure once per retained record or source.
+- Verify a bounded window of upcoming CHUNKs in three Linux processes and present it through the same selected-event checks. Preserve synchronous verification for recovery and when lookahead cannot be used.
+- Recheck source identity before using cached data and release prefetched results and workers on source changes, explicit full verification and Close.
+
 ### Fixed (Interactive LMTR playback)
 - Drive the time bar with a monotonic playback clock and keep the displayed event time, display skips and recorded gaps explicit.
 - Keep Pause, time scrubbing and measurement tools usable while the worker is reading. Supersede stale frame requests, seek by indexed nanosecond time and step through exact events with the keyboard.

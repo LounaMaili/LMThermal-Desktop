@@ -282,6 +282,7 @@ class LmtrWorker(QThread):
                     elif action == 'tick':
                         target_ns, displayed_index = value
                         model.project_time_ns(target_ns)
+                        frame_ready = model.prepare_playback()
                     elif action in ANALYSIS_ACTIONS:
                         model.index, value = value
                         series, temporal_message = self._analyse(model, generation, action, value)
@@ -290,7 +291,7 @@ class LmtrWorker(QThread):
                         raise InterruptedError('LMTR load cancelled')
                     # The GUI supplies the index it already displays. There is no
                     # need to rebuild or repaint that same observation on a tick.
-                    if action == 'tick' and model.index == displayed_index:
+                    if action == 'tick' and (not frame_ready or model.index == displayed_index):
                         result = token, None, None, None
                     else:
                         frame = model.frame()
